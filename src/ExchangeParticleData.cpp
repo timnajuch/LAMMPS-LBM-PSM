@@ -8,13 +8,13 @@ Tim Najuch, 2019
 
 #include "ExchangeParticleData.h"
 
-ExchangeParticleData::ExchangeParticleData(double dp_, std::vector<double> xp_, std::vector<double> us_) : dp(dp_), xp(xp_), us(us_) {};
+//ExchangeParticleData::ExchangeParticleData(double dp_, std::vector<double> xp_, std::vector<double> us_) : dp(dp_), xp(xp_), us(us_) {};
+ExchangeParticleData::ExchangeParticleData() {};
 
 ExchangeParticleData::~ExchangeParticleData() {};
 
 
 void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_){
-std::cout << "EPD: " << dp << " / " << xp[0] << " / " << xp[1] << " / " << us[0] << " / " << us[1] << std::endl;
   for(int i = 0; i < lattice2D_->get_nx(); ++i){
     for(int j = 0; j < lattice2D_->get_ny(); ++j){
 
@@ -27,15 +27,24 @@ std::cout << "EPD: " << dp << " / " << xp[0] << " / " << xp[1] << " / " << us[0]
 };
 
 
-void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, int numberParticles, double **xPart)
+void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, double **xPart, double **uPart, double *rp, vector<double> boxLength, vector<double> origin)
 {
   for(int iPart = 0; iPart < numberParticles; ++iPart){
+          double xScaled = (xPart[iPart][0] - origin[0])/boxLength[0];
+          double yScaled = (xPart[iPart][1] - origin[1])/boxLength[1];
+//          double zScaled = (xPart[iPart][0] - origin[0])/boxLength[0];
     for(int i = 0; i < lattice2D_->get_nx(); ++i){
       for(int j = 0; j < lattice2D_->get_ny(); ++j){
 
         int ind_phys_1D = i * lattice2D_->get_ny() + j;
         
-        lattice2D_->set_B(ind_phys_1D, calcSolidFraction(i, j, xPart[iPart][0], xPart[iPart][1], dp/2.0));
+//        lattice2D_->set_B(ind_phys_1D, calcSolidFraction(i, j, xPart[iPart][0], xPart[iPart][1], dp/2.0));
+          // Todo swap iPart so that it is the LAMMPS particle ID
+          //lattice2D_->setParticleOnLattice(ind_phys_1D, iPart, uPart[iPart], calcSolidFraction(i, j, xPart[iPart][0], xPart[iPart][1], unitConversion->get_radius_lb(*rp)));
+
+          lattice2D_->setParticleOnLattice(ind_phys_1D, iPart, uPart[iPart], calcSolidFraction(i, j, unitConversion->get_pos_lb(xPart[iPart][0]), unitConversion->get_pos_lb(xPart[iPart][1]), unitConversion->get_radius_lb(*rp)));
+          //lattice2D_->setParticleOnLattice(ind_phys_1D, iPart, uPart[iPart], calcSolidFraction(i, j, unitConversion->get_pos_lb(xScaled), unitConversion->get_pos_lb(yScaled), unitConversion->get_radius_lb(*rp)));
+          //lattice2D_->setParticleOnLattice(ind_phys_1D, iPart, uPart, calcSolidFraction(i, j, xPart[iPart], unitConversion->get_radius_lb(*rp)));
 
       }
     }

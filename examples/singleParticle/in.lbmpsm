@@ -1,0 +1,44 @@
+# Read in 
+
+units			si
+atom_style		sphere
+atom_modify		map array
+atom_modify 	sort 0 0.0
+
+comm_modify	vel yes
+
+boundary		p p p
+newton			off
+
+processors      1 1 1 
+region			box block 0. 0.005 0. 0.005 0. 0.005 units box
+create_box		1 box
+
+create_atoms 	1 single 0.0025 0.0025 0.0025
+set 			group all diameter 0.0005 density 1000
+
+neighbor		0.003 bin
+neigh_modify	delay 0 every 1 check yes
+
+timestep       0.001      
+
+pair_style		none
+
+fix             integrate all nve/sphere
+dump           	iddump all custom 1 s.p id type diameter mass x y z vx vy vz fx fy fz tqx tqy tqz omegax omegay omegaz
+
+fix lbDYN all lbm-psm
+#fix lbEPD all lbm-psm-particleExchange
+fix lbBC all lbm-psm-bc
+#fix lbMPI all lbm-psm-mpi
+fix lbVTK all lbm-psm-vtk
+
+# thermo settings
+compute			1 all erotate/sphere
+thermo_style	custom step atoms ke
+thermo			1000
+thermo_modify	lost ignore norm no flush yes
+compute_modify	thermo_temp dynamic yes
+
+
+run 1000

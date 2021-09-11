@@ -10,7 +10,6 @@ Tim Najuch, 2021
 #define LATTICE_2D_H
 
 #include "boost/multi_array.hpp"
-//#include "phys_properties_2D.h"
 #include <vector>
 #include <array>
 #include <math.h>
@@ -91,6 +90,12 @@ class Lattice2D{
 
     void set_B(int index, double B_);
     double get_B(int index);
+    
+    double get_rho(int index);
+
+    void setParticleOnLattice(int index, int pID, double uP[2], double eps);
+    double getSolidFractionOnLattice(int index, int pID);
+    vector<double> getSolidVelocityOnLattice(int index, int pID);
 
     void set_Fhydx(int index, double Fhydx_);
     void set_Fhydy(int index, double Fhydy_);

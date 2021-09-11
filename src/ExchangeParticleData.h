@@ -12,6 +12,7 @@ Tim Najuch, 2021
 #include <iostream>
 #include <vector>
 #include "lattice2D.h"
+#include "unit_conversion.h"
 
 using namespace std;
 
@@ -26,7 +27,8 @@ class ExchangeParticleData {
 
 
   public:
-    ExchangeParticleData(double dp_, std::vector<double> xp_, std::vector<double> us_);
+    //ExchangeParticleData(double dp_, std::vector<double> xp_, std::vector<double> us_);
+    ExchangeParticleData();
     ~ExchangeParticleData();
 
   // Add methods for placing particles on lattice and obtaining force
@@ -34,7 +36,7 @@ class ExchangeParticleData {
 
     //void setParticlesOnLattice(Lattice2D &lattice2D_);
     void setParticlesOnLattice(Lattice2D *lattice2D_);
-    void setParticlesOnLattice(Lattice2D *lattice2D_, int numberParticles, double **xPart);
+    void setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, double **xPart, double **uPart, double *rp, vector<double> boxLength, vector<double> origin);
     double calcSolidFraction(int i, int j, double xP_LB, double yP_LB, double rP_LB);
     double calculateHydroydnamicInteractions(Lattice2D &lattice2D_);
 

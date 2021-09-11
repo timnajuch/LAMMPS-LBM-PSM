@@ -35,7 +35,6 @@ void WriteVTK::init()
 
   nx = fixPSMLBM->dynamics->get_nx();
   ny = fixPSMLBM->dynamics->get_ny();
-std::cout << "LATTIC ECELLS IN WRITE: " << nx << " / " << ny << std::endl;
 
   vector<double> x_vtk = fixPSMLBM->dynamics->get_x();
   vector<double> y_vtk = fixPSMLBM->dynamics->get_y();
@@ -49,9 +48,7 @@ std::cout << "LATTIC ECELLS IN WRITE: " << nx << " / " << ny << std::endl;
   //vector<double> B_vtk = fixPSMLBM->get_B();
   double u_infty = 1.0;
   double ly = 1.0;
-std::cout << "WRITE VTK" << std::endl;
   write_vtk("test.vtk", x_vtk, 1.0/ly, y_vtk, 1.0/ly, B_vtk, 1.0, rho_vtk, 1000.0, u_vtk, 1.0/u_infty);
-std::cout << "VTK WRITTEN" << std::endl;
 }
 
 
@@ -164,7 +161,6 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
     rho0.resize(nx*decomposition[0]*ny*decomposition[1]);
     u0.resize(nx*decomposition[0]*ny*decomposition[1]*2);
   }
-  //cout << "DEBUG B" << std::endl;
 //  MPI_Gather(&x_[0], nx*ny, MPI_DOUBLE, &x0[0], nx*ny, MPI_DOUBLE, 0, mpicomm.cartComm3D);
 //  MPI_Gather(&y_[0], nx*ny, MPI_DOUBLE, &y0[0], nx*ny, MPI_DOUBLE, 0, mpicomm.cartComm3D);
 //  MPI_Gather(&B_[0], nx*ny, MPI_DOUBLE, &B0[0], nx*ny, MPI_DOUBLE, 0, mpicomm.cartComm3D);
@@ -176,7 +172,6 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
   MPI_Gather(&B_[0], nx*ny, MPI_DOUBLE, &B0[0], nx*ny, MPI_DOUBLE, 0, world);
   MPI_Gather(&rho_[0], nx*ny, MPI_DOUBLE, &rho0[0], nx*ny, MPI_DOUBLE, 0, world);
   MPI_Gather(&u_[0], nx*ny*2, MPI_DOUBLE, &u0[0], nx*ny*2, MPI_DOUBLE, 0, world);
-  //cout << "DEBUG C" << std::endl;
 
   if(comm->me == 0){
 
@@ -201,7 +196,6 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
   vector<double> u_vtk = u0;
   //u_vtk = scale_vector(u_vtk, u0_);
   scale_vector(u_vtk, u0_);
-  //cout << "DEBUG D" << std::endl;
   ofstream ovel;
   ovel.open(name_);
   ovel << "# vtk DataFile Version 3.1 \n";

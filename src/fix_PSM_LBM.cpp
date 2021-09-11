@@ -13,39 +13,8 @@
 
 
 #include "fix_PSM_LBM.h"
-/*
-#include <cmath>
 
-
-#include <cstring>
-#include <algorithm>
-#include <utility>
-#include "comm.h"
-#include "memory.h"
-#include "error.h"
-#include "domain.h"
-#include "atom.h"
-#include "group.h"
-#include "random_mars.h"
-#include "update.h"
-#include "force.h"
-#include "modify.h"
-
-#include "BGK_GuoExtForce_dynamics2D.h"
-//#include "mpiCommunication.h"
-#include "fix_PSM_LBM_MPICOMM.h"
-
-using namespace LAMMPS_NS;
-using namespace FixConst;
-*/
-
-fix_PSM_LBM::fix_PSM_LBM(LAMMPS *lmp, int narg, char **arg) :
-  Fix(lmp, narg, arg)
-{
-//  int decomposition[3] = {comm->procgrid[0], comm->procgrid[1], comm->procgrid[2]};
-//  int procCoordinates[3] = {0, 0, 0};
-//  vector<double> F_lbm(2,0.0);
-}
+fix_PSM_LBM::fix_PSM_LBM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg) {}
 
 fix_PSM_LBM::~fix_PSM_LBM()
 {
@@ -64,27 +33,8 @@ int fix_PSM_LBM::setmask()
 
 void fix_PSM_LBM::init()
 {
-
-//  MPICommunication mpicomm(&argc, &argv);
   int decomposition[3] = {comm->procgrid[0], comm->procgrid[1], comm->procgrid[2]};
-//  mpicomm.domainDecomposition(decomposition);
-
   int procCoordinates[3] = {0, 0, 0}; // todo: get proc coordinate of current proc from lammps mpi class
-//  vector<int> procCoordinatesTmp;
-//  procCoordinatesTmp.resize(3);
-//  mpicomm.returnProcCoordinatesArray(procCoordinatesTmp);
-//  procCoordinates[0] = procCoordinatesTmp[0];
-//  procCoordinates[1] = procCoordinatesTmp[1];
-//  procCoordinates[2] = procCoordinatesTmp[2];
-/*
-  int procNeigh[3][2];
-    = comm->procneigh[0][0];
-    = comm->procneigh[0][1];
-   = comm->procneigh[1][0];
-   = comm->procneigh[1][1];
-    = comm->procneigh[2][0];
-  procNeigh[2][1]    = comm->procneigh[2][1];
-*/
   int procNeigh[6];
   procNeigh[0] = comm->procneigh[0][0];
   procNeigh[1] = comm->procneigh[0][1];
@@ -92,23 +42,23 @@ void fix_PSM_LBM::init()
   procNeigh[3] = comm->procneigh[1][1];
   procNeigh[4] = comm->procneigh[2][0];
   procNeigh[5] = comm->procneigh[2][1];
-//std::cout << "DEBUG A" << std::endl;
   lbmmpicomm = new PSM_LBM_MPI(world, decomposition, procNeigh);
-//std::cout << "DEBUG B" << std::endl;
-
-//  BGK_GuoExtForce_Dynamics2D dynamics(tau, nx, ny, q, F_lbm, decomposition, procCoordinates);
-  vector<double> F_lbm(2,0.0);
-//  BGK_GuoExtForce_Dynamics2D dynamics(0.7, 100, 50, 9, F_lbm, decomposition, procCoordinates);
-  dynamics = new BGK_GuoExtForce_Dynamics2D(0.7, 100, 50, 9, F_lbm, decomposition, procCoordinates);
-
 
   double rhof = 1000.0;
   double Re = 0.1;
   double nu = 0.0001;
   double tau = 0.7;
   int N_particle = 10;
-  double dp = 0.01;   // particle diameter
+  //double dp = 0.01;   // particle diameter
+  double dp = atom->radius[0]*2.0;   // particle diameter
   unitConversion = new Unit_Conversion(rhof, nu, dp, Re, N_particle, tau);
+
+//  BGK_GuoExtForce_Dynamics2D dynamics(tau, nx, ny, q, F_lbm, decomposition, procCoordinates);
+  vector<double> F_lbm(2,0.0);
+  int nx = domain->xprd/unitConversion->get_dx();
+  int ny = domain->yprd/unitConversion->get_dx();
+  //dynamics = new BGK_GuoExtForce_Dynamics2D(0.7, 100, 50, 9, F_lbm, decomposition, procCoordinates);
+  dynamics = new BGK_GuoExtForce_Dynamics2D(0.7, nx, ny, 9, F_lbm, decomposition, procCoordinates);
 
   dynamics->initialise_domain(unitConversion->get_dx(), unitConversion->get_dx());
 
@@ -128,8 +78,7 @@ void fix_PSM_LBM::init()
 
 
   int nPart = atom->nlocal + atom->nghost;
-  std::cout << "nPart: " << nPart << std::endl;
-
+/*
   //double dp = 10.0; /a/ 10 lattice cells over particle diameter
   vector<double> xp;
   vector<double> us;
@@ -145,15 +94,18 @@ void fix_PSM_LBM::init()
   us[1] = 0.0;
   
   exchangeParticleData = new ExchangeParticleData((double)N_particle, xp, us);
-  //exchangeParticleData->setParticlesOnLattice(dynamics);
-  exchangeParticleData->setParticlesOnLattice(dynamics, nPart, atom->x);
+  exchangeParticleData->setParticlesOnLattice(dynamics);
+*/
+  exchangeParticleData = new ExchangeParticleData();
+  vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
+  vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
+  exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->x, atom->v, atom->radius, boxLength, origin);
 
 }
 
 void fix_PSM_LBM::pre_force(int)
 {
 //  if (update->ntimestep % nevery) return;
-
   int envelopeWidth = 1;
   lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, envelopeWidth, true);
 

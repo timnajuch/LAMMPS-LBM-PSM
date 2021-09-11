@@ -10,10 +10,6 @@ Tim Najuch, 2021
 
 
 Lattice2D::Lattice2D(int nx_, int ny_, int q_, int decomposition[3], int procCoordinates_[3]){
-  //decomposition[0] = decomposition_[0];
-  //decomposition[1] = decomposition_[1];
-  //decomposition[2] = decomposition_[2];
-
   envelopeWidth = 1;
 
   procCoordinates[0] = procCoordinates_[0];
@@ -23,10 +19,8 @@ Lattice2D::Lattice2D(int nx_, int ny_, int q_, int decomposition[3], int procCoo
   c = 1.0;
   cs = 1.0/sqrt(3.0);
   csPow2 = 1.0/3.0;
-  //std::cout << "DEBUG LATTICE 2D. A" << endl;
   nx = nx_/decomposition[0] + envelopeWidth*2;
   ny = ny_/decomposition[1] + envelopeWidth*2;
-  //std::cout << "DEBUG LATTICE 2D. B" << endl;
   q = q_;
 
   f = vector<double>(nx*ny*q,0.0);
@@ -81,7 +75,6 @@ Lattice2D::Lattice2D(int nx_, int ny_, int q_, int decomposition[3], int procCoo
         };
     }
 
-  //std::cout << "DEBUG LATTICE 2D. C" << endl;
 };
 
 Lattice2D::~Lattice2D(){};
@@ -131,7 +124,24 @@ void Lattice2D::initialise_domain(double dx_, double dy_){
 
       Fhydx[ind_2D] = 0.0;
       Fhydy[ind_2D] = 0.0;
-   
+ /*
+      pData[ind_2D].particleID[0] = 0;
+      pData[ind_2D].particleID[1] = 0;
+      pData[ind_2D].solidFraction[0] = 0.0;
+      pData[ind_2D].solidFraction[1] = 0.0;
+      pData[ind_2D].particleVelocity[0] = 0.0;
+      pData[ind_2D].particleVelocity[1] = 0.0;
+      pData[ind_2D].particleVelocity[1] = 0.0;
+      pData[ind_2D].particleVelocity[3] = 0.0;
+      pData[ind_2D].particleVelocity[4] = 0.0;
+      pData[ind_2D].particleVelocity[5] = 0.0;
+      pData[ind_2D].hydrodynamicForce[0] = 0.0;
+      pData[ind_2D].hydrodynamicForce[1] = 0.0;
+      pData[ind_2D].hydrodynamicForce[2] = 0.0;
+      pData[ind_2D].hydrodynamicForce[3] = 0.0;
+      pData[ind_2D].hydrodynamicForce[4] = 0.0;
+      pData[ind_2D].hydrodynamicForce[5] = 0.0;
+  */
     }
   }
 
@@ -217,6 +227,10 @@ double Lattice2D::get_B(int index){
   return B[index];
 };
 
+double Lattice2D::get_rho(int index){
+  return rho[index];
+};
+
 double Lattice2D::get_Fhydx(int index){
   return Fhydx[index];
 };
@@ -243,4 +257,28 @@ void Lattice2D::add_Fhydx(int index, double Fhydx_)
 void Lattice2D::add_Fhydy(int index, double Fhydy_)
 {
   Fhydy[index] += Fhydy_;
+}
+
+
+// Extend to two or morge particles
+void Lattice2D::setParticleOnLattice(int index, int pID, double uP[2], double eps)
+{
+  pData[index].particleID[0] = pID;
+  pData[index].solidFraction[0] = eps;
+  pData[index].particleVelocity[0] = uP[0];
+  pData[index].particleVelocity[1] = uP[1];
+  pData[index].hydrodynamicForce[0] = 0.0;
+  pData[index].hydrodynamicForce[1] = 0.0;
+  B[index] = pData[index].solidFraction[0];
+}
+
+// Todo modify so that it gets the solid fraction of a specific particle ID covering a node
+double Lattice2D::getSolidFractionOnLattice(int index, int pID)
+{
+  return pData[index].solidFraction[0];
+}
+
+vector<double> Lattice2D::getSolidVelocityOnLattice(int index, int pID)
+{
+  return pData[index].particleVelocity;
 }
