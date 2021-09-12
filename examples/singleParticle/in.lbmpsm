@@ -7,7 +7,7 @@ atom_modify 	sort 0 0.0
 
 comm_modify	vel yes
 
-boundary		p p p
+boundary		p f f
 newton			off
 
 processors      1 1 1 
@@ -24,14 +24,13 @@ timestep       0.001
 
 pair_style		none
 
-fix             integrate all nve/sphere
-dump           	iddump all custom 1 s.p id type diameter mass x y z vx vy vz fx fy fz tqx tqy tqz omegax omegay omegaz
-
-fix lbDYN all lbm-psm
-#fix lbEPD all lbm-psm-particleExchange
-fix lbBC all lbm-psm-bc
-#fix lbMPI all lbm-psm-mpi
+fix lbDYN all lbm-psm every 1 Nlc 10 lc 0.0005 rho 1000.0 nu 0.0001 Re 0.1 tau 0.7 
+fix lbBC all lbm-psm-bc shear
+#fix lbBC all lbm-psm-bc xFlow
 fix lbVTK all lbm-psm-vtk
+
+#fix             integrate all nve/sphere
+dump           	iddump all custom 1 s.p id type diameter mass x y z vx vy vz fx fy fz tqx tqy tqz omegax omegay omegaz
 
 # thermo settings
 compute			1 all erotate/sphere

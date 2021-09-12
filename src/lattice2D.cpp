@@ -227,26 +227,30 @@ double Lattice2D::get_Fhydy(int index){
 void Lattice2D::set_Fhydx(int index, double Fhydx_)
 {
   Fhydx[index] = Fhydx_;
+  pData[index].hydrodynamicForce[0] = Fhydx_;
 }
 
 void Lattice2D::set_Fhydy(int index, double Fhydy_)
 {
   Fhydy[index] = Fhydy_;
+  pData[index].hydrodynamicForce[1] = Fhydy_;
 }
 
 void Lattice2D::add_Fhydx(int index, double Fhydx_)
 {
   Fhydx[index] += Fhydx_;
+  pData[index].hydrodynamicForce[0] += Fhydx_;
 }
 
 void Lattice2D::add_Fhydy(int index, double Fhydy_)
 {
   Fhydy[index] += Fhydy_;
+  pData[index].hydrodynamicForce[1] += Fhydy_;
 }
 
 
 // Extend to two or morge particles
-void Lattice2D::setParticleOnLattice(int index, int pID, double uP[2], double eps)
+void Lattice2D::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[2], double eps)
 {
   pData[index].particleID[0] = pID;
   pData[index].solidFraction[0] = eps;
@@ -266,4 +270,10 @@ double Lattice2D::getSolidFractionOnLattice(int index, int pID)
 vector<double> Lattice2D::getSolidVelocityOnLattice(int index, int pID)
 {
   return pData[index].particleVelocity;
+}
+
+
+ParticleDataOnLattice Lattice2D::getParticleDataOnLatticeNode(int index)
+{
+  return pData[index];
 }

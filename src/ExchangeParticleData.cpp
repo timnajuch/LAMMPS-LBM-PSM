@@ -27,24 +27,29 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_){
 };
 
 
-void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, double **xPart, double **uPart, double *rp, vector<double> boxLength, vector<double> origin)
+void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double **uPart, double *rp, vector<double> boxLength, vector<double> origin)
 {
   for(int iPart = 0; iPart < numberParticles; ++iPart){
-          double xScaled = (xPart[iPart][0] - origin[0])/boxLength[0];
-          double yScaled = (xPart[iPart][1] - origin[1])/boxLength[1];
-//          double zScaled = (xPart[iPart][0] - origin[0])/boxLength[0];
-    for(int i = 0; i < lattice2D_->get_nx(); ++i){
-      for(int j = 0; j < lattice2D_->get_ny(); ++j){
+    int x_lb = unitConversion->get_pos_lb(xPart[iPart][0]);
+    int y_lb = unitConversion->get_pos_lb(xPart[iPart][1]);
+    int r_lb = unitConversion->get_radius_lb(*rp);
+
+    //int nodeZone[3][2] = {{x_lb-r_lb-3, x_lb+r_lb+3}, {y_lb-r_lb-3, y_lb+r_lb+3}, {z_lb--r_lb-3, z_lb+r_lb+3}};
+    int nodeZone[2][2] = {{x_lb-r_lb-3, x_lb+r_lb+3}, {y_lb-r_lb-3, y_lb+r_lb+3}};
+    for (int i = 0; i < 2; i++){
+        nodeZone[0][i] = fmin(fmax(nodeZone[0][i],0),lattice2D_->get_nx());
+        nodeZone[1][i] = fmin(fmax(nodeZone[1][i],0),lattice2D_->get_nx());
+//        nodeZone[0][i] = std::clamp(nodeZone[0][i], 0, lattice2D_->get_nx()); // check compiler options. doesnt work (yet)
+//        nodeZone[1][i] = std::clamp(nodeZone[1][i], 0, lattice2D_->get_ny());
+//        nodeZone[2][i] = std::clamp(nodeZone[2][j], 0, lattice2D_->get_nz());
+    }
+    
+    for(int i = nodeZone[0][0]; i < nodeZone[0][1]; ++i){
+      for(int j = nodeZone[1][0]; j < nodeZone[1][1]; ++j){
 
         int ind_phys_1D = i * lattice2D_->get_ny() + j;
-        
-//        lattice2D_->set_B(ind_phys_1D, calcSolidFraction(i, j, xPart[iPart][0], xPart[iPart][1], dp/2.0));
-          // Todo swap iPart so that it is the LAMMPS particle ID
-          //lattice2D_->setParticleOnLattice(ind_phys_1D, iPart, uPart[iPart], calcSolidFraction(i, j, xPart[iPart][0], xPart[iPart][1], unitConversion->get_radius_lb(*rp)));
 
-          lattice2D_->setParticleOnLattice(ind_phys_1D, iPart, uPart[iPart], calcSolidFraction(i, j, unitConversion->get_pos_lb(xPart[iPart][0]), unitConversion->get_pos_lb(xPart[iPart][1]), unitConversion->get_radius_lb(*rp)));
-          //lattice2D_->setParticleOnLattice(ind_phys_1D, iPart, uPart[iPart], calcSolidFraction(i, j, unitConversion->get_pos_lb(xScaled), unitConversion->get_pos_lb(yScaled), unitConversion->get_radius_lb(*rp)));
-          //lattice2D_->setParticleOnLattice(ind_phys_1D, iPart, uPart, calcSolidFraction(i, j, xPart[iPart], unitConversion->get_radius_lb(*rp)));
+        lattice2D_->setParticleOnLattice(ind_phys_1D, tag[iPart], uPart[iPart], calcSolidFraction(i, j, x_lb, y_lb, r_lb));
 
       }
     }
@@ -105,7 +110,7 @@ double ExchangeParticleData::calcSolidFraction(int i, int j, double xP_LB, doubl
     return fraction*((double)n);
 };
 
-
+/*
 double ExchangeParticleData::calculateHydroydnamicInteractions(Lattice2D &lattice2D_)
 {
   double stresslet = 0.0;
@@ -128,8 +133,44 @@ double ExchangeParticleData::calculateHydroydnamicInteractions(Lattice2D &lattic
   }
   return stresslet;
 }
+*/
 
-//void calculateHydroInteractionSingleParticle()
-//{
+void ExchangeParticleData::calculateHydroydnamicInteractions(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double *rp, int hydroForceID, int hydroTorqueID, int stressletID, LAMMPS_NS::Atom *atom)
+{
+  for(int iPart = 0; iPart < numberParticles; ++iPart){
+    int x_lb = unitConversion->get_pos_lb(xPart[iPart][0]);
+    int y_lb = unitConversion->get_pos_lb(xPart[iPart][1]);
+    int r_lb = unitConversion->get_radius_lb(*rp);
 
-//}
+    //int nodeZone[3][2] = {{x_lb-r_lb-3, x_lb+r_lb+3}, {y_lb-r_lb-3, y_lb+r_lb+3}, {z_lb--r_lb-3, z_lb+r_lb+3}};
+    int nodeZone[2][2] = {{x_lb-r_lb-3, x_lb+r_lb+3}, {y_lb-r_lb-3, y_lb+r_lb+3}};
+    for (int i = 0; i < 2; i++){
+        nodeZone[0][i] = fmin(fmax(nodeZone[0][i],0),lattice2D_->get_nx());
+        nodeZone[1][i] = fmin(fmax(nodeZone[1][i],0),lattice2D_->get_nx());
+//        nodeZone[0][i] = std::clamp(nodeZone[0][i], 0, lattice2D_->get_nx()); // check compiler options. doesnt work (yet)
+//        nodeZone[1][i] = std::clamp(nodeZone[1][i], 0, lattice2D_->get_ny());
+//        nodeZone[2][i] = std::clamp(nodeZone[2][j], 0, lattice2D_->get_nz());
+    }
+    
+    for(int i = nodeZone[0][0]; i < nodeZone[0][1]; ++i){
+      for(int j = nodeZone[1][0]; j < nodeZone[1][1]; ++j){
+
+        int ind_phys_1D = i * lattice2D_->get_ny() + j;
+        
+        // Todo extend to two or more particles
+        LAMMPS_NS::tagint pID = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).particleID[0];
+        vector<double> Fhyd = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).hydrodynamicForce;
+
+        atom->dvector[hydroForceID][0] += Fhyd[0]*unitConversion->get_forceFactor();
+        atom->dvector[hydroForceID][1] += Fhyd[1]*unitConversion->get_forceFactor();
+//        atom->dvector[hydroForceID][2] += Fhyd[2];
+  
+// TODO torque and stresslet      
+//        atom->dvector[hydroTorqueID][0] += Fhyd[0]*dx etc;
+//        atom->dvector[hydroTorqueID][1] += Fhyd[1];
+//        atom->dvector[hydroTorqueID][2] += Fhyd[2];
+
+      }
+    }
+  }
+}

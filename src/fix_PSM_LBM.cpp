@@ -18,6 +18,10 @@ fix_PSM_LBM::fix_PSM_LBM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
 {
   if (narg < 15) error->all(FLERR,"Illegal fix lbm-psm command");
 
+  fix_hydroForce_ = nullptr;
+  fix_hydroTorque_ = nullptr;
+  fix_stresslet_ = nullptr;
+
   tau = 0.7; // default value for BGK relaxation parameter
 
   int iarg = 3;
@@ -101,12 +105,51 @@ void fix_PSM_LBM::init()
   dynamics->initialise_domain(unitConversion->get_dx(), unitConversion->get_dx());
 
   dynamics->initialise_dynamics(1.0, 0.0, 0.0);
-
-  int nPart = atom->nlocal + atom->nghost;
   exchangeParticleData = new ExchangeParticleData();
-  vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
-  vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
-  exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->x, atom->v, atom->radius, boxLength, origin);
+
+  if(!fix_hydroForce_)
+  {
+    char *fixarg[] = {
+      (char *)"hydroForce",     // fix id
+      (char *)"all",            // fix group
+      (char *)"property/atom",  // fix style: property/atom
+      (char *)"d_hydroForce",   // name
+      (char *)"ghost",          // communicate ghost atom
+      (char *)"yes"
+    };
+ 
+    modify->add_fix(6, fixarg, 1);
+    fix_hydroForce_ = (FixPropertyAtom *) modify->fix[modify->nfix-1];
+  }
+
+  if(!fix_hydroTorque_)
+  {
+    char *fixarg[] = {
+      (char *)"hydroTorque",    // fix id
+      (char *)"all",            // fix group
+      (char *)"property/atom",  // fix style: property/atom
+      (char *)"d_hydroTorque",  // name
+      (char *)"ghost",          // communicate ghost atom
+      (char *)"yes"
+    };
+    modify->add_fix(6, fixarg, 1);
+    fix_hydroTorque_ = (FixPropertyAtom *) modify->fix[modify->nfix-1];
+  }
+
+  if(!fix_stresslet_)
+  {
+    char *fixarg[] = {
+      (char *)"stresslet",      // fix id
+      (char *)"all",            // fix group
+      (char *)"property/atom",  // fix style: property/atom
+      (char *)"d2_stresslet",   // name
+      (char *)"3",              // number of array columns
+      (char *)"ghost",          // communicate ghost atom
+      (char *)"yes"
+    };
+    modify->add_fix(7, fixarg, 1);
+    fix_stresslet_ = (FixPropertyAtom *) modify->fix[modify->nfix-1];
+  }
 }
 
 
@@ -114,11 +157,53 @@ void fix_PSM_LBM::pre_force(int)
 {
   if (update->ntimestep % nevery) return;
 
+  int nPart = atom->nlocal + atom->nghost;
+  vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
+  vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
+  exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->v, atom->radius, boxLength, origin);
+
   lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
   lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic);
   //lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), true, 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
 
   dynamics->macroCollideStream();
+
+
+  double **f = atom->f;
+  double **t = atom->torque;
+
+  int flagHF, ncolumnsHF;
+  int hydroForceFixID = atom->find_custom((char *)"hydroForce", flagHF, ncolumnsHF);
+  int flagHT, ncolumnsHT;
+  int hydroTorqueFixID = atom->find_custom((char *)"hydroTorque", flagHT, ncolumnsHT);
+  int flagS, ncolumnsS;
+  int stressletFixID = atom->find_custom((char *)"stresslet", flagS, ncolumnsS);
+
+
+  //exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, nPart, atom->tag, atom->x, hydroForceFixID, hydroTorqueFixID, stressletFixID, atom);
+
+
+  for(int i=0;i<atom->nlocal;i++){
+    f[i][0] += atom->dvector[hydroForceFixID][0];
+    f[i][1] += atom->dvector[hydroForceFixID][1];
+    f[i][2] += atom->dvector[hydroForceFixID][2];
+
+    t[i][0] += atom->dvector[hydroTorqueFixID][0];
+    t[i][1] += atom->dvector[hydroTorqueFixID][1];
+    t[i][2] += atom->dvector[hydroTorqueFixID][2];
+
+    // Torque added because it is the antisymmetric part 
+    // of the first moment of the stress over the surface
+    // Stress defined as negative, hence the flipped signs
+    // TODO: Check what middle indice of darray stands for. [][1][] gives seg fault
+    virial[0] += atom->darray[stressletFixID][0][0];
+    virial[1] += atom->darray[stressletFixID][0][1];
+    virial[2] += atom->darray[stressletFixID][0][2];     
+    virial[3] += atom->darray[stressletFixID][0][3] - 0.5*atom->dvector[hydroTorqueFixID][2];
+    virial[4] += atom->darray[stressletFixID][0][4] + 0.5*atom->dvector[hydroTorqueFixID][1];
+    virial[5] += atom->darray[stressletFixID][0][5] - 0.5*atom->dvector[hydroTorqueFixID][0];
+  }
+
 }
 
 
@@ -162,3 +247,37 @@ vector<double> fix_PSM_LBM::get_B()
 {
   return dynamics->get_B();
 }
+
+
+double **fix_PSM_LBM::get_force_ptr()
+{
+  return fix_hydroForce_->array_atom;
+}
+
+double **fix_PSM_LBM::get_torque_ptr()
+{
+  return fix_hydroTorque_->array_atom;
+}
+
+double **fix_PSM_LBM::get_stresslet_ptr()
+{
+  return fix_stresslet_->array_atom;
+}
+
+
+/*
+  void FixLbCouplingOnetoone::post_run()
+  {
+    // need one very last forward_comm to make sure 
+    // that velocities on owned and ghost particles match
+    timer->stamp();
+    comm->forward_comm();
+    timer->stamp(TIME_COMM);
+  }
+  void FixLbCouplingOnetoone::comm_force_torque()
+  {
+    fix_dragforce_->do_reverse_comm();
+    fix_hdtorque_->do_reverse_comm();
+    fix_stresslet_->do_reverse_comm();
+  }
+*/

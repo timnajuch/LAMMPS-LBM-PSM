@@ -9,10 +9,16 @@ Tim Najuch, 2021
 #ifndef EXC_PART_DATA_H
 #define EXC_PART_DATA_H
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
+
+#include "atom.h"
+#include "lmptype.h"
+
 #include "lattice2D.h"
 #include "unit_conversion.h"
+
 
 using namespace std;
 
@@ -36,9 +42,9 @@ class ExchangeParticleData {
 
     //void setParticlesOnLattice(Lattice2D &lattice2D_);
     void setParticlesOnLattice(Lattice2D *lattice2D_);
-    void setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, double **xPart, double **uPart, double *rp, vector<double> boxLength, vector<double> origin);
+    void setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double **uPart, double *rp, vector<double> boxLength, vector<double> origin);
     double calcSolidFraction(int i, int j, double xP_LB, double yP_LB, double rP_LB);
-    double calculateHydroydnamicInteractions(Lattice2D &lattice2D_);
+    void calculateHydroydnamicInteractions(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double *rp, int hydroForceID, int hydroTorqueID, int stressletID, LAMMPS_NS::Atom *atom);
 
 };
 

@@ -30,6 +30,7 @@ FixStyle(lbm-psm,fix_PSM_LBM)
 #include "domain.h"
 #include "error.h"
 #include "fix.h"
+#include "fix_property_atom.h"
 #include "force.h"
 #include "group.h"
 #include "memory.h"
@@ -68,6 +69,10 @@ class fix_PSM_LBM : public Fix {
     ExchangeParticleData *exchangeParticleData;
     PSM_LBM_MPI *lbmmpicomm;
 
+    double **get_force_ptr();
+    double **get_torque_ptr();
+    double **get_stresslet_ptr();
+
   private:
     int Nlc;            // Number of lattice grid nodes discretising the characteristic length lc
     double lc;          // characteristic length
@@ -76,7 +81,12 @@ class fix_PSM_LBM : public Fix {
     double Re;          // Reynolds number of system (based on characteristic velocity, characteristic length, and fluid viscosity)
     double tau;         // BGK relaxation parameter (optional, default is tau = 0.7)
 
+    class FixPropertyAtom *fix_hydroForce_;
+    class FixPropertyAtom *fix_hydroTorque_;
+    class FixPropertyAtom *fix_stresslet_; 
 };
 
 #endif
 #endif
+
+// TODO add comminucation of hyd force etc to ghost atoms every step (otherwise only communicated when neighborl list newly build)

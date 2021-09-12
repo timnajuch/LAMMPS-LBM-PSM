@@ -13,6 +13,8 @@ Tim Najuch, 2021
 #include <math.h>
 #include <vector>
 
+#include "lmptype.h"
+
 #include "particleDataOnLattice.h"
 
 using namespace std;
@@ -92,9 +94,11 @@ class Lattice2D{
     
     double get_rho(int index);
 
-    void setParticleOnLattice(int index, int pID, double uP[2], double eps);
+    void setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[2], double eps);
     double getSolidFractionOnLattice(int index, int pID);
     vector<double> getSolidVelocityOnLattice(int index, int pID);
+
+    ParticleDataOnLattice getParticleDataOnLatticeNode(int index);
 
     void set_Fhydx(int index, double Fhydx_);
     void set_Fhydy(int index, double Fhydy_);

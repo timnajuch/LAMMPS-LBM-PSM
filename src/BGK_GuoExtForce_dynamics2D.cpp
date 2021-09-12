@@ -168,6 +168,7 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int iq_){
   Lattice2D::set_f(i_, j_, iq_, Lattice2D::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll 
           + ( 1.0 - B ) * (Lattice2D::g[iq_] / Lattice2D::c) * ( Lattice2D::e[2*iq_] * F_lbm[0] + Lattice2D::e[2*iq_+1] * F_lbm[1] ) );
 
+  // todo extend to two or more particles
   if(iq_ == 0)
   {
     Lattice2D::set_Fhydx(ind_phys_1D, B * solid_coll * Lattice2D::e[2*iq_]);

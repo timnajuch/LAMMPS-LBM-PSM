@@ -9,8 +9,10 @@ Tim Najuch, 2021
 #ifndef PARTDATALATTICE_H
 #define PARTDATALATTICE_H
 
-#include <vector>
 #include <iostream>
+#include <vector>
+
+#include "lmptype.h"
 
 using namespace std;
 
@@ -19,12 +21,10 @@ class ParticleDataOnLattice{
     ParticleDataOnLattice();
     ~ParticleDataOnLattice();
 
-    vector<int> particleID;
+    vector<LAMMPS_NS::tagint> particleID;
     vector<double> solidFraction;
     vector<double> particleVelocity;
     vector<double> hydrodynamicForce;
-
 };
-
 
 #endif
