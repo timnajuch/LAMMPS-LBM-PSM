@@ -77,7 +77,9 @@ Lattice2D::Lattice2D(int nx_, int ny_, int q_, int decomposition[3], int procCoo
 
 };
 
+
 Lattice2D::~Lattice2D(){};
+
 
 void Lattice2D::initialise_channel_geometry(double wallHeightHalf_, double eps_, double nychannel_, double dx_, double dy_){
   dx = dx_;
@@ -106,8 +108,8 @@ void Lattice2D::initialise_channel_geometry(double wallHeightHalf_, double eps_,
    
     }
   }
-
 };
+
 
 void Lattice2D::initialise_domain(double dx_, double dy_){
   dx = dx_;
@@ -124,28 +126,11 @@ void Lattice2D::initialise_domain(double dx_, double dy_){
 
       Fhydx[ind_2D] = 0.0;
       Fhydy[ind_2D] = 0.0;
- /*
-      pData[ind_2D].particleID[0] = 0;
-      pData[ind_2D].particleID[1] = 0;
-      pData[ind_2D].solidFraction[0] = 0.0;
-      pData[ind_2D].solidFraction[1] = 0.0;
-      pData[ind_2D].particleVelocity[0] = 0.0;
-      pData[ind_2D].particleVelocity[1] = 0.0;
-      pData[ind_2D].particleVelocity[1] = 0.0;
-      pData[ind_2D].particleVelocity[3] = 0.0;
-      pData[ind_2D].particleVelocity[4] = 0.0;
-      pData[ind_2D].particleVelocity[5] = 0.0;
-      pData[ind_2D].hydrodynamicForce[0] = 0.0;
-      pData[ind_2D].hydrodynamicForce[1] = 0.0;
-      pData[ind_2D].hydrodynamicForce[2] = 0.0;
-      pData[ind_2D].hydrodynamicForce[3] = 0.0;
-      pData[ind_2D].hydrodynamicForce[4] = 0.0;
-      pData[ind_2D].hydrodynamicForce[5] = 0.0;
-  */
     }
   }
 
 };
+
 
 void Lattice2D::set_f(int i_, int j_, int iq_, double value_){
   f[i_*ny*q + j_*q + iq_] = value_;

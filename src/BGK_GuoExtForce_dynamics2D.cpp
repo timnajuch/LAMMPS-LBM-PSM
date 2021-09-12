@@ -11,7 +11,9 @@ Tim Najuch, 2021
 BGK_GuoExtForce_Dynamics2D::BGK_GuoExtForce_Dynamics2D(double tau_, int nx_, int ny_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3]) :
   Dynamics2D(nx_, ny_, q_, decomposition_, procCoordinates_), tau(tau_), F_lbm(F_lbm_) {};
 
+
 BGK_GuoExtForce_Dynamics2D::~BGK_GuoExtForce_Dynamics2D(){};
+
 
 void BGK_GuoExtForce_Dynamics2D::compute_macro_values(){
   for(int i = 0; i < Lattice2D::nx; ++i){
@@ -38,10 +40,10 @@ void BGK_GuoExtForce_Dynamics2D::compute_macro_values(){
       Lattice2D::u[ind_phys_2D+1] = jy/rho_tmp;
 
       //p[i][j] = rho_tmp*csPow2;
-
     }
   }
 };
+
 
 void BGK_GuoExtForce_Dynamics2D::compute_macro_values(int i_, int j_){
   int ind_phys_1D = i_ * Lattice2D::ny + j_;
@@ -65,7 +67,6 @@ void BGK_GuoExtForce_Dynamics2D::compute_macro_values(int i_, int j_){
   Lattice2D::u[ind_phys_2D+1] = jy/rho_tmp;
 
   //p[i][j] = rho_tmp*csPow2;
-
 };
 
 
@@ -79,23 +80,19 @@ void BGK_GuoExtForce_Dynamics2D::collision(){
         int ind_phys_2D = i * Lattice2D::ny * 2 + j*2;
  
         Lattice2D::set_f0(i, j, iq, Dynamics2D::feq(iq, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );
-   //     double f0_solid = Dynamics2D::feq(iq, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::us);
-  vector<double> uSolid{Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[0], Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[1]};
-  //vector<double> uSolid{0.0, 0.0};
-  //double f0_solid = Dynamics2D::feq(iq, ind_phys_1D, ind_phys_2D, Lattice2D::rho, uSolid);
-  double f0_solid = Dynamics2D::feq(iq, ind_phys_1D, ind_phys_2D, Lattice2D::get_rho(ind_phys_1D), uSolid);
+        vector<double> uSolid{Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[0], Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[1]};
+        double f0_solid = Dynamics2D::feq(iq, ind_phys_1D, ind_phys_2D, Lattice2D::get_rho(ind_phys_1D), uSolid);
 
-      int iqO = 0;    
-      if ((iq == 1) || (iq == 5) || (iq == 2) || (iq == 6)) 
-        iqO = iq + 2;
-      if ((iq == 3) || (iq == 7) || (iq == 4) || (iq == 8)) 
-        iqO = iq - 2;
+        int iqO = 0;    
+        if ((iq == 1) || (iq == 5) || (iq == 2) || (iq == 6)) 
+          iqO = iq + 2;
+        if ((iq == 3) || (iq == 7) || (iq == 4) || (iq == 8)) 
+          iqO = iq - 2;
 
         int ind_iqO = i * Lattice2D::ny * Lattice2D::q + j * Lattice2D::q + iqO;
-      
-      double f0iqO = Dynamics2D::feq(iqO, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u);
-      //double f0iqO_solid = Dynamics2D::feq(iqO, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::us);
-      double f0iqO_solid = Dynamics2D::feq(iqO, ind_phys_1D, ind_phys_2D, Lattice2D::rho, uSolid);
+        
+        double f0iqO = Dynamics2D::feq(iqO, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u);
+        double f0iqO_solid = Dynamics2D::feq(iqO, ind_phys_1D, ind_phys_2D, Lattice2D::rho, uSolid);
 
 
         double BGKcoll = ( Lattice2D::get_f0(ind_iq) - Lattice2D::get_f(ind_iq) ) / tau;
@@ -141,11 +138,7 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int iq_){
   int ind_phys_2D = i_ * Lattice2D::ny * 2 + j_*2;
 
   Lattice2D::set_f0(i_, j_, iq_, Dynamics2D::feq(iq_, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );
-  //double f0_solid = Dynamics2D::feq(iq_, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::us);
-  //vector<double> uSolid(Lattice2D::getSolidVelocityOnLattice(ind_phys_2D, 0)[0], Lattice2D::getSolidVelocityOnLattice(ind_phys_2D, 0)[1]);
-  //vector<double> uSolid = Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0);
   vector<double> uSolid{Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[0], Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[1]};
-  //vector<double> uSolid{0.0, 0.0};
   double f0_solid = Dynamics2D::feq(iq_, ind_phys_1D, ind_phys_2D, Lattice2D::get_rho(ind_phys_1D), uSolid);
 
 
@@ -162,15 +155,6 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int iq_){
     {
       iq_m = iq_ < 7 ? iq_ + 2 : iq_ - 2;
     }
-    
-   /*if( (iq_ + 2 < Lattice2D::q) && (Lattice2D::e[2*iq_]+Lattice2D::e[2*iq_+2*2]+Lattice2D::e[2*iq_+1]+Lattice2D::e[2*iq_+1+2*2 == 0]) )
-   {
-     iq_m = iq_ + 2;
-   }
-   else
-   {
-     iq_m = iq_ - 2;
-   }*/
   }
   int ind_iq_m = i_ * Lattice2D::ny * Lattice2D::q + j_ * Lattice2D::q + iq_m;
   Lattice2D::set_f0(i_, j_, iq_m, Dynamics2D::feq(iq_m, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );

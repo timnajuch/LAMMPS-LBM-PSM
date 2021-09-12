@@ -13,16 +13,11 @@ Tim Najuch, 2021
 #include <vector>
 #include "mpi.h"
 
-
 using namespace std;
-
 
 class PSM_LBM_MPI{
 
     public:
-        //MPICommunication(int *argc, char ***argv);
-        //~MPICommunication();
-        //PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[3][2]);
         PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6]);
         ~PSM_LBM_MPI();
     
@@ -34,8 +29,6 @@ class PSM_LBM_MPI{
 
         MPI_Comm world;
         MPI_Status status;
-
-//        void domainDecomposition(int decomposition[3], int **procNeigh);
 
         void returnProcCoordinatesArray(vector<int>& procCoordinates_){ procCoordinates_[0] = procCoordinates[0]; procCoordinates_[1] = procCoordinates[1]; procCoordinates_[2] = procCoordinates[2]; }
 
@@ -107,7 +100,6 @@ template<typename T> void PSM_LBM_MPI::sendRecvData(vector<T> &data_, bool isVec
                          {upRank, downRank} };
 
   MPI_Datatype commDataType = get_type<T>();
-//cout << "DEBUG SENDRECV. A" << endl;
   switch(commDirection)
   {
     case 0: // x-direction
@@ -129,46 +121,30 @@ template<typename T> void PSM_LBM_MPI::sendRecvData(vector<T> &data_, bool isVec
   envelopeIterRecv[0] = 0;
   envelopeIterRecv[1] = 0;
   envelopeIterRecv[2] = 0;
-//int a = 1;
-//int b = 2;
   vector<T> sendBuf1;
   vector<T> recvBuf1;
-  //commDataSize = 600;
   sendBuf1.resize(commDataSize);
   recvBuf1.resize(commDataSize);
 
   envelopeStart = direction[0]*envelopeIterSend[0] +
                   direction[1]*envelopeIterSend[1] +
                   direction[2]*envelopeIterSend[2];
-//cout << "DEBUG SENDRECV. B" << endl;
+
   packData(sendBuf1, data_, direction, envelopeIterSend, envelopeStart, dataSize, nx, ny, nz, envelopeWidth);
-//cout << "DEBUG SENDRECV. C: " << commDataSize << " / " << commDirection << " / " << rank << " / " << recvRank[0][0] << " / " << sendRank[0][0] << " / " << westRank << " / " << eastRank << endl;
-//for(int i =0; i<commDataSize; ++i){
-//    sendBuf1[i] = 0.0;
-//    recvBuf1[i] = 0.0;
-//    //cout << "DEBUG  sendbuf and rcbuf: " << i << " / " << sendBuf1[i] << " / " << recvBuf1[i] << endl;
-//}
-//cout << "DEBUG SENDRECV. Cb" << endl;
+
   MPI_Sendrecv(&sendBuf1[0], commDataSize, commDataType, recvRank[commDirection][0], 0,
                &recvBuf1[0], commDataSize, commDataType, sendRank[commDirection][0], 0,
                world, &status);
-  //MPI_Sendrecv(&sendBuf1[0], commDataSize, MPI_DOUBLE, recvRank[commDirection][0], 0,
-   //            &recvBuf1[0], commDataSize, MPI_DOUBLE, sendRank[commDirection][0], 0,
-   //            world, &status);
-  //MPI_Sendrecv(&a, 1, MPI_INT, recvRank[commDirection][0], 0,
-  //            &b, 1, MPI_INT, sendRank[commDirection][0], 0,
-  //            world, &status);
-  //MPI_Barrier(world);
-//cout << "DEBUG SENDRECV. D" << endl;
+
   if(procCoordinates[commDirection] != 0 || (periodicInX == true && commDirection == 0))
   {
     envelopeStart = direction[0]*envelopeIterRecv[0] +
                     direction[1]*envelopeIterRecv[1] +
                     direction[2]*envelopeIterRecv[2];
-//cout << "DEBUG SENDRECV. E" << endl;
+
     unpackData(recvBuf1, data_, direction, envelopeIterRecv, envelopeStart, dataSize, nx, ny, nz, envelopeWidth);
   }
-//cout << "DEBUG SENDRECV. F" << endl;
+
   envelopeIterSend[0] = direction[0]*envelopeWidth;
   envelopeIterSend[1] = direction[1]*envelopeWidth;
   envelopeIterSend[2] = direction[2]*envelopeWidth;
@@ -281,5 +257,4 @@ template<typename T> void PSM_LBM_MPI::unpackData(vector<T> &recvBuf, vector<T> 
 
 }
 
-//}
 #endif

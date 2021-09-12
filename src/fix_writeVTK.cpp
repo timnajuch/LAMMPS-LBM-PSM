@@ -7,7 +7,6 @@ Tim Najuch, 2019
 ------------------------------------------------------*/
 
 #include "fix_writeVTK.h"
-//#include "fix_PSM_LBM.h"
 
 WriteVTK::WriteVTK(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg) {
   for(int ifix=0; ifix<modify->nfix; ifix++)

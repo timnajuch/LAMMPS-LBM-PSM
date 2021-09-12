@@ -9,11 +9,10 @@ Tim Najuch, 2021
 #ifndef LATTICE_2D_H
 #define LATTICE_2D_H
 
-#include "boost/multi_array.hpp"
-#include <vector>
-#include <array>
-#include <math.h>
 #include <iostream>
+#include <math.h>
+#include <vector>
+
 #include "particleDataOnLattice.h"
 
 using namespace std;
@@ -106,6 +105,5 @@ class Lattice2D{
     
     friend class ZouHeBC2D;
 };
-
 
 #endif

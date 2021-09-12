@@ -9,10 +9,11 @@ Tim Najuch, 2021
 #ifndef DYNAMICS_2D
 #define DYNAMICS_2D
 
-#include "lattice2D.h"
 #include <iostream>
-#include <vector>
 #include <math.h>
+#include <vector>
+
+#include "lattice2D.h"
 
 using namespace std;
 
@@ -22,10 +23,9 @@ class Dynamics2D : public Lattice2D {
   //  double tau;
 
   public:
-    Dynamics2D(int nx_, int ny_, int q_, int decomposition_[3], int procCoordinates_[3]); // : Lattice2D(int nx_, int ny_, int q_);
+    Dynamics2D(int nx_, int ny_, int q_, int decomposition_[3], int procCoordinates_[3]);
     ~Dynamics2D();
 
-    //double feq(double rho_, double ux_, double uy_, double ex_, double ey_, double w_, double c_);
     double feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, vector<double> &rho_, vector<double> &u_);
     double feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, double rho, vector<double> u);
 

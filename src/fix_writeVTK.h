@@ -15,17 +15,17 @@ FixStyle(lbm-psm-vtk,WriteVTK)
 #ifndef WRITEVTK_H
 #define WRITEVTK_H
 
-#include <iostream>
-#include <vector>
-#include <math.h>
-#include <fstream> 
 #include <algorithm>
+#include <fstream> 
 #include <functional>
-//#include "mpiCommunication.h"
-//#include "fix_PSM_LBM_MPICOMM.h"
-#include "fix.h"
+#include <iostream>
+#include <math.h>
+#include <vector>
+
 #include "comm.h"
+#include "fix.h"
 #include "modify.h"
+
 #include "fix_PSM_LBM.h"
 
 using namespace LAMMPS_NS;
