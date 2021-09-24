@@ -19,7 +19,7 @@ class BGK_GuoExtForce_Dynamics2D : public Dynamics2D {
     vector<double> F_lbm;
 
   public:
-    BGK_GuoExtForce_Dynamics2D(double tau_, int nx_, int ny_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3]);
+    BGK_GuoExtForce_Dynamics2D(double tau_, int nx_, int ny_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_);
     ~BGK_GuoExtForce_Dynamics2D();
 
     void compute_macro_values();

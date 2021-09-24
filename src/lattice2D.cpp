@@ -9,12 +9,23 @@ Tim Najuch, 2021
 #include "lattice2D.h"
 
 
-Lattice2D::Lattice2D(int nx_, int ny_, int q_, int decomposition[3], int procCoordinates_[3]){
+Lattice2D::Lattice2D(int nx_, int ny_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_){
   envelopeWidth = 1;
 
   procCoordinates[0] = procCoordinates_[0];
   procCoordinates[1] = procCoordinates_[1];
   procCoordinates[2] = procCoordinates_[2];
+
+  procLength.resize(3);
+  procOrigin.resize(3);
+
+  procLength[0] = boxLength_[0]/((double)decomposition[0]);
+  procLength[1] = boxLength_[1]/((double)decomposition[1]);
+  //procLength[2] = boxLength_[2]/((double)decomposition[2]);
+
+  procOrigin[0] = origin_[0] + procCoordinates[0]*boxLength_[0]/((double)decomposition[0]);
+  procOrigin[1] = origin_[1] + procCoordinates[1]*boxLength_[1]/((double)decomposition[1]);
+  //procOrigin[2] = origin_[2] + procCoordinates[2]*boxLength_[2]/((double)decomposition[2]);
 
   c = 1.0;
   cs = 1.0/sqrt(3.0);

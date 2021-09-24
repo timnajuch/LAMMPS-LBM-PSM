@@ -23,7 +23,7 @@ class Dynamics2D : public Lattice2D {
   //  double tau;
 
   public:
-    Dynamics2D(int nx_, int ny_, int q_, int decomposition_[3], int procCoordinates_[3]);
+    Dynamics2D(int nx_, int ny_, int q_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_);
     ~Dynamics2D();
 
     double feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, vector<double> &rho_, vector<double> &u_);

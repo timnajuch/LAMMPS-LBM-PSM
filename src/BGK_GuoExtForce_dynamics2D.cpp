@@ -8,8 +8,8 @@ Tim Najuch, 2021
 
 #include "BGK_GuoExtForce_dynamics2D.h"
 
-BGK_GuoExtForce_Dynamics2D::BGK_GuoExtForce_Dynamics2D(double tau_, int nx_, int ny_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3]) :
-  Dynamics2D(nx_, ny_, q_, decomposition_, procCoordinates_), tau(tau_), F_lbm(F_lbm_) {};
+BGK_GuoExtForce_Dynamics2D::BGK_GuoExtForce_Dynamics2D(double tau_, int nx_, int ny_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_) :
+  Dynamics2D(nx_, ny_, q_, decomposition_, procCoordinates_, origin_, boxLength_), tau(tau_), F_lbm(F_lbm_) {};
 
 
 BGK_GuoExtForce_Dynamics2D::~BGK_GuoExtForce_Dynamics2D(){};

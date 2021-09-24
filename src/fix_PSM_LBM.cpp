@@ -93,14 +93,17 @@ void fix_PSM_LBM::init()
   procNeigh[3] = comm->procneigh[1][1];
   procNeigh[4] = comm->procneigh[2][0];
   procNeigh[5] = comm->procneigh[2][1];
-  lbmmpicomm = new PSM_LBM_MPI(world, decomposition, procNeigh);
+  lbmmpicomm = new PSM_LBM_MPI(world, decomposition, procNeigh, procCoordinates);
 
   unitConversion = new Unit_Conversion(rho, nu, lc, Re, Nlc, tau);
 
   vector<double> F_lbm(2,0.0); // external forcing such as gravity. not incorporated yet.
-  int nx = domain->xprd/unitConversion->get_dx();
-  int ny = domain->yprd/unitConversion->get_dx();
-  dynamics = new BGK_GuoExtForce_Dynamics2D(tau, nx, ny, 9, F_lbm, decomposition, procCoordinates);
+  int nx = domain->xprd/unitConversion->get_dx()+1;
+  int ny = domain->yprd/unitConversion->get_dx()+1;
+  vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
+  vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
+
+  dynamics = new BGK_GuoExtForce_Dynamics2D(tau, nx, ny, 9, F_lbm, decomposition, procCoordinates, origin, boxLength);
 
   dynamics->initialise_domain(unitConversion->get_dx(), unitConversion->get_dx());
 
@@ -162,6 +165,7 @@ void fix_PSM_LBM::pre_force(int)
   vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
   exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->v, atom->radius, boxLength, origin);
 
+  //lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), false);
   lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
   lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic);
   //lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), true, 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
@@ -180,7 +184,7 @@ void fix_PSM_LBM::pre_force(int)
   int stressletFixID = atom->find_custom((char *)"stresslet", flagS, ncolumnsS);
 
 
-  //exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, nPart, atom->tag, atom->x, hydroForceFixID, hydroTorqueFixID, stressletFixID, atom);
+  //exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, nPart, atom->tag, atom->x, hydroForceFixID, hydroTorqueFixID, stressletFixID, atom, origin);
 
 
   for(int i=0;i<atom->nlocal;i++){

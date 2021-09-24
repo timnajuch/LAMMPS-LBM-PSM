@@ -18,7 +18,7 @@ using namespace std;
 class PSM_LBM_MPI{
 
     public:
-        PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6]);
+        PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6], int procCoordinates_[3]);
         ~PSM_LBM_MPI();
     
         int size;
@@ -30,7 +30,7 @@ class PSM_LBM_MPI{
         MPI_Comm world;
         MPI_Status status;
 
-        void returnProcCoordinatesArray(vector<int>& procCoordinates_){ procCoordinates_[0] = procCoordinates[0]; procCoordinates_[1] = procCoordinates[1]; procCoordinates_[2] = procCoordinates[2]; }
+//        void returnProcCoordinatesArray(vector<int>& procCoordinates_){ procCoordinates_[0] = procCoordinates[0]; procCoordinates_[1] = procCoordinates[1]; procCoordinates_[2] = procCoordinates[2]; }
 
         template<typename T> MPI_Datatype get_type();
         template<typename T> void sendRecvData(vector<T> &data_, bool isVector3D, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool periodicInX);
