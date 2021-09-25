@@ -100,6 +100,9 @@ void fix_PSM_LBM::init()
   vector<double> F_lbm(2,0.0); // external forcing such as gravity. not incorporated yet.
   int nx = domain->xprd/unitConversion->get_dx()+1;
   int ny = domain->yprd/unitConversion->get_dx()+1;
+  int nz = 0;
+  if (domain->dimension == 3)
+    {nz = domain->zprd/unitConversion->get_dx()+1; }
   vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
   vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
 
@@ -184,7 +187,7 @@ void fix_PSM_LBM::pre_force(int)
   int stressletFixID = atom->find_custom((char *)"stresslet", flagS, ncolumnsS);
 
 
-  //exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, nPart, atom->tag, atom->x, hydroForceFixID, hydroTorqueFixID, stressletFixID, atom, origin);
+  exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->radius, hydroForceFixID, hydroTorqueFixID, stressletFixID, atom, origin);
 
 
   for(int i=0;i<atom->nlocal;i++){

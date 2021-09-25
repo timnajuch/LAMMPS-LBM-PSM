@@ -159,8 +159,8 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int iq_){
   int ind_iq_m = i_ * Lattice2D::ny * Lattice2D::q + j_ * Lattice2D::q + iq_m;
   Lattice2D::set_f0(i_, j_, iq_m, Dynamics2D::feq(iq_m, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );
 
-  //double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (Lattice2D::get_f(ind_iq) - Lattice2D::get_f0(ind_iq) );
-  double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + Lattice2D::get_f(ind_iq_m) - Lattice2D::get_f0(ind_iq_m);
+  double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (Lattice2D::get_f(ind_iq) - Lattice2D::get_f0(ind_iq) );
+  //double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + Lattice2D::get_f(ind_iq_m) - Lattice2D::get_f0(ind_iq_m);
 
   double B = Lattice2D::getSolidFractionOnLattice(ind_phys_1D, 0);
   //double B = Lattice2D::get_B(ind_phys_1D);
@@ -174,7 +174,7 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int iq_){
     Lattice2D::set_Fhydx(ind_phys_1D, B * solid_coll * Lattice2D::e[2*iq_]);
     Lattice2D::set_Fhydy(ind_phys_1D, B * solid_coll * Lattice2D::e[2*iq_+1]);
   }else{
-    Lattice2D::add_Fhydx(ind_phys_1D, B * solid_coll * Lattice2D::e[2*iq_]);
+    Lattice2D::add_Fhydx(ind_phys_1D, B * solid_coll * Lattice2D::e[2*iq_]); // TODO: check if dim seclection is correct
     Lattice2D::add_Fhydy(ind_phys_1D, B * solid_coll * Lattice2D::e[2*iq_+1]);
   }
 

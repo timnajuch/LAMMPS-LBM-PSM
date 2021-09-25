@@ -131,7 +131,7 @@ void Lattice2D::initialise_domain(double dx_, double dy_){
 
       int ind_2D = i*ny + j;
 
-      x[ind_2D] = i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
+      x[ind_2D] = i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx; // TODO: check correctness
       y[ind_2D] = j*dy - dy*envelopeWidth + procCoordinates[1]*(ny-2*envelopeWidth)*dy;
 
 
