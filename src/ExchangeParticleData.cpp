@@ -13,7 +13,7 @@ ExchangeParticleData::ExchangeParticleData() {};
 ExchangeParticleData::~ExchangeParticleData() {};
 
 
-void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double **uPart, double *rp, vector<double> boxLength, vector<double> origin)
+void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double **uPart, double **omega, double *rp, vector<double> boxLength, vector<double> origin)
 {
   for(int iPart = 0; iPart < numberParticles; ++iPart){
       double x_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[iPart][0]-(lattice2D_->getProcOrigin()[0]-(double)lattice2D_->get_envelopeWidth()*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_nx()-1.0);
@@ -31,7 +31,46 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
 
           int ind_phys_1D = i * lattice2D_->get_ny() + j;
 
-          lattice2D_->setParticleOnLattice(ind_phys_1D, tag[iPart], uPart[iPart], calcSolidFraction(i, j, x_lb, y_lb, r_lb));
+          double sf = calcSolidFraction(i, j, x_lb, y_lb, r_lb);
+
+          int id_old = 0;
+          double sf_old = 0.0;
+          // Todo: Extend to two or more particles
+          if (tag[iPart] == lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).particleID[0]){
+            id_old = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).particleID[0];
+            sf_old = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[0];
+          }
+
+          int const decFlag = (sf > 0.001) + 2*(sf_old > 0.001);
+          double zeroVel[2] = {0.0, 0.0};
+
+          double dx = (double)i - x_lb;
+          double dy = (double)j - y_lb;
+          double dz = 0.0;
+//          double dz = (double)k - z_lb;  
+          double uNode[2];
+          uNode[0] = unitConversion->get_vel_lb(uPart[iPart][0]);
+          uNode[1] = unitConversion->get_vel_lb(uPart[iPart][1]);
+          uNode[0] += unitConversion->get_freq_lb(omega[iPart][1])*dz - unitConversion->get_freq_lb(omega[iPart][2])*dy;
+          uNode[1] += -unitConversion->get_freq_lb(omega[iPart][0])*dz + unitConversion->get_freq_lb(omega[iPart][2])*dx;
+          //uNode[2] += omega[0]*dy - omega[1]*dx;
+
+          switch(decFlag){
+            case 0: // sf == 0 && sf_old == 0
+              lattice2D_->setParticleOnLattice(ind_phys_1D, 0, zeroVel, 0.0);
+              break;
+            case 1: // sf > 0 && sf_old == 0
+              lattice2D_->setParticleOnLattice(ind_phys_1D, tag[iPart], uNode, calcSolidFraction(i, j, x_lb, y_lb, r_lb));
+              break;
+            case 2: // sf == 0 && sf_old > 0
+              if( id_old == tag[iPart] ) // then particle has left this cell
+                lattice2D_->setParticleOnLattice(ind_phys_1D, 0, zeroVel, 0.0);
+              break;
+            case 3: // sf > 0 && sf_old > 0
+              if( sf > sf_old || id_old == tag[iPart] )
+                lattice2D_->setParticleOnLattice(ind_phys_1D, tag[iPart], uNode, calcSolidFraction(i, j, x_lb, y_lb, r_lb));
+              break;
+          }
 
         }
       }
@@ -105,9 +144,9 @@ void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2
         fHydro[1] += Fhyd[1]*unitConversion->get_forceFactor();
         //fHydro[2] += Fhyd[2]*unitConversion->get_forceFactor();
 
-        double dx = i - x_lb;
-        double dy = j - y_lb;
-//        double dz = k - z_lb;  
+        double dx = (double)i - x_lb;
+        double dy = (double)j - y_lb;
+//        double dz = (double)k - z_lb;  
 
         //tHydro[0] += (dy*Fhyd[2] - dz*Fhyd[1])*unitConversion->get_torqueFactor();
         //tHydro[1] += (dz*Fhyd[0] - dx*Fhyd[2])*unitConversion->get_torqueFactor();
