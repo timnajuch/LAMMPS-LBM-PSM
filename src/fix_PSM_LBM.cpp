@@ -194,32 +194,55 @@ void fix_PSM_LBM::pre_force(int)
     fh[0] = 0.0;
     fh[1] = 0.0;
 
-    exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, atom->x[i], atom->radius[i], fh);
+    vector<double> th;
+    th.resize(3);
+    th[0] = 0.0;
+    th[1] = 0.0;
+    th[2] = 0.0;
+
+    vector<double> stresslet;
+    stresslet.resize(6);
+    stresslet[0] = 0.0;
+    stresslet[1] = 0.0;
+    stresslet[2] = 0.0;
+    stresslet[3] = 0.0;
+    stresslet[4] = 0.0;
+    stresslet[5] = 0.0;
+
+    exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, atom->x[i], atom->radius[i], fh, th, stresslet);
 
     if (i < atom->nlocal){
       f[i][0] += fh[0];
       f[i][1] += fh[1];
+//      f[i][2] += fh[2];
     }else{ // ghost atoms
       f[i][0] = fh[0];
       f[i][1] = fh[1];
+//      f[i][2] = fh[2];
     }
-/*
-    t[i][0] += atom->dvector[hydroTorqueFixID][0];
-    t[i][1] += atom->dvector[hydroTorqueFixID][1];
-    t[i][2] += atom->dvector[hydroTorqueFixID][2];
-*/
+
+
+    if (i < atom->nlocal){
+//      t[i][0] += fh[0];
+//      t[i][1] += fh[1];
+      t[i][2] += th[2];
+    }else{ // ghost atoms
+//      t[i][0] = fh[0];
+//      t[i][1] = fh[1];
+      t[i][2] = th[2];
+    }
+
     // Torque added because it is the antisymmetric part 
     // of the first moment of the stress over the surface
     // Stress defined as negative, hence the flipped signs
     // TODO: Check what middle indice of darray stands for. [][1][] gives seg fault
-/*
-    virial[0] += atom->darray[stressletFixID][0][0];
-    virial[1] += atom->darray[stressletFixID][0][1];
-    virial[2] += atom->darray[stressletFixID][0][2];     
-    virial[3] += atom->darray[stressletFixID][0][3] - 0.5*atom->dvector[hydroTorqueFixID][2];
-    virial[4] += atom->darray[stressletFixID][0][4] + 0.5*atom->dvector[hydroTorqueFixID][1];
-    virial[5] += atom->darray[stressletFixID][0][5] - 0.5*atom->dvector[hydroTorqueFixID][0];
-*/
+    virial[0] += stresslet[0];
+    virial[1] += stresslet[1];
+//    virial[2] += stresslet[2];
+    virial[3] += stresslet[3] - 0.5*th[2];
+//    virial[4] += stresslet[4] + 0.5*th[1];
+//    virial[5] += stresslet[5] - 0.5*th[0];
+
   }
   comm->reverse_comm();
 

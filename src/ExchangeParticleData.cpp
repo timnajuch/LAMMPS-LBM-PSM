@@ -78,7 +78,7 @@ double ExchangeParticleData::calcSolidFraction(int i, int j, double xP_LB, doubl
 };
 
 
-void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, double *xPart, double rp, vector<double> &fHydro)
+void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, double *xPart, double rp, vector<double> &fHydro, vector<double> &tHydro, vector<double> &stresslet)
 {
     int envelopeWidth = lattice2D_->get_envelopeWidth();
 
@@ -105,7 +105,20 @@ void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2
         fHydro[1] += Fhyd[1]*unitConversion->get_forceFactor();
         //fHydro[2] += Fhyd[2]*unitConversion->get_forceFactor();
 
-// TODO torque and stresslet      
+        double dx = i - x_lb;
+        double dy = j - y_lb;
+//        double dz = k - z_lb;  
+
+        //tHydro[0] += (dy*Fhyd[2] - dz*Fhyd[1])*unitConversion->get_torqueFactor();
+        //tHydro[1] += (dz*Fhyd[0] - dx*Fhyd[2])*unitConversion->get_torqueFactor();
+        tHydro[2] += (dx*Fhyd[1] - dy*Fhyd[0])*unitConversion->get_torqueFactor();
+
+        stresslet[0] -= 0.5*(dx*Fhyd[0] + dx*Fhyd[0])*unitConversion->get_torqueFactor();
+        stresslet[1] -= 0.5*(dy*Fhyd[1] + dy*Fhyd[1])*unitConversion->get_torqueFactor();
+//        stresslet[2] -= 0.5*(dz*Fhyd[2] + dz*Fhyd[2])*unitConversion->get_torqueFactor();
+        stresslet[3] -= 0.5*(dy*Fhyd[0] + dx*Fhyd[1])*unitConversion->get_torqueFactor();
+//        stresslet[4] -= 0.5*(dz*Fhyd[0] + dx*Fhyd[2])*unitConversion->get_torqueFactor();
+//        stresslet[5] -= 0.5*(dz*Fhyd[1] + dy*Fhyd[2])*unitConversion->get_torqueFactor();
 
       }
     }
