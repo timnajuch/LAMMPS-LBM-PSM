@@ -119,12 +119,13 @@ void fix_PSM_LBM::init()
       (char *)"hydroForce",     // fix id
       (char *)"all",            // fix group
       (char *)"property/atom",  // fix style: property/atom
-      (char *)"d_hydroForce",   // name
+      (char *)"d2_hydroForce",   // name
+      (char *)"3",              // number of array columns
       (char *)"ghost",          // communicate ghost atom
       (char *)"yes"
     };
  
-    modify->add_fix(6, fixarg, 1);
+    modify->add_fix(7, fixarg, 1);
     fix_hydroForce_ = (FixPropertyAtom *) modify->fix[modify->nfix-1];
   }
 
@@ -149,7 +150,7 @@ void fix_PSM_LBM::init()
       (char *)"all",            // fix group
       (char *)"property/atom",  // fix style: property/atom
       (char *)"d2_stresslet",   // name
-      (char *)"3",              // number of array columns
+      (char *)"6",              // number of array columns
       (char *)"ghost",          // communicate ghost atom
       (char *)"yes"
     };
@@ -168,7 +169,6 @@ void fix_PSM_LBM::pre_force(int)
   vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
   exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->v, atom->radius, boxLength, origin);
 
-  //lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), false);
   lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
   lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic);
   //lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), true, 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
@@ -187,29 +187,41 @@ void fix_PSM_LBM::pre_force(int)
   int stressletFixID = atom->find_custom((char *)"stresslet", flagS, ncolumnsS);
 
 
-  exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->radius, hydroForceFixID, hydroTorqueFixID, stressletFixID, atom, origin);
+  for(int i=0;i<nPart;i++){
 
+    vector<double> fh;
+    fh.resize(2);
+    fh[0] = 0.0;
+    fh[1] = 0.0;
 
-  for(int i=0;i<atom->nlocal;i++){
-    f[i][0] += atom->dvector[hydroForceFixID][0];
-    f[i][1] += atom->dvector[hydroForceFixID][1];
-    f[i][2] += atom->dvector[hydroForceFixID][2];
+    exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, atom->x[i], atom->radius[i], fh);
 
+    if (i < atom->nlocal){
+      f[i][0] += fh[0];
+      f[i][1] += fh[1];
+    }else{ // ghost atoms
+      f[i][0] = fh[0];
+      f[i][1] = fh[1];
+    }
+/*
     t[i][0] += atom->dvector[hydroTorqueFixID][0];
     t[i][1] += atom->dvector[hydroTorqueFixID][1];
     t[i][2] += atom->dvector[hydroTorqueFixID][2];
-
+*/
     // Torque added because it is the antisymmetric part 
     // of the first moment of the stress over the surface
     // Stress defined as negative, hence the flipped signs
     // TODO: Check what middle indice of darray stands for. [][1][] gives seg fault
+/*
     virial[0] += atom->darray[stressletFixID][0][0];
     virial[1] += atom->darray[stressletFixID][0][1];
     virial[2] += atom->darray[stressletFixID][0][2];     
     virial[3] += atom->darray[stressletFixID][0][3] - 0.5*atom->dvector[hydroTorqueFixID][2];
     virial[4] += atom->darray[stressletFixID][0][4] + 0.5*atom->dvector[hydroTorqueFixID][1];
     virial[5] += atom->darray[stressletFixID][0][5] - 0.5*atom->dvector[hydroTorqueFixID][0];
+*/
   }
+  comm->reverse_comm();
 
 }
 

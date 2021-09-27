@@ -3,34 +3,37 @@
 units			si
 atom_style		sphere
 atom_modify		map array
-atom_modify 	sort 0 0.0
+atom_modify 	sort 0 0.003
 
-comm_modify	vel yes
+dimension 2 
 
-boundary		p f f
+comm_modify	cutoff 0.001 vel yes
+
+boundary		f f p
 newton			off
 
-processors      1 1 1 
+processors      1 2 1 map cart
 region			box block 0. 0.005 0. 0.005 0. 0.005 units box
 create_box		1 box
 
 create_atoms 	1 single 0.0025 0.0025 0.0025
 set 			group all diameter 0.0005 density 1000
 
-neighbor		0.003 bin
+neighbor		0.001 bin
 neigh_modify	delay 0 every 1 check yes
 
 timestep       0.001      
 
 pair_style		none
 
-fix lbDYN all lbm-psm every 1 Nlc 10 lc 0.0005 rho 1000.0 nu 0.0001 Re 0.1 tau 0.7 
-fix lbBC all lbm-psm-bc shear
-#fix lbBC all lbm-psm-bc xFlow
+fix lbDYN all lbm-psm every 1 Nlc 11 lc 0.0005 rho 1000.0 nu 0.0001 Re 0.1 tau 0.7 
+#fix lbBC all lbm-psm-bc shear
+fix lbBC all lbm-psm-bc xFlow
 fix lbVTK all lbm-psm-vtk
 
 #fix             integrate all nve/sphere
-dump           	iddump all custom 1 s.p id type diameter mass x y z vx vy vz fx fy fz tqx tqy tqz omegax omegay omegaz
+#fix f2d all enforce2d
+dump           	iddump all custom 1 s.p id type diameter mass x y z vx vy vz fx fy fz tqx tqy tqz omegax omegay omegaz #f_hydroForce[0]
 
 # thermo settings
 compute			1 all erotate/sphere

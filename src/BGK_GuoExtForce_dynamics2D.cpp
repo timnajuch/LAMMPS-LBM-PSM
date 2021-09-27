@@ -171,11 +171,11 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int iq_){
   // todo extend to two or more particles
   if(iq_ == 0)
   {
-    Lattice2D::set_Fhydx(ind_phys_1D, B * solid_coll * Lattice2D::e[2*iq_]);
-    Lattice2D::set_Fhydy(ind_phys_1D, B * solid_coll * Lattice2D::e[2*iq_+1]);
+    Lattice2D::set_Fhydx(ind_phys_1D, -B * solid_coll * Lattice2D::e[2*iq_]);
+    Lattice2D::set_Fhydy(ind_phys_1D, -B * solid_coll * Lattice2D::e[2*iq_+1]);
   }else{
-    Lattice2D::add_Fhydx(ind_phys_1D, B * solid_coll * Lattice2D::e[2*iq_]); // TODO: check if dim seclection is correct
-    Lattice2D::add_Fhydy(ind_phys_1D, B * solid_coll * Lattice2D::e[2*iq_+1]);
+    Lattice2D::add_Fhydx(ind_phys_1D, -B * solid_coll * Lattice2D::e[2*iq_]);
+    Lattice2D::add_Fhydy(ind_phys_1D, -B * solid_coll * Lattice2D::e[2*iq_+1]);
   }
 
 };
