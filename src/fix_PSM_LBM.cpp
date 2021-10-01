@@ -97,6 +97,8 @@ void fix_PSM_LBM::init()
 
   unitConversion = new Unit_Conversion(rho, nu, lc, Re, Nlc, tau);
 
+  update->dt = unitConversion->get_phys_time(1.0)/((double)nevery);
+
   vector<double> F_lbm(2,0.0); // external forcing such as gravity. not incorporated yet.
   int nx = domain->xprd/unitConversion->get_dx()+1;
   int ny = domain->yprd/unitConversion->get_dx()+1;
