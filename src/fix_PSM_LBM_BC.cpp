@@ -215,29 +215,46 @@ void fix_PSM_LBM_BC::pre_force(int)
 */
 
 
-  // Shear
-  if (typeBC == 1)
-  {
-    if (comm->myloc[1] == 0)
-      { zouHe2D->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, -u_infty ); }
-    if (comm->myloc[1] == comm->procgrid[1]-1)
-      { zouHe2D->setZouHeVelBC2D_yp( fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
-  }
-  else if (typeBC == 2)
-  {
-    if (comm->myloc[0] == 0)
-      { zouHe2D->setZouHeVelBC2D_xn( envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, u_infty ); }
-    if (comm->myloc[0] == comm->procgrid[0]-1)
-      { zouHe2D->setZouHeDensBC2D_xp( fixPSMLBM->dynamics->get_nx()-1-envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, rho_outlet ); }
-    if (comm->myloc[1] == 0)
-      { zouHe2D->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
-    if (comm->myloc[1] == comm->procgrid[1]-1)
-      { zouHe2D->setZouHeVelBC2D_yp( fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
-  }
+  if(domain->dimension == 2){
+    // Shear
+    if (typeBC == 1)
+    {
+      if (comm->myloc[1] == 0)
+        { zouHe2D->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, -u_infty ); }
+      if (comm->myloc[1] == comm->procgrid[1]-1)
+        { zouHe2D->setZouHeVelBC2D_yp( fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
+    }
+    else if (typeBC == 2)
+    {
+      if (comm->myloc[0] == 0)
+        { zouHe2D->setZouHeVelBC2D_xn( envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, u_infty ); }
+      if (comm->myloc[0] == comm->procgrid[0]-1)
+        { zouHe2D->setZouHeDensBC2D_xp( fixPSMLBM->dynamics->get_nx()-1-envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, rho_outlet ); }
+      if (comm->myloc[1] == 0)
+        { zouHe2D->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
+      if (comm->myloc[1] == comm->procgrid[1]-1)
+        { zouHe2D->setZouHeVelBC2D_yp( fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
+    }
 
-  // External flow
-//  if (procCoordinates[0] == 0)
-//    { boundaries.setZouHeVelBC2D_xn(  envelopeWidth,                      envelopeWidth, dynamics.get_ny()-1-envelopeWidth, u_infty    ); }
-//  if (procCoordinates[0] == decomposition[0]-1)
-//    { boundaries.setZouHeDensBC2D_xp( dynamics.get_nx()-1-envelopeWidth,  envelopeWidth, dynamics.get_ny()-1-envelopeWidth, rho_outlet ); }
+    // External flow
+  //  if (procCoordinates[0] == 0)
+  //    { boundaries.setZouHeVelBC2D_xn(  envelopeWidth,                      envelopeWidth, dynamics.get_ny()-1-envelopeWidth, u_infty    ); }
+  //  if (procCoordinates[0] == decomposition[0]-1)
+  //    { boundaries.setZouHeDensBC2D_xp( dynamics.get_nx()-1-envelopeWidth,  envelopeWidth, dynamics.get_ny()-1-envelopeWidth, rho_outlet ); }
+  }else{
+    // Shear
+    if (typeBC == 1)
+    {
+      if (comm->myloc[1] == 0)
+        { zouHe2D->setZouHeVelBC3D_yn( 0+envelopeWidth, 
+                                       1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, 
+                                       1+envelopeWidth, fixPSMLBM->dynamics->get_nz()-2-envelopeWidth, 
+                                       -u_infty, 0.0, 0.0); }
+      if (comm->myloc[1] == comm->procgrid[1]-1)
+        { zouHe2D->setZouHeVelBC3D_yp( fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, 
+                                       1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, 
+                                       1+envelopeWidth, fixPSMLBM->dynamics->get_nz()-2-envelopeWidth, 
+                                       u_infty, 0.0, 0.0 ); }
+    }
+  }
 }

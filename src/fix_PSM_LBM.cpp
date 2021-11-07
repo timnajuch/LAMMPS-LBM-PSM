@@ -99,7 +99,7 @@ void fix_PSM_LBM::init()
 
   update->dt = unitConversion->get_phys_time(1.0)/((double)nevery);
 
-  vector<double> F_lbm(2,0.0); // external forcing such as gravity. not incorporated yet.
+  vector<double> F_lbm(3,0.0); // external forcing such as gravity. not incorporated yet.
   int nx = domain->xprd/unitConversion->get_dx()+1;
   int ny = domain->yprd/unitConversion->get_dx()+1;
   int nz = 0;
@@ -171,10 +171,14 @@ void fix_PSM_LBM::pre_force(int)
   vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
   exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->v, atom->omega, atom->radius, boxLength, origin);
 
-  lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
-  lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic);
-  //lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), true, 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
-
+  if(domain->dimension == 2){
+    lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
+    lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic);
+  }else(domain->dimension == 3){
+    lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->xperiodic);
+    lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->yperiodic);
+    lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
+  }
   dynamics->macroCollideStream();
 
 
@@ -216,21 +220,21 @@ void fix_PSM_LBM::pre_force(int)
     if (i < atom->nlocal){
       f[i][0] += fh[0];
       f[i][1] += fh[1];
-//      f[i][2] += fh[2];
+      f[i][2] += fh[2];
     }else{ // ghost atoms
       f[i][0] = fh[0];
       f[i][1] = fh[1];
-//      f[i][2] = fh[2];
+      f[i][2] = fh[2];
     }
 
 
     if (i < atom->nlocal){
-//      t[i][0] += fh[0];
-//      t[i][1] += fh[1];
+      t[i][0] += fh[0];
+      t[i][1] += fh[1];
       t[i][2] += th[2];
     }else{ // ghost atoms
-//      t[i][0] = fh[0];
-//      t[i][1] = fh[1];
+      t[i][0] = fh[0];
+      t[i][1] = fh[1];
       t[i][2] = th[2];
     }
 
@@ -240,10 +244,10 @@ void fix_PSM_LBM::pre_force(int)
     // TODO: Check what middle indice of darray stands for. [][1][] gives seg fault
     virial[0] += stresslet[0];
     virial[1] += stresslet[1];
-//    virial[2] += stresslet[2];
+    virial[2] += stresslet[2];
     virial[3] += stresslet[3] - 0.5*th[2];
-//    virial[4] += stresslet[4] + 0.5*th[1];
-//    virial[5] += stresslet[5] - 0.5*th[0];
+    virial[4] += stresslet[4] + 0.5*th[1];
+    virial[5] += stresslet[5] - 0.5*th[0];
 
   }
   comm->reverse_comm();

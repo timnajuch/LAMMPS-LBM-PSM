@@ -34,7 +34,7 @@ using namespace std;
 
 class WriteVTK : public Fix{
   private:
-    int nx, ny;
+    int nx, ny, nz;
     int decomposition[3];
     //vector<double> point_id;
 
@@ -48,8 +48,8 @@ class WriteVTK : public Fix{
 
 //  void write_vtk(string name_, vector<double> &x_, vector<double> &y_, vector<double> &B_, vector<double> &rho_, vector<double> &u_, MPICommunication &mpicomm);
 //  void write_vtk(string name_, vector<double> &x_, double x0_, vector<double> &y_, double y0_, vector<double> &B_, double B0_, vector<double> &rho_, double rho0_, vector<double> &u_, double u0_, MPICommunication &mpicomm);
-  void write_vtk(string name_, vector<double> &x_, vector<double> &y_, vector<double> &B_, vector<double> &rho_, vector<double> &u_);
-  void write_vtk(string name_, vector<double> &x_, double x0_, vector<double> &y_, double y0_, vector<double> &B_, double B0_, vector<double> &rho_, double rho0_, vector<double> &u_, double u0_);
+  void write_vtk(string name_, vector<double> &x_, vector<double> &y_, vector<double> &z_, vector<double> &B_, vector<double> &rho_, vector<double> &u_);
+  void write_vtk(string name_, vector<double> &x_, double x0_, vector<double> &y_, double y0_, vector<double> &z_, double z0_, vector<double> &B_, double B0_, vector<double> &rho_, double rho0_, vector<double> &u_, double u0_);
 
   void write_profile(string name_, int ix_, vector<double> &y_, double y0_, vector<double> &B_, double B0_, vector<double> &rho_, double rho0_, vector<double> &u_, double u0_);
 

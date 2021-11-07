@@ -30,8 +30,14 @@ Unit_Conversion::Unit_Conversion(double rhof_, double nu_, double lc_, double Re
 
   // forceFacdoubleor is doubleo scale dp/dx (nodouble doublehe force). units of dp/dx = kg/(m^2s^2) (force F = kg/m/s^2). 
   // Hence, we need additionally "/ (pow(lc,2)*pow(dx_d,2))" to scale correctly
-  forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
-  torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
+  // TODO check units for 2D and 3D
+  if(domain->dimension == 2){
+    forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
+    torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
+  }else{
+    forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
+    torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
+  }
 
 };
 
@@ -78,9 +84,10 @@ double Unit_Conversion::get_torqueFactor(){
 };
 
 std::vector<double> Unit_Conversion::get_force_lb_2D(std::vector<double> F_phys_2D_){
-  std::vector<double> F_lb(2,0.0);
+  std::vector<double> F_lb(3,0.0);
   F_lb[0] = F_phys_2D_[0]/forceFactor;
   F_lb[1] = F_phys_2D_[1]/forceFactor;
+  F_lb[2] = F_phys_2D_[2]/forceFactor;
 
   return F_lb;
 };
