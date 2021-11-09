@@ -53,17 +53,19 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
   rho = vector<double>(nx*ny*nz,0.0);
   x = vector<double>(nx*ny*nz,0.0);
   y = vector<double>(nx*ny*nz,0.0);
+  z = vector<double>(nx*ny*nz,0.0);
   
-  u = vector<double>(nx*ny*nz*2,0.0);
-  us = vector<double>(nx*ny*nz*2,0.0);
+  u = vector<double>(nx*ny*nz*3,0.0);
+  us = vector<double>(nx*ny*nz*3,0.0);
 
   Fhydx = vector<double>(nx*ny*nz,0.0);
   Fhydy = vector<double>(nx*ny*nz,0.0);
+  Fhydz = vector<double>(nx*ny*nz,0.0);
   //if (domain->dimension == 3)
   if (dimension == 3)
     { Fhydz = vector<double>(nx*ny*nz,0.0); }
 
-  pData.resize(nx*ny);
+  pData.resize(nx*ny*nz);
 
   if(q == 9){
     e = { 0.0 ,  0.0,  0.0,
@@ -85,7 +87,7 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
           1.0/36.0,
           1.0/36.0,
           1.0/36.0,
-          1.0/36.0,
+          1.0/36.0
         };
     
     g = { 0.0,
@@ -96,7 +98,7 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
           1.0/12.0,
           1.0/12.0,
           1.0/12.0,
-          1.0/12.0,
+          1.0/12.0
         };
     }
 

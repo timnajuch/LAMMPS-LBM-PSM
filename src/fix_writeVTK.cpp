@@ -34,7 +34,7 @@ void WriteVTK::init()
 
   nx = fixPSMLBM->dynamics->get_nx();
   ny = fixPSMLBM->dynamics->get_ny();
-  ny = fixPSMLBM->dynamics->get_nz();
+  nz = fixPSMLBM->dynamics->get_nz();
 
   vector<double> x_vtk = fixPSMLBM->dynamics->get_x();
   vector<double> y_vtk = fixPSMLBM->dynamics->get_y();
@@ -49,6 +49,7 @@ void WriteVTK::init()
   //vector<double> B_vtk = fixPSMLBM->get_B();
   double u_infty = 1.0;
   double ly = 1.0;
+
   write_vtk("test.vtk", x_vtk, 1.0/ly, y_vtk, 1.0/ly, z_vtk, 1.0/ly, B_vtk, 1.0, rho_vtk, 1000.0, u_vtk, 1.0/u_infty);
 }
 
@@ -78,6 +79,7 @@ vector<double> rho0;
 vector<double> u0;
 
 vector<double> point_id(nx*decomposition[0]*ny*decomposition[1]*nz*decomposition[2], 0.0);
+
 
 ofstream ovel;
 ovel.open(name_);
@@ -153,6 +155,12 @@ ovel.close();
 void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<double> &y_, double y0_, vector<double> &z_, double z0_, vector<double> &B_, double B0_, vector<double> &rho_, double rho0_, vector<double> &u_, double u0_){
 
   int envelopeWidth = 1;
+  int nzLoopStart = 0;
+  int nzLoopEnd = 1;
+  if(domain->dimension == 3){
+    nzLoopStart = envelopeWidth;
+    nzLoopEnd = nz-envelopeWidth;
+  }
 
   vector<double> x0;
   vector<double> y0;
@@ -176,6 +184,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
 
   MPI_Gather(&x_[0], nx*ny*nz, MPI_DOUBLE, &x0[0], nx*ny*nz, MPI_DOUBLE, 0, world);
   MPI_Gather(&y_[0], nx*ny*nz, MPI_DOUBLE, &y0[0], nx*ny*nz, MPI_DOUBLE, 0, world);
+  MPI_Gather(&z_[0], nx*ny*nz, MPI_DOUBLE, &z0[0], nx*ny*nz, MPI_DOUBLE, 0, world);
   MPI_Gather(&B_[0], nx*ny*nz, MPI_DOUBLE, &B0[0], nx*ny*nz, MPI_DOUBLE, 0, world);
   MPI_Gather(&rho_[0], nx*ny*nz, MPI_DOUBLE, &rho0[0], nx*ny*nz, MPI_DOUBLE, 0, world);
   MPI_Gather(&u_[0], nx*ny*nz*3, MPI_DOUBLE, &u0[0], nx*ny*nz*3, MPI_DOUBLE, 0, world);
@@ -213,7 +222,11 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
   ovel << "Fluid flow field from LBM simulation\n";
   ovel << "ASCII\n";
   ovel << "DATASET RECTILINEAR_GRID\n";
-  ovel << "DIMENSIONS " << (nx-2*envelopeWidth)*decomposition[0] << " " << (ny-2*envelopeWidth)*decomposition[1] << " " << (nz-2*envelopeWidth)*decomposition[2] << "\n";
+  if(domain->dimension == 2){
+    ovel << "DIMENSIONS " << (nx-2*envelopeWidth)*decomposition[0] << " " << (ny-2*envelopeWidth)*decomposition[1] << " " << 1 << "\n";
+  }else{
+    ovel << "DIMENSIONS " << (nx-2*envelopeWidth)*decomposition[0] << " " << (ny-2*envelopeWidth)*decomposition[1] << " " << (nz-2*envelopeWidth)*decomposition[2] << "\n";
+  }
   //ovel << "DATASET UNSTRUCTURED_GRID\n\n";
 
   ovel << "X_COORDINATES " << (nx-2*envelopeWidth)*decomposition[0] << " float" << endl;
@@ -264,7 +277,8 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
   ovel << "SCALARS B-Field FLOAT" << "\n";
   ovel << "LOOKUP_TABLE default" << "\n";
   for(int kproc = 0; kproc<decomposition[2]; kproc++){
-    for(int k=envelopeWidth; k<(nz-envelopeWidth); k++){
+    //for(int k=envelopeWidth; k<(nz-envelopeWidth); k++){
+    for(int k=nzLoopStart; k<nzLoopEnd; k++){
       for(int jproc = 0; jproc<decomposition[1]; jproc++){
         for(int j=envelopeWidth; j<(ny-envelopeWidth); j++){
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
@@ -282,7 +296,8 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
   ovel << "\nSCALARS Density FLOAT" << "\n";
   ovel << "LOOKUP_TABLE default" << "\n";
   for(int kproc = 0; kproc<decomposition[2]; kproc++){
-    for(int k=envelopeWidth; k<(nz-envelopeWidth); k++){
+    //for(int k=envelopeWidth; k<(nz-envelopeWidth); k++){
+    for(int k=nzLoopStart; k<nzLoopEnd; k++){
       for(int jproc = 0; jproc<decomposition[1]; jproc++){
         for(int j=envelopeWidth; j<(ny-envelopeWidth); j++){
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
@@ -300,7 +315,8 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
   ovel << "\nSCALARS Velocity-x FLOAT" << "\n";
   ovel << "LOOKUP_TABLE default" << "\n";
   for(int kproc = 0; kproc<decomposition[2]; kproc++){
-    for(int k=envelopeWidth; k<(nz-envelopeWidth); k++){
+    //for(int k=envelopeWidth; k<(nz-envelopeWidth); k++){
+    for(int k=nzLoopStart; k<nzLoopEnd; k++){
       for(int jproc = 0; jproc<decomposition[1]; jproc++){
         for(int j=envelopeWidth; j<(ny-envelopeWidth); j++){
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
@@ -318,7 +334,8 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
   ovel << "\nSCALARS Velocity-y FLOAT" << "\n";
   ovel << "LOOKUP_TABLE default" << "\n";
   for(int kproc = 0; kproc<decomposition[2]; kproc++){
-    for(int k=envelopeWidth; k<(nz-envelopeWidth); k++){
+    //for(int k=envelopeWidth; k<(nz-envelopeWidth); k++){
+    for(int k=nzLoopStart; k<nzLoopEnd; k++){
       for(int jproc = 0; jproc<decomposition[1]; jproc++){
         for(int j=envelopeWidth; j<(ny-envelopeWidth); j++){
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
@@ -333,17 +350,20 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
     }
   }
 
-  ovel << "\nSCALARS Velocity-z FLOAT" << "\n";
-  ovel << "LOOKUP_TABLE default" << "\n";
-  for(int kproc = 0; kproc<decomposition[2]; kproc++){
-    for(int k=envelopeWidth; k<(nz-envelopeWidth); k++){
-      for(int jproc = 0; jproc<decomposition[1]; jproc++){
-        for(int j=envelopeWidth; j<(ny-envelopeWidth); j++){
-          for(int iproc = 0; iproc<decomposition[0]; iproc++){
-            for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
-              //int index = i*ny*2 + j*2 + iproc*nx*ny*decomposition[1]*2 + jproc*nx*ny*2 + 1;
-              int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[1] + kproc*nx*ny*nz)*3+2;
-              ovel << u_vtk[index] <<"\n";
+  if(domain->dimension == 3){
+    ovel << "\nSCALARS Velocity-z FLOAT" << "\n";
+    ovel << "LOOKUP_TABLE default" << "\n";
+    for(int kproc = 0; kproc<decomposition[2]; kproc++){
+      //for(int k=envelopeWidth; k<(nz-envelopeWidth); k++){
+      for(int k=nzLoopStart; k<nzLoopEnd; k++){
+        for(int jproc = 0; jproc<decomposition[1]; jproc++){
+          for(int j=envelopeWidth; j<(ny-envelopeWidth); j++){
+            for(int iproc = 0; iproc<decomposition[0]; iproc++){
+              for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
+                //int index = i*ny*2 + j*2 + iproc*nx*ny*decomposition[1]*2 + jproc*nx*ny*2 + 1;
+                int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[1] + kproc*nx*ny*nz)*3+2;
+                ovel << u_vtk[index] <<"\n";
+              }
             }
           }
         }

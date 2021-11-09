@@ -24,8 +24,6 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
       double z_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[iPart][2]-(lattice2D_->getProcOrigin()[2]-(double)lattice2D_->get_envelopeWidth()*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_nz()-1.0);
       double r_lb = unitConversion->get_radius_lb(rp[iPart]);
 
-
-
       int nodeZone[3][2] = {{(int)(x_lb-r_lb)-3, (int)(x_lb+r_lb)+3}, 
                             {(int)(y_lb-r_lb)-3, (int)(y_lb+r_lb)+3},
                             {(int)(z_lb-r_lb)-3, (int)(z_lb+r_lb)+3}};
@@ -61,7 +59,7 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
             double uNode[3];
             uNode[0] = unitConversion->get_vel_lb(uPart[iPart][0]);
             uNode[1] = unitConversion->get_vel_lb(uPart[iPart][1]);
-            uNode[3] = unitConversion->get_vel_lb(uPart[iPart][3]);
+            uNode[2] = unitConversion->get_vel_lb(uPart[iPart][3]);
             uNode[0] += unitConversion->get_freq_lb(omega[iPart][1])*dz - unitConversion->get_freq_lb(omega[iPart][2])*dy;
             uNode[1] += -unitConversion->get_freq_lb(omega[iPart][0])*dz + unitConversion->get_freq_lb(omega[iPart][2])*dx;
             uNode[2] += unitConversion->get_freq_lb(omega[iPart][0])*dy - unitConversion->get_freq_lb(omega[iPart][1])*dx;

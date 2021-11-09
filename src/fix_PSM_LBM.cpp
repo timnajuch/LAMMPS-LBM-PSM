@@ -113,6 +113,7 @@ void fix_PSM_LBM::init()
   dynamics->initialise_domain(unitConversion->get_dx(), unitConversion->get_dx(), unitConversion->get_dx());
 
   dynamics->initialise_dynamics(1.0, 0.0, 0.0, 0.0);
+
   exchangeParticleData = new ExchangeParticleData(domain->dimension);
 
   if(!fix_hydroForce_)
@@ -165,7 +166,6 @@ void fix_PSM_LBM::init()
 void fix_PSM_LBM::pre_force(int)
 {
   if (update->ntimestep % nevery) return;
-
   int nPart = atom->nlocal + atom->nghost;
   vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
   vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
@@ -180,7 +180,6 @@ void fix_PSM_LBM::pre_force(int)
     lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
   }
   dynamics->macroCollideStream();
-
 
   double **f = atom->f;
   double **t = atom->torque;
