@@ -9,8 +9,9 @@ Tim Najuch, 2021
 #include "lattice2D.h"
 
 
-Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_){
+Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_){
   envelopeWidth = 1;
+  dimension = dimension_;
 
   procCoordinates[0] = procCoordinates_[0];
   procCoordinates[1] = procCoordinates_[1];
@@ -22,13 +23,15 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
   procLength[0] = boxLength_[0]/((double)decomposition[0]);
   procLength[1] = boxLength_[1]/((double)decomposition[1]);
   procLength[2] = 0.0;
-  if (domain->dimension == 3)
+  //if (domain->dimension == 3)
+  if (dimension == 3)
     { procLength[2] = boxLength_[2]/((double)decomposition[2]); }
 
   procOrigin[0] = origin_[0] + procCoordinates[0]*boxLength_[0]/((double)decomposition[0]);
   procOrigin[1] = origin_[1] + procCoordinates[1]*boxLength_[1]/((double)decomposition[1]);
   procOrigin[2] = 0.0;
-  if (domain->dimension == 3)
+  //if (domain->dimension == 3)
+  if (dimension == 3)
     { procOrigin[2] = origin_[2] + procCoordinates[2]*boxLength_[2]/((double)decomposition[2]); }
 
   c = 1.0;
@@ -37,7 +40,8 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
   nx = nx_/decomposition[0] + envelopeWidth*2;
   ny = ny_/decomposition[1] + envelopeWidth*2;
   nz = 1;
-  if (domain->dimension == 3)
+  //if (domain->dimension == 3)
+  if (dimension == 3)
     { nz = nz_/decomposition[2] + envelopeWidth*2; }
   q = q_;
 
@@ -55,7 +59,8 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
 
   Fhydx = vector<double>(nx*ny*nz,0.0);
   Fhydy = vector<double>(nx*ny*nz,0.0);
-  if (domain->dimension == 3)
+  //if (domain->dimension == 3)
+  if (dimension == 3)
     { Fhydz = vector<double>(nx*ny*nz,0.0); }
 
   pData.resize(nx*ny);
@@ -136,7 +141,7 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
           1.0/36.0,
           1.0/36.0,
           1.0/36.0
-        }
+        };
   }
 
 };

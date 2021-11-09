@@ -8,8 +8,8 @@ Tim Najuch, 2021
 
 #include "BGK_GuoExtForce_dynamics2D.h"
 
-BGK_GuoExtForce_Dynamics2D::BGK_GuoExtForce_Dynamics2D(double tau_, int nx_, int ny_, int nz_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_) :
-  Dynamics2D(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_), tau(tau_), F_lbm(F_lbm_) {};
+BGK_GuoExtForce_Dynamics2D::BGK_GuoExtForce_Dynamics2D(double tau_, int nx_, int ny_, int nz_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_) :
+  Dynamics2D(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_), tau(tau_), F_lbm(F_lbm_) {};
 
 
 BGK_GuoExtForce_Dynamics2D::~BGK_GuoExtForce_Dynamics2D(){};
@@ -51,7 +51,7 @@ void BGK_GuoExtForce_Dynamics2D::compute_macro_values(){
 
 
 void BGK_GuoExtForce_Dynamics2D::compute_macro_values(int i_, int j_, int k_){
-  int ind_phys_1D = i_ * Lattice2D::ny + j_ * Lattice2D:nz + k;
+  int ind_phys_1D = i_ * Lattice2D::ny + j_ * Lattice2D::nz + k_;
   int ind_phys_2D = i_ * Lattice2D::ny * Lattice2D::nz * 3 + j_*Lattice2D::nz*3 + k_*3;
 
   double rho_tmp = 0.0;
@@ -112,8 +112,8 @@ void BGK_GuoExtForce_Dynamics2D::collision(){
 
           double B = Lattice2D::getSolidFractionOnLattice(ind_phys_1D, 0);
           
-          Lattice2D::set_fcoll(i, j, iq, Lattice2D::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll 
-                  + ( 1.0 - B ) * (Lattice2D::g[iq] / Lattice2D::c) * ( Lattice2D::e[3*iq] * F_lbm[0] + Lattice2D::e[3*iq+1] * F_lbm[1] + Lattice2D::e[3*iq+2] * F_lbm[2] ) );//TODO forcing term not correct. not g. just use w divided by cs**2
+          Lattice2D::set_fcoll(i, j, k, iq, Lattice2D::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll 
+                  + ( 1.0 - B ) * (Lattice2D::g[iq] / Lattice2D::c) * ( Lattice2D::e[3*iq] * F_lbm[0] + Lattice2D::e[3*iq+1] * F_lbm[1] + Lattice2D::e[3*iq+2] * F_lbm[2] ) ); //TODO forcing term not correct. not g. just use w divided by cs**2
 
           if(iq == 0)
           {
@@ -147,7 +147,7 @@ void BGK_GuoExtForce_Dynamics2D::collision(){
 void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int k_, int iq_){
         
   int ind_iq = i_ * Lattice2D::ny * Lattice2D::nz * Lattice2D::q + j_ * Lattice2D::nz * Lattice2D::q + k_*Lattice2D::q + iq_;
-  int ind_phys_1D = i_ * Lattice2D::ny *Lattice2D::nz + j_*Lattice2D::nz + k;
+  int ind_phys_1D = i_ * Lattice2D::ny *Lattice2D::nz + j_*Lattice2D::nz + k_;
   int ind_phys_2D = i_ * Lattice2D::ny *Lattice2D::nz* 3 + j_*3*Lattice2D::nz + k_*3;
 
   Lattice2D::set_f0(i_, j_, k_, iq_, Dynamics2D::feq(iq_, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );
@@ -179,7 +179,7 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int k_, int iq_){
   double B = Lattice2D::getSolidFractionOnLattice(ind_phys_1D, 0);
   //double B = Lattice2D::get_B(ind_phys_1D);
         
-  Lattice2D::set_f(i_, j_, iq_, Lattice2D::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll 
+  Lattice2D::set_f(i_, j_, k_, iq_, Lattice2D::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll 
           + ( 1.0 - B ) * (Lattice2D::g[iq_] / Lattice2D::c) * ( Lattice2D::e[3*iq_] * F_lbm[0] + Lattice2D::e[3*iq_+1] * F_lbm[1] + Lattice2D::e[3*iq_+2] * F_lbm[2]) ); //TODO forcing term. See above
 
   // todo extend to two or more particles
@@ -231,7 +231,8 @@ void BGK_GuoExtForce_Dynamics2D::macroCollideStream(){
 
         int corner = 0;
 
-        if(domain->dimension == 2){
+        //if(domain->dimension == 2){
+        if(Lattice2D::dimension == 2){
           if(i == 0                && j == 0)                 corner = 1;
           if(i == 0                && j == Lattice2D::ny-1)   corner = 2;
           if(i == Lattice2D::nx-1  && j == 0)                 corner = 1;
@@ -275,16 +276,17 @@ void BGK_GuoExtForce_Dynamics2D::macroCollideStream(){
             corner = 9;
         }
 */
-        compute_macro_values(i, j);
+        compute_macro_values(i, j, k);
         for(int iq = 0; iq < Lattice2D::q; ++iq){
           
           collision(i, j, k, iq);
           
-          if(domain->dimension == 2){
+          //if(domain->dimension == 2){
+          if(Lattice2D::dimension == 2){
             if( (i > 0) && (i < Lattice2D::nx-1) && (j > 0) && (j < Lattice2D::ny-1) )
-              Dynamics2D::streamBulk(i, j, iq);
-            if(i == 0)                  Dynamics2D::streamBC_xn(i,j,k,iq, corner);
-            if(i == Lattice2D::nx - 1)  Dynamics2D::streamBC_xp(i,j,k,iq, corner);
+              Dynamics2D::streamBulk(i, j, k, iq);
+            if(i == 0)                  Dynamics2D::streamBC_xn(i,j,iq, corner);
+            if(i == Lattice2D::nx - 1)  Dynamics2D::streamBC_xp(i,j,iq, corner);
             if(j == 0)                  Dynamics2D::streamBC_yn(i,j,iq, corner);
             if(j == Lattice2D::ny - 1)  Dynamics2D::streamBC_yp(i,j,iq, corner);
           }else{
@@ -296,7 +298,7 @@ void BGK_GuoExtForce_Dynamics2D::macroCollideStream(){
             if(j == Lattice2D::ny - 1)  Dynamics2D::streamBC(i,j,k,iq);
             if(k == 0)                  Dynamics2D::streamBC(i,j,k,iq);
             if(k == Lattice2D::nz - 1)  Dynamics2D::streamBC(i,j,k,iq);
-            TODO combine bulk and BC streaming?
+            //TODO combine bulk and BC streaming?
           }
             
 

@@ -26,6 +26,7 @@ class Lattice2D{
     int q;
 
     int envelopeWidth;
+    int dimension;
 
     vector<double> w;
     vector<double> g;
@@ -43,7 +44,7 @@ class Lattice2D{
 
     vector<double> procOrigin;
     vector<double> procLength;
-    vector<double> x, y;
+    vector<double> x, y, z;
     vector<double> rho;
     vector<double> B;
     
@@ -74,7 +75,7 @@ class Lattice2D{
     int procCoordinates[3];
 
   public:
-    Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_);
+    Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_);
     ~Lattice2D();
 
     void initialise_channel_geometry(double wallHeightHalf_, double eps_, double nychannel_, double dx_, double dy_, double dz_);

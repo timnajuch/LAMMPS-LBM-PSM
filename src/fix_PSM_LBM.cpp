@@ -95,7 +95,7 @@ void fix_PSM_LBM::init()
   procNeigh[5] = comm->procneigh[2][1];
   lbmmpicomm = new PSM_LBM_MPI(world, decomposition, procNeigh, procCoordinates);
 
-  unitConversion = new Unit_Conversion(rho, nu, lc, Re, Nlc, tau);
+  unitConversion = new Unit_Conversion(rho, nu, lc, Re, Nlc, tau, domain->dimension);
 
   update->dt = unitConversion->get_phys_time(1.0)/((double)nevery);
 
@@ -108,12 +108,12 @@ void fix_PSM_LBM::init()
   vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
   vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
 
-  dynamics = new BGK_GuoExtForce_Dynamics2D(tau, nx, ny, 9, F_lbm, decomposition, procCoordinates, origin, boxLength);
+  dynamics = new BGK_GuoExtForce_Dynamics2D(tau, nx, ny, nz, 9, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension);
 
-  dynamics->initialise_domain(unitConversion->get_dx(), unitConversion->get_dx());
+  dynamics->initialise_domain(unitConversion->get_dx(), unitConversion->get_dx(), unitConversion->get_dx());
 
-  dynamics->initialise_dynamics(1.0, 0.0, 0.0);
-  exchangeParticleData = new ExchangeParticleData();
+  dynamics->initialise_dynamics(1.0, 0.0, 0.0, 0.0);
+  exchangeParticleData = new ExchangeParticleData(domain->dimension);
 
   if(!fix_hydroForce_)
   {
@@ -174,7 +174,7 @@ void fix_PSM_LBM::pre_force(int)
   if(domain->dimension == 2){
     lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
     lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic);
-  }else(domain->dimension == 3){
+  }else{
     lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->xperiodic);
     lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->yperiodic);
     lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);

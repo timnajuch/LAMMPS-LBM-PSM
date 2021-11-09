@@ -23,6 +23,7 @@ FixStyle(lbm-psm-vtk,WriteVTK)
 #include <vector>
 
 #include "comm.h"
+//#include "domain.h"
 #include "fix.h"
 #include "modify.h"
 

@@ -64,8 +64,10 @@ class Unit_Conversion{
     // Force converted to LB system
     //double F_lb[2];
 
+    int dimension;
+
   public:
-    Unit_Conversion(double rhof_, double nu_, double lc_, double Re_, int N_, double tau_);
+    Unit_Conversion(double rhof_, double nu_, double lc_, double Re_, int N_, double tau_, int dimension_);
     ~Unit_Conversion();
 
     double get_dx();

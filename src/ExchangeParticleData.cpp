@@ -7,8 +7,11 @@ Tim Najuch, 2019
 ------------------------------------------------------*/
 
 #include "ExchangeParticleData.h"
+#include "domain.h"
 
-ExchangeParticleData::ExchangeParticleData() {};
+ExchangeParticleData::ExchangeParticleData(int dimension_){
+  dimension = dimension_;
+};
 
 ExchangeParticleData::~ExchangeParticleData() {};
 
@@ -20,6 +23,8 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
       double y_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[iPart][1]-(lattice2D_->getProcOrigin()[1]-(double)lattice2D_->get_envelopeWidth()*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_ny()-1.0);
       double z_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[iPart][2]-(lattice2D_->getProcOrigin()[2]-(double)lattice2D_->get_envelopeWidth()*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_nz()-1.0);
       double r_lb = unitConversion->get_radius_lb(rp[iPart]);
+
+
 
       int nodeZone[3][2] = {{(int)(x_lb-r_lb)-3, (int)(x_lb+r_lb)+3}, 
                             {(int)(y_lb-r_lb)-3, (int)(y_lb+r_lb)+3},
@@ -79,6 +84,7 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
                 break;
             }
 
+          }
         }
       }
   }
@@ -91,11 +97,13 @@ double ExchangeParticleData::calcSolidFraction(int i, int j, int k, double xP_LB
     int slicesPerDim = 10;
     double sliceWidth = 1.0/((double)slicesPerDim);
     double fraction = 1.0/((double)(slicesPerDim*slicesPerDim));
-    if(domain->dimension == 3)
+    //if(domain->dimension == 3)
+    if (dimension == 3)
       fraction = 1.0/((double)(slicesPerDim*slicesPerDim*slicesPerDim));
 
     double sqrt2half = sqrt(2.0)/2.0;
-    if(domain->dimension == 3){
+    //if(domain->dimension == 3){
+    if (dimension == 3){
       sqrt2half = sqrt(3.0)/2.0;
     }
     double dx = (double)i - xP_LB;
@@ -121,20 +129,22 @@ double ExchangeParticleData::calcSolidFraction(int i, int j, int k, double xP_LB
     }   
 
     int n = 0;
-    if(domain->dimension == 2){
+    //if(domain->dimension == 2){
+    if (dimension == 2){
       for(int i = 0; i < slicesPerDim; ++i){
         for(int j = 0; j < slicesPerDim; ++j){
           if(dx_sq[i] + dy_sq[j] < rSq) ++n;
         }   
       }   
     }else{
-    for(int i = 0; i < slicesPerDim; ++i){
-      for(int j = 0; j < slicesPerDim; ++j){
-        for(int k = 0; k < slicesPerDim; ++k){
-          if(dx_sq[i] + dy_sq[j] + dz_sq[k] < rSq) ++n;
+      for(int i = 0; i < slicesPerDim; ++i){
+        for(int j = 0; j < slicesPerDim; ++j){
+          for(int k = 0; k < slicesPerDim; ++k){
+            if(dx_sq[i] + dy_sq[j] + dz_sq[k] < rSq) ++n;
+          }
         }
-      }   
-    }   
+      }
+    }
 
     return fraction*((double)n);
 };
@@ -149,7 +159,7 @@ void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2
     double z_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[2]-(lattice2D_->getProcOrigin()[2]-(double)envelopeWidth*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_nz()-1.0);
     double r_lb = unitConversion->get_radius_lb(rp);
 
-    int nodeZone[2][2] = {{(int)(x_lb-r_lb)-3, (int)(x_lb+r_lb)+3},
+    int nodeZone[3][2] = {{(int)(x_lb-r_lb)-3, (int)(x_lb+r_lb)+3},
                           {(int)(y_lb-r_lb)-3, (int)(y_lb+r_lb)+3},
                           {(int)(z_lb-r_lb)-3, (int)(z_lb+r_lb)+3}};
     for (int i = 0; i < 2; i++){
@@ -190,4 +200,4 @@ void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2
         }
       }
     }
-}
+};

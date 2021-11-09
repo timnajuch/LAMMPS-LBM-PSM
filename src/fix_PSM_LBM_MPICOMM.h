@@ -270,7 +270,7 @@ template<typename T> void fix_PSM_LBM_MPI::packData(vector<T> &sendBuf, vector<T
             envelopeIterSend[1] = direction[1]*(envelopeStart + iEnvelope) + j;
             envelopeIterSend[2] = direction[2]*(envelopeStart + iEnvelope) + k;
 
-            envelopeIterSendIndex = envelopeIterSend[0] * ny * nz * q + envelopeIterSend[1] * nz * q + envelopeItersend[2] * q + iq;
+            envelopeIterSendIndex = envelopeIterSend[0] * ny * nz * q + envelopeIterSend[1] * nz * q + envelopeIterSend[2] * q + iq;
             sendBufIndex = (k + j*kMax + i*jMax*kMax + iEnvelope*iMax*jMax*kMax)*dataSize + iq;
 
             sendBuf[sendBufIndex] = data[envelopeIterSendIndex];

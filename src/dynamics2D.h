@@ -23,7 +23,7 @@ class Dynamics2D : public Lattice2D {
   //  double tau;
 
   public:
-    Dynamics2D(int nx_, int ny_, int nz_, int q_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_);
+    Dynamics2D(int nx_, int ny_, int nz_, int q_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_);
     ~Dynamics2D();
 
     double feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, vector<double> &rho_, vector<double> &u_);
@@ -33,13 +33,13 @@ class Dynamics2D : public Lattice2D {
     void streaming_periodic_2D();
     void streaming();
     void streamBulk(int i_, int j_, int k_, int iq_);
-    void streamBC_xn(int i_, int j_, int k_, int iq_, int corner_);
-    void streamBC_xp(int i_, int j_, int k_, int iq_, int corner_);
+    void streamBC_xn(int i_, int j_, int iq_, int corner_);
+    void streamBC_xp(int i_, int j_, int iq_, int corner_);
     void streamBC_yn(int i_, int j_, int iq_, int corner_);
     void streamBC_yp(int i_, int j_, int iq_, int corner_);
 //    void streamBC_zn(int i_, int j_, int iq_, int corner_);
 //    void streamBC_zp(int i_, int j_, int iq_, int corner_);
-    void streamBC(int i_, int j_, int k_, int iq_) //3D. above BC function are for 2D
+    void streamBC(int i_, int j_, int k_, int iq_); //3D. above BC function are for 2D
     virtual void collision() = 0;
 
 };

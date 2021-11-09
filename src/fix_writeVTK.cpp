@@ -150,7 +150,7 @@ ovel.close();
 };
 
 //void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<double> &y_, double y0_, vector<double> &B_, double B0_, vector<double> &rho_, double rho0_, vector<double> &u_, double u0_, MPICommunication &mpicomm){
-void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<double> &y_, double y0_, vector<double> &B_, double B0_, vector<double> &rho_, double rho0_, vector<double> &u_, double u0_){
+void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<double> &y_, double y0_, vector<double> &z_, double z0_, vector<double> &B_, double B0_, vector<double> &rho_, double rho0_, vector<double> &u_, double u0_){
 
   int envelopeWidth = 1;
 
@@ -166,7 +166,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
     z0.resize(nx*decomposition[0]*ny*decomposition[1]*nz*decomposition[2]);
     B0.resize(nx*decomposition[0]*ny*decomposition[1]*nz*decomposition[2]);
     rho0.resize(nx*decomposition[0]*ny*decomposition[1]*nz*decomposition[2]);
-    u0.resize(nx*decomposition[0]*ny*decomposition[1]**nz*decomposition[2]*3);
+    u0.resize(nx*decomposition[0]*ny*decomposition[1]*nz*decomposition[2]*3);
   }
 //  MPI_Gather(&x_[0], nx*ny, MPI_DOUBLE, &x0[0], nx*ny, MPI_DOUBLE, 0, mpicomm.cartComm3D);
 //  MPI_Gather(&y_[0], nx*ny, MPI_DOUBLE, &y0[0], nx*ny, MPI_DOUBLE, 0, mpicomm.cartComm3D);

@@ -95,7 +95,7 @@ void ZouHeBC2D::setZouHeVelBC3D_yn (int iy_, int ix0_, int ix1_, int iz0_, int i
                                           lattice2D->get_f(ind_iq + 5) + lattice2D->get_f(ind_iq + 6) + lattice2D->get_f(ind_iq + 9) +
                                           lattice2D->get_f(ind_iq + 15) + lattice2D->get_f(ind_iq + 16) + lattice2D->get_f(ind_iq + 10) +
                                 2.0*( lattice2D->get_f(ind_iq + 4) + lattice2D->get_f(ind_iq + 13) + lattice2D->get_f(ind_iq + 8) +
-                                      lattice2D->get_f(ind_iq + 18) + lattice2D->get_f(ind_iq + 12) );
+                                      lattice2D->get_f(ind_iq + 18) + lattice2D->get_f(ind_iq + 12) ) );
 
       double Nxy = 0.5*(lattice2D->get_f(ind_iq + 1) + lattice2D->get_f(ind_iq + 9) + lattice2D->get_f(ind_iq + 15)
                         -(lattice2D->get_f(ind_iq + 2) + lattice2D->get_f(ind_iq + 16) + lattice2D->get_f(ind_iq + 10)))
@@ -108,13 +108,13 @@ void ZouHeBC2D::setZouHeVelBC3D_yn (int iy_, int ix0_, int ix1_, int iz0_, int i
 
       lattice2D->set_f(ind_iq + 3, lattice2D->get_f(ind_iq + 4) + 1.0/3.0*rho_tmp*uy_bc_ );
 
-      lattice2D->set_f(ind_iq + 7, lattice2D->get_f(ind_iq + 8) + rho_tmp/6.0*(uy_bc_ + ux_bc_) - Nxy;
+      lattice2D->set_f(ind_iq + 7, lattice2D->get_f(ind_iq + 8) + rho_tmp/6.0*(uy_bc_ + ux_bc_) - Nxy );
 
-      lattice2D->set_f(ind_iq + 14, lattice2D->get_f(ind_iq + 13) + rho_tmp/6.0*(uy_bc_ - ux_bc_) + Nxy;
+      lattice2D->set_f(ind_iq + 14, lattice2D->get_f(ind_iq + 13) + rho_tmp/6.0*(uy_bc_ - ux_bc_) + Nxy );
 
-      lattice2D->set_f(ind_iq + 11, lattice2D->get_f(ind_iq + 12) + rho_tmp/6.0*(uy_bc_ + uz_bc_) - Nzy;
+      lattice2D->set_f(ind_iq + 11, lattice2D->get_f(ind_iq + 12) + rho_tmp/6.0*(uy_bc_ + uz_bc_) - Nzy );
 
-      lattice2D->set_f(ind_iq + 17, lattice2D->get_f(ind_iq + 18) + rho_tmp/6.0*(uy_bc_ - uz_bc_) + Nzy;
+      lattice2D->set_f(ind_iq + 17, lattice2D->get_f(ind_iq + 18) + rho_tmp/6.0*(uy_bc_ - uz_bc_) + Nzy );
 
     }
   }
@@ -131,7 +131,7 @@ void ZouHeBC2D::setZouHeVelBC3D_yp (int iy_, int ix0_, int ix1_, int iz0_, int i
                                           lattice2D->get_f(ind_iq + 5) + lattice2D->get_f(ind_iq + 6) + lattice2D->get_f(ind_iq + 9) +
                                           lattice2D->get_f(ind_iq + 15) + lattice2D->get_f(ind_iq + 16) + lattice2D->get_f(ind_iq + 10) +
                                 2.0*( lattice2D->get_f(ind_iq + 3) + lattice2D->get_f(ind_iq + 7) + lattice2D->get_f(ind_iq + 14) +
-                                      lattice2D->get_f(ind_iq + 11) + lattice2D->get_f(ind_iq + 17) );
+                                      lattice2D->get_f(ind_iq + 11) + lattice2D->get_f(ind_iq + 17) ) );
 
       double Nxy = 0.5*(lattice2D->get_f(ind_iq + 1) + lattice2D->get_f(ind_iq + 9) + lattice2D->get_f(ind_iq + 15)
                         -(lattice2D->get_f(ind_iq + 2) + lattice2D->get_f(ind_iq + 16) + lattice2D->get_f(ind_iq + 10)))
@@ -144,13 +144,13 @@ void ZouHeBC2D::setZouHeVelBC3D_yp (int iy_, int ix0_, int ix1_, int iz0_, int i
 
       lattice2D->set_f(ind_iq + 4, lattice2D->get_f(ind_iq + 3) - 1.0/3.0*rho_tmp*uy_bc_ );
 
-      lattice2D->set_f(ind_iq + 8, lattice2D->get_f(ind_iq + 7) + rho_tmp/6.0*(-uy_bc_ - ux_bc_) + Nxy;
+      lattice2D->set_f(ind_iq + 8, lattice2D->get_f(ind_iq + 7) + rho_tmp/6.0*(-uy_bc_ - ux_bc_) + Nxy );
 
-      lattice2D->set_f(ind_iq + 13, lattice2D->get_f(ind_iq + 14) + rho_tmp/6.0*(-uy_bc_ + ux_bc_) - Nxy;
+      lattice2D->set_f(ind_iq + 13, lattice2D->get_f(ind_iq + 14) + rho_tmp/6.0*(-uy_bc_ + ux_bc_) - Nxy );
 
-      lattice2D->set_f(ind_iq + 12, lattice2D->get_f(ind_iq + 11) + rho_tmp/6.0*(-uy_bc_ - uz_bc_) + Nzy;
+      lattice2D->set_f(ind_iq + 12, lattice2D->get_f(ind_iq + 11) + rho_tmp/6.0*(-uy_bc_ - uz_bc_) + Nzy );
 
-      lattice2D->set_f(ind_iq + 18, lattice2D->get_f(ind_iq + 17) + rho_tmp/6.0*(-uy_bc_ + uz_bc_) - Nzy;
+      lattice2D->set_f(ind_iq + 18, lattice2D->get_f(ind_iq + 17) + rho_tmp/6.0*(-uy_bc_ + uz_bc_) - Nzy );
 
     }
   }

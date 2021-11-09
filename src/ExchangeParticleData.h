@@ -14,6 +14,7 @@ Tim Najuch, 2021
 #include <vector>
 
 #include "atom.h"
+//#include "domain.h"
 #include "lmptype.h"
 //#include "fix_property_atom.h"
 
@@ -24,12 +25,15 @@ Tim Najuch, 2021
 using namespace std;
 
 class ExchangeParticleData {
+  private: 
+    int dimension;
+
   public:
-    ExchangeParticleData();
+    ExchangeParticleData(int dimension_);
     ~ExchangeParticleData();
 
     void setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double **uPart, double **omega, double *rp, vector<double> boxLength, vector<double> origin);
-    double calcSolidFraction(int i, int j, intk, double xP_LB, double yP_LB, double zP_LB, double rP_LB);
+    double calcSolidFraction(int i, int j, int k, double xP_LB, double yP_LB, double zP_LB, double rP_LB);
     void calculateHydrodynamicInteractions(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, double *xPart, double rp, vector<double> &fHydro, vector<double> &tHydro, vector<double> &stresslet);
 
 };

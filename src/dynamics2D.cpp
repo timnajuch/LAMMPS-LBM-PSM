@@ -8,8 +8,8 @@ Tim Najuch, 2021
 
 #include "dynamics2D.h"
 
-Dynamics2D::Dynamics2D(int nx_, int ny_, int nz_, int q_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_) :
-  Lattice2D(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_)
+Dynamics2D::Dynamics2D(int nx_, int ny_, int nz_, int q_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_) :
+  Lattice2D(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_)
 {
   for(int i = 0; i < nx; ++i){
     for(int j = 0; j < ny; ++j){
@@ -286,7 +286,8 @@ Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_] , j_ + Lattice2D::e[3*iq_+1] , iq
 
 
 // TODO
-void Dynamics2D::streamBC_xn(int i_, int j_, int k_, int iq_, int corner_){
+void Dynamics2D::streamBC_xn(int i_, int j_, int iq_, int corner_){
+  int k_ = 0;
   if(corner_ == 0 && Lattice2D::e[3*iq_] > -1)
     Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_], j_ + Lattice2D::e[3*iq_+1], k_ + Lattice2D::e[3*iq_+2], iq_, Lattice2D::get_f(i_, j_, k_, iq_ ) );
     //Lattice2D::set_fcoll( i_ + Lattice2D::e[2*iq_] ,j_ + Lattice2D::e[2*iq_+1] , iq_, Lattice2D::get_f(i_, j_, iq_ ) );
@@ -306,7 +307,7 @@ void Dynamics2D::streamBC_xn(int i_, int j_, int k_, int iq_, int corner_){
     if(corner_ == 3 && Lattice2D::e[3*iq_] > -1 && Lattice2D::e[3*iq_+1] > -1)
       Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_], j_ + Lattice2D::e[3*iq_+1], k_ + Lattice2D::e[3*iq_+2], iq_, Lattice2D::get_f(i_, j_, k_, iq_ ) );
 */
-  }
+  //}
 };
 
 void Dynamics2D::streamBC(int i_, int j_, int k_, int iq_)

@@ -8,7 +8,7 @@ Tim Najuch, 2021
 
 #include "unit_conversion.h"
 
-Unit_Conversion::Unit_Conversion(double rhof_, double nu_, double lc_, double Re_, int N_, double tau_) : rhof(rhof_), nu(nu_), lc(lc_), Re(Re_), N(N_), tau(tau_) {
+Unit_Conversion::Unit_Conversion(double rhof_, double nu_, double lc_, double Re_, int N_, double tau_, int dimension_) : rhof(rhof_), nu(nu_), lc(lc_), Re(Re_), N(N_), tau(tau_), dimension(dimension_) {
    
   Uc_d = 1.0;
   Lc_d = 1.0;
@@ -31,7 +31,8 @@ Unit_Conversion::Unit_Conversion(double rhof_, double nu_, double lc_, double Re
   // forceFacdoubleor is doubleo scale dp/dx (nodouble doublehe force). units of dp/dx = kg/(m^2s^2) (force F = kg/m/s^2). 
   // Hence, we need additionally "/ (pow(lc,2)*pow(dx_d,2))" to scale correctly
   // TODO check units for 2D and 3D
-  if(domain->dimension == 2){
+  //if(domain->dimension == 2){
+  if(dimension == 2){
     forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
     torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
   }else{
