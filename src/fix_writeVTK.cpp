@@ -284,7 +284,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
             for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
 //              int index = i*ny + j + iproc*nx*ny*decomposition[1] + jproc*nx*ny;
-              int index = i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[1] + kproc*nx*ny*nz;
+              int index = i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[2] + kproc*nx*ny*nz;
               ovel << B_vtk[index] <<"\n";
             }
           }
@@ -303,7 +303,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
             for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
               //int index = i*ny + j + iproc*nx*ny*decomposition[1] + jproc*nx*ny;
-              int index = i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[1] + kproc*nx*ny*nz;
+              int index = i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[2] + kproc*nx*ny*nz;
               ovel << rho_vtk[index] << "\n";
             }
           }
@@ -322,7 +322,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
             for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
               //int index = i*ny*2 + j*2 + iproc*nx*ny*decomposition[1]*2 + jproc*nx*ny*2;
-              int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[1] + kproc*nx*ny*nz)*3;
+              int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[2] + kproc*nx*ny*nz)*3;
               ovel << u_vtk[index] <<"\n";
             }
           }
@@ -341,7 +341,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
             for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
               //int index = i*ny*2 + j*2 + iproc*nx*ny*decomposition[1]*2 + jproc*nx*ny*2 + 1;
-              int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[1] + kproc*nx*ny*nz)*3+1;
+              int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[2] + kproc*nx*ny*nz)*3+1;
               ovel << u_vtk[index] <<"\n";
             }
           }
@@ -361,7 +361,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
             for(int iproc = 0; iproc<decomposition[0]; iproc++){
               for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
                 //int index = i*ny*2 + j*2 + iproc*nx*ny*decomposition[1]*2 + jproc*nx*ny*2 + 1;
-                int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[1] + kproc*nx*ny*nz)*3+2;
+                int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[2] + kproc*nx*ny*nz)*3+2;
                 ovel << u_vtk[index] <<"\n";
               }
             }

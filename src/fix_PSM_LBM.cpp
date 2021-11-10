@@ -93,7 +93,7 @@ void fix_PSM_LBM::init()
   procNeigh[3] = comm->procneigh[1][1];
   procNeigh[4] = comm->procneigh[2][0];
   procNeigh[5] = comm->procneigh[2][1];
-  lbmmpicomm = new PSM_LBM_MPI(world, decomposition, procNeigh, procCoordinates);
+  lbmmpicomm = new PSM_LBM_MPI(world, decomposition, procNeigh, procCoordinates, domain->dimension);
 
   unitConversion = new Unit_Conversion(rho, nu, lc, Re, Nlc, tau, domain->dimension);
 

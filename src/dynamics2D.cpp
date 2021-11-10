@@ -280,7 +280,8 @@ void Dynamics2D::streaming(){
 void Dynamics2D::streamBulk(int i_, int j_, int k_, int iq_){
 
 //Lattice2D::set_fcoll( i_ + Lattice2D::e[2*iq_] , j_ + Lattice2D::e[2*iq_+1] , iq_, Lattice2D::get_f(i_, j_, iq_ ) );
-Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_] , j_ + Lattice2D::e[3*iq_+1] , iq_, k_ + Lattice2D::e[3*iq_+2], Lattice2D::get_f(i_, j_, k_, iq_ ) );
+//Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_] , j_ + Lattice2D::e[3*iq_+1] , iq_, k_ + Lattice2D::e[3*iq_+2], Lattice2D::get_f(i_, j_, k_, iq_ ) );
+Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_] , j_ + Lattice2D::e[3*iq_+1] , k_ + Lattice2D::e[3*iq_+2], iq_, Lattice2D::get_f(i_, j_, k_, iq_ ) );
 
 };
 
@@ -321,25 +322,25 @@ void Dynamics2D::streamBC(int i_, int j_, int k_, int iq_)
 }
 
 void Dynamics2D::streamBC_xp(int i_, int j_, int iq_, int corner_){
-  if(corner_ == 0 && Lattice2D::e[2*iq_] < 1)
-    Lattice2D::set_fcoll( i_ + Lattice2D::e[2*iq_] ,j_ + Lattice2D::e[2*iq_+1] ,0, iq_, Lattice2D::get_f(i_, j_, 0,iq_ ) );
+  if(corner_ == 0 && Lattice2D::e[3*iq_] < 1)
+    Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_] ,j_ + Lattice2D::e[3*iq_+1] ,0, iq_, Lattice2D::get_f(i_, j_, 0,iq_ ) );
 
   // Bottom corner
-  if(corner_ == 1 && Lattice2D::e[2*iq_] < 1 && Lattice2D::e[2*iq_+1] > -1)
-    Lattice2D::set_fcoll( i_ + Lattice2D::e[2*iq_] ,j_ + Lattice2D::e[2*iq_+1] ,0, iq_, Lattice2D::get_f(i_, j_, 0,iq_ ) );
+  if(corner_ == 1 && Lattice2D::e[3*iq_] < 1 && Lattice2D::e[3*iq_+1] > -1)
+    Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_] ,j_ + Lattice2D::e[3*iq_+1] ,0, iq_, Lattice2D::get_f(i_, j_, 0,iq_ ) );
 
   // Top corner
-  if(corner_ == 2 && Lattice2D::e[2*iq_] < 1 && Lattice2D::e[2*iq_+1] < 1)
-    Lattice2D::set_fcoll( i_ + Lattice2D::e[2*iq_] ,j_ + Lattice2D::e[2*iq_+1] ,0, iq_, Lattice2D::get_f(i_, j_, 0,iq_ ) );
+  if(corner_ == 2 && Lattice2D::e[3*iq_] < 1 && Lattice2D::e[3*iq_+1] < 1)
+    Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_] ,j_ + Lattice2D::e[3*iq_+1] ,0, iq_, Lattice2D::get_f(i_, j_, 0,iq_ ) );
 };
 
 
 void Dynamics2D::streamBC_yn(int i_, int j_, int iq_, int corner_){
-  if(corner_ == 0 && Lattice2D::e[2*iq_+1] > -1)
-    Lattice2D::set_fcoll( i_ + Lattice2D::e[2*iq_] ,j_ + Lattice2D::e[2*iq_+1] , 0, iq_, Lattice2D::get_f(i_, j_, 0,iq_ ) );
+  if(corner_ == 0 && Lattice2D::e[3*iq_+1] > -1)
+    Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_] ,j_ + Lattice2D::e[3*iq_+1] , 0, iq_, Lattice2D::get_f(i_, j_, 0,iq_ ) );
 };
 
 void Dynamics2D::streamBC_yp(int i_, int j_, int iq_, int corner_){
-  if(corner_ == 0 && Lattice2D::e[2*iq_+1] < 1)
-    Lattice2D::set_fcoll( i_ + Lattice2D::e[2*iq_] ,j_ + Lattice2D::e[2*iq_+1] , 0, iq_, Lattice2D::get_f(i_, j_, 0,iq_ ) );
+  if(corner_ == 0 && Lattice2D::e[3*iq_+1] < 1)
+    Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_] ,j_ + Lattice2D::e[3*iq_+1] , 0, iq_, Lattice2D::get_f(i_, j_, 0,iq_ ) );
 };

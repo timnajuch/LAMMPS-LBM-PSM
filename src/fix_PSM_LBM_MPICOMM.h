@@ -129,7 +129,7 @@ template<typename T> MPI_Datatype fix_PSM_LBM_MPI::get_type()
 template<typename T> void fix_PSM_LBM_MPI::sendRecvData(vector<T> &data_, bool isVector3D, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool periodicInX)
 {
   //int dataSize = 1+2*(int)isVector3D;
-  int dataSize = 9;
+  int dataSize = 9; // TODO: Extend so it can be used also by D3Q19
   int commDataSize = 0;
   int envelopeStart;
   int direction[3] = {0, 0, 0};

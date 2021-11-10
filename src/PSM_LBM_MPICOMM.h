@@ -17,12 +17,16 @@ using namespace std;
 
 class PSM_LBM_MPI{
 
+    private:
+        int dimension;
+
     public:
-        PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6], int procCoordinates_[3]);
+        PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6], int procCoordinates_[3], int dimension_);
         ~PSM_LBM_MPI();
     
         int size;
         int rank;
+
         int dimensions[3];
         int procCoordinates[3];
         int northRank, eastRank, southRank, westRank, upRank, downRank;
@@ -88,7 +92,7 @@ template<typename T> MPI_Datatype PSM_LBM_MPI::get_type()
 template<typename T> void PSM_LBM_MPI::sendRecvData(vector<T> &data_, bool isVector3D, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool periodicInX)
 {
   //int dataSize = 1+2*(int)isVector3D;
-  int dataSize = 9;
+  int dataSize = 9; // TODO: Extend to 3D
   int commDataSize = 0;
   int envelopeStart;
   int direction[3] = {0, 0, 0};
@@ -101,7 +105,7 @@ template<typename T> void PSM_LBM_MPI::sendRecvData(vector<T> &data_, bool isVec
 
   MPI_Datatype commDataType = get_type<T>();
   switch(commDirection)
-  {
+  {/*
     case 0: // x-direction
       commDataSize = dataSize*ny*envelopeWidth;
       direction[0] = 1;
@@ -109,8 +113,28 @@ template<typename T> void PSM_LBM_MPI::sendRecvData(vector<T> &data_, bool isVec
     case 1: // y-direction
       commDataSize = dataSize*nx*envelopeWidth;
       direction[1] = 1;
-      break;
+      break;*/
     //case 2: // z-direction // not 3D yet
+    case 0: // x-direction
+      if(dimension == 2){
+        commDataSize = dataSize*ny*envelopeWidth;
+      }else{
+        commDataSize = dataSize*ny*nz*envelopeWidth;
+      }
+      direction[0] = 1;
+      break;
+    case 1: // y-direction
+      if(dimension == 2){
+        commDataSize = dataSize*nx*envelopeWidth;
+      }else{
+        commDataSize = dataSize*nx*nz*envelopeWidth;
+      }
+      direction[1] = 1;
+      break;
+    case 2: // z-direction // Only for 3D. In 2D this direction is not possible. 2D in x-y-plane
+      commDataSize = dataSize*nx*ny*envelopeWidth;
+      direction[2] = 1;
+      break;
   }
 
   int envelopeIterSend[3];
@@ -136,7 +160,8 @@ template<typename T> void PSM_LBM_MPI::sendRecvData(vector<T> &data_, bool isVec
                &recvBuf1[0], commDataSize, commDataType, sendRank[commDirection][0], 0,
                world, &status);
 
-  if(procCoordinates[commDirection] != 0 || (periodicInX == true && commDirection == 0))
+  //if(procCoordinates[commDirection] != 0 || (periodicInX == true && commDirection == 0))
+  if(procCoordinates[commDirection] != 0 || (periodicInX == true))
   {
     envelopeStart = direction[0]*envelopeIterRecv[0] +
                     direction[1]*envelopeIterRecv[1] +
@@ -167,7 +192,8 @@ template<typename T> void PSM_LBM_MPI::sendRecvData(vector<T> &data_, bool isVec
                &recvBuf2[0], commDataSize, commDataType, sendRank[commDirection][1], 0,
                world, &status);
 
-  if(procCoordinates[commDirection] != dimensions[commDirection]-1 || (periodicInX == true && commDirection == 0))
+  //if(procCoordinates[commDirection] != dimensions[commDirection]-1 || (periodicInX == true && commDirection == 0))
+  if(procCoordinates[commDirection] != dimensions[commDirection]-1 || (periodicInX == true))
   {
     envelopeStart = direction[0]*envelopeIterRecv[0] +
                     direction[1]*envelopeIterRecv[1] +
@@ -199,7 +225,8 @@ template<typename T> void PSM_LBM_MPI::packData(vector<T> &sendBuf, vector<T> &d
             envelopeIterSend[1] = direction[1]*(envelopeStart + iEnvelope) + j;
             envelopeIterSend[2] = direction[2]*(envelopeStart + iEnvelope) + k;
 
-            envelopeIterSendIndex = envelopeIterSend[0] * ny * q + envelopeIterSend[1] * q + iq;
+            //envelopeIterSendIndex = envelopeIterSend[0] * ny * q + envelopeIterSend[1] * q + iq;
+            envelopeIterSendIndex = envelopeIterSend[0] * ny * nz * q + envelopeIterSend[1] * nz * q + envelopeIterSend[2] * q + iq;
             sendBufIndex = (k + j*kMax + i*jMax*kMax + iEnvelope*iMax*jMax*kMax)*dataSize + iq;
 
             sendBuf[sendBufIndex] = data[envelopeIterSendIndex];
@@ -239,7 +266,8 @@ template<typename T> void PSM_LBM_MPI::unpackData(vector<T> &recvBuf, vector<T> 
             envelopeIterRecv[2] = direction[2]*(envelopeStart + iEnvelope) + k;
 
             //envelopeIterRecvIndex = i * ny * q + j * q + iq;
-            envelopeIterRecvIndex = envelopeIterRecv[0] * ny * q + envelopeIterRecv[1] * q + iq;
+            //envelopeIterRecvIndex = envelopeIterRecv[0] * ny * q + envelopeIterRecv[1] * q + iq;
+            envelopeIterRecvIndex = envelopeIterRecv[0] * ny * nz * q + envelopeIterRecv[1] * nz * q + envelopeIterRecv[2] * q + iq;
             recvBufIndex = (k + j*kMax + i*jMax*kMax + iEnvelope*iMax*jMax*kMax)*dataSize + iq;
 
             data[envelopeIterRecvIndex] = recvBuf[recvBufIndex];

@@ -1,10 +1,12 @@
 #include "PSM_LBM_MPICOMM.h"
 
-PSM_LBM_MPI::PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6], int procCoordinates_[3])
+PSM_LBM_MPI::PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6], int procCoordinates_[3], int dimension_)
 {
     world = world_;
     MPI_Comm_size(world, &size);
     MPI_Comm_rank(world, &rank);
+
+    dimension = dimension_;
 
     int periodicity[3] = {1, 1, 1};
 
