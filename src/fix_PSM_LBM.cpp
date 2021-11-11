@@ -92,7 +92,7 @@ void fix_PSM_LBM::init()
   procNeigh[2] = comm->procneigh[1][0];
   procNeigh[3] = comm->procneigh[1][1];
   procNeigh[4] = comm->procneigh[2][0];
-  procNeigh[5] = comm->procneigh[2][1];
+  procNeigh[5] = comm->procneigh[2][1]; 
   lbmmpicomm = new PSM_LBM_MPI(world, decomposition, procNeigh, procCoordinates, domain->dimension);
 
   unitConversion = new Unit_Conversion(rho, nu, lc, Re, Nlc, tau, domain->dimension);
@@ -179,6 +179,7 @@ void fix_PSM_LBM::pre_force(int)
     lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->yperiodic);
     lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
   }
+
   dynamics->macroCollideStream();
 
   double **f = atom->f;

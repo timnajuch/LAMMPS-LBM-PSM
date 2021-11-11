@@ -16,7 +16,7 @@ Dynamics2D::Dynamics2D(int nx_, int ny_, int nz_, int q_, int decomposition_[3],
       for(int k = 0; k < nz; ++k){
         for(int iq = 0; iq < q; ++iq){
           int ind_phys_1D = i * Lattice2D::ny * Lattice2D::nz + j * Lattice2D::nz + k;
-          int ind_phys_2D = i * Lattice2D::ny * Lattice2D::nz * 3 + j*3 * Lattice2D::nz + k;
+          int ind_phys_2D = (i * Lattice2D::ny * Lattice2D::nz + j * Lattice2D::nz + k)*3;
           int ind_iq = i * Lattice2D::ny * Lattice2D::nz * Lattice2D::q + j * Lattice2D::nz * Lattice2D::q + k*Lattice2D::q + iq;
 
           Lattice2D::set_f0(i, j, k, iq, Dynamics2D::feq(iq, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );
@@ -35,7 +35,7 @@ Dynamics2D::~Dynamics2D(){};
 double Dynamics2D::feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, vector<double> &rho_, vector<double> &u_){
   return rho_[ind_phys_1D_] * Lattice2D::w[iq_] * 
         (1.0 + ( Lattice2D::e[3*iq_] * u_[ind_phys_2D_] + Lattice2D::e[3*iq_+1] * u_[ind_phys_2D_+1] + Lattice2D::e[3*iq_+2] * u_[ind_phys_2D_+2]) / (pow(Lattice2D::cs, 2.0))
-        + pow( Lattice2D::e[3*iq_] * u_[ind_phys_2D_] + Lattice2D::e[iq_*3+1] * u_[ind_phys_2D_+1] + Lattice2D::e[3*iq_+2] * u_[ind_phys_2D_+2] , 2.0) / (2.0*pow(Lattice2D::cs, 4.0))
+        + pow( Lattice2D::e[3*iq_] * u_[ind_phys_2D_] + Lattice2D::e[3*iq_+1] * u_[ind_phys_2D_+1] + Lattice2D::e[3*iq_+2] * u_[ind_phys_2D_+2] , 2.0) / (2.0*pow(Lattice2D::cs, 4.0))
         - 1.0/2.0 * ( u_[ind_phys_2D_] * u_[ind_phys_2D_] + u_[ind_phys_2D_+1] * u_[ind_phys_2D_+1] + u_[ind_phys_2D_+2] * u_[ind_phys_2D_+2]) / (pow(Lattice2D::cs,2.0) ) );
 }
 
@@ -43,7 +43,7 @@ double Dynamics2D::feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, vector<doubl
 double Dynamics2D::feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, double rho, vector<double> u){
   return rho * Lattice2D::w[iq_] * 
         (1.0 + ( Lattice2D::e[3*iq_] * u[0] + Lattice2D::e[3*iq_+1] * u[1] + Lattice2D::e[3*iq_+2] * u[2]) / (pow(Lattice2D::cs, 2.0))
-        + pow( Lattice2D::e[3*iq_] * u[0] + Lattice2D::e[iq_*3+1] * u[1] + Lattice2D::e[iq_*3+2] * u[2], 2.0) / (2.0*pow(Lattice2D::cs, 4.0))
+        + pow( Lattice2D::e[3*iq_] * u[0] + Lattice2D::e[3*iq_+1] * u[1] + Lattice2D::e[iq_*3+2] * u[2], 2.0) / (2.0*pow(Lattice2D::cs, 4.0))
         - 1.0/2.0 * ( u[0] * u[0] + u[1] * u[1] + u[2] * u[2]) / (pow(Lattice2D::cs,2.0) ) );
 }
 
@@ -193,7 +193,7 @@ void Dynamics2D::streaming(){
       }
     }
   }
-  else if(Lattice2D::q == 19){
+  else if(Lattice2D::q == 19){ // todo not entirely correct
     for(int i = 0; i < Lattice2D::nx; ++i){
       //in = (i>0   )            ? (i-1):(Lattice2D::nx-1);
       //ip = (i<Lattice2D::nx-1) ? (i+1):(0   );
@@ -253,7 +253,8 @@ void Dynamics2D::streaming(){
               kShift = Lattice2D::nz-1;
             }
           
-            Lattice2D::set_f( iShift, jShift, kShift, 0, Lattice2D::get_fcoll( i,j,k,iq ) );
+            //Lattice2D::set_f( iShift, jShift, kShift, 0, Lattice2D::get_fcoll( i,j,k,iq ) );
+            Lattice2D::set_f( iShift, jShift, kShift, iq, Lattice2D::get_fcoll( i,j,k,iq ) );
 
 /*
             Lattice2D::set_f( i ,j ,0, Lattice2D::get_fcoll( i,j,k,0 ) );

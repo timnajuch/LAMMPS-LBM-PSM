@@ -9,9 +9,22 @@ Tim Najuch, 2019
 #include "fix_writeVTK.h"
 
 WriteVTK::WriteVTK(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg) {
+
+  if (narg < 5) error->all(FLERR,"Illegal fix lbm-psm-vtk command");
+
   for(int ifix=0; ifix<modify->nfix; ifix++)
     if(strcmp(modify->fix[ifix]->style,"lbm-psm")==0)
       fixPSMLBM = (fix_PSM_LBM *)modify->fix[ifix];
+
+  int iarg = 3;
+  while (iarg < narg) {
+    if (strcmp(arg[iarg],"every") == 0) {
+      if (iarg+2 > narg) error->all(FLERR,"Illegal fix lbm-psm-vtk command");
+      nevery = atoi(arg[iarg+1]);
+      if (nevery <= 0) error->all(FLERR,"Illegal fix lbm-psm-vtk command");
+      iarg += 2;
+    } else error->all(FLERR,"Illegal fix lbm-psm-vtk command");
+  }
 };
 
 WriteVTK::~WriteVTK() {};
@@ -56,6 +69,7 @@ void WriteVTK::init()
 
 void WriteVTK::pre_force(int)
 {
+  if (update->ntimestep % nevery) return;
   vector<double> x_vtk = fixPSMLBM->dynamics->get_x();
   vector<double> y_vtk = fixPSMLBM->dynamics->get_y();
   vector<double> z_vtk = fixPSMLBM->dynamics->get_z();
@@ -284,7 +298,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
             for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
 //              int index = i*ny + j + iproc*nx*ny*decomposition[1] + jproc*nx*ny;
-              int index = i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[2] + kproc*nx*ny*nz;
+              int index = i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*nz*decomposition[2] + kproc*nx*ny*nz;
               ovel << B_vtk[index] <<"\n";
             }
           }
@@ -303,7 +317,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
             for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
               //int index = i*ny + j + iproc*nx*ny*decomposition[1] + jproc*nx*ny;
-              int index = i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[2] + kproc*nx*ny*nz;
+              int index = i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*nz*decomposition[2] + kproc*nx*ny*nz;
               ovel << rho_vtk[index] << "\n";
             }
           }
@@ -322,7 +336,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
             for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
               //int index = i*ny*2 + j*2 + iproc*nx*ny*decomposition[1]*2 + jproc*nx*ny*2;
-              int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[2] + kproc*nx*ny*nz)*3;
+              int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*nz*decomposition[2] + kproc*nx*ny*nz)*3;
               ovel << u_vtk[index] <<"\n";
             }
           }
@@ -341,7 +355,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
           for(int iproc = 0; iproc<decomposition[0]; iproc++){
             for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
               //int index = i*ny*2 + j*2 + iproc*nx*ny*decomposition[1]*2 + jproc*nx*ny*2 + 1;
-              int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[2] + kproc*nx*ny*nz)*3+1;
+              int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*nz*decomposition[2] + kproc*nx*ny*nz)*3+1;
               ovel << u_vtk[index] <<"\n";
             }
           }
@@ -361,7 +375,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
             for(int iproc = 0; iproc<decomposition[0]; iproc++){
               for(int i=envelopeWidth; i<(nx-envelopeWidth); i++){
                 //int index = i*ny*2 + j*2 + iproc*nx*ny*decomposition[1]*2 + jproc*nx*ny*2 + 1;
-                int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*decomposition[2] + kproc*nx*ny*nz)*3+2;
+                int index = (i*ny*nz + j*nz + k + iproc*nx*ny*decomposition[1]*nz*decomposition[2] + jproc*nx*ny*nz*decomposition[2] + kproc*nx*ny*nz)*3+2;
                 ovel << u_vtk[index] <<"\n";
               }
             }

@@ -7,6 +7,11 @@ PSM_LBM_MPI::PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6]
     MPI_Comm_rank(world, &rank);
 
     dimension = dimension_;
+    if(dimension == 2){
+      q = 9;
+    }else{
+      q = 19;
+    }
 
     int periodicity[3] = {1, 1, 1};
 

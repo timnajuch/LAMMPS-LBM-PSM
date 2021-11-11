@@ -41,9 +41,13 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
   ny = ny_/decomposition[1] + envelopeWidth*2;
   nz = 1;
   //if (domain->dimension == 3)
+  q = 9;
   if (dimension == 3)
-    { nz = nz_/decomposition[2] + envelopeWidth*2; }
-  q = q_;
+  { 
+    nz = nz_/decomposition[2] + envelopeWidth*2;
+    q = 19;
+  }
+//  q = q_;
 
   f = vector<double>(nx*ny*nz*q,0.0);
   f0 = vector<double>(nx*ny*nz*q,0.0);

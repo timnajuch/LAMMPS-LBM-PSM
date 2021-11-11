@@ -171,7 +171,7 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int k_, int iq_){
     }
   }
   int ind_iq_m = i_ * Lattice2D::ny * Lattice2D::nz * Lattice2D::q + j_ * Lattice2D::nz * Lattice2D::q + k_*Lattice2D::q + iq_m;
-  Lattice2D::set_f0(i_, j_, k_, iq_m, Dynamics2D::feq(iq_m, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );
+//  Lattice2D::set_f0(i_, j_, k_, iq_m, Dynamics2D::feq(iq_m, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );
 
   double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (Lattice2D::get_f(ind_iq) - Lattice2D::get_f0(ind_iq) );
   //double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + Lattice2D::get_f(ind_iq_m) - Lattice2D::get_f0(ind_iq_m);
@@ -179,8 +179,8 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int k_, int iq_){
   double B = Lattice2D::getSolidFractionOnLattice(ind_phys_1D, 0);
   //double B = Lattice2D::get_B(ind_phys_1D);
         
-  Lattice2D::set_f(i_, j_, k_, iq_, Lattice2D::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll 
-          + ( 1.0 - B ) * (Lattice2D::g[iq_] / Lattice2D::c) * ( Lattice2D::e[3*iq_] * F_lbm[0] + Lattice2D::e[3*iq_+1] * F_lbm[1] + Lattice2D::e[3*iq_+2] * F_lbm[2]) ); //TODO forcing term. See above
+  Lattice2D::set_f(i_, j_, k_, iq_, Lattice2D::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll );
+//          + ( 1.0 - B ) * (Lattice2D::g[iq_] / Lattice2D::c) * ( Lattice2D::e[3*iq_] * F_lbm[0] + Lattice2D::e[3*iq_+1] * F_lbm[1] + Lattice2D::e[3*iq_+2] * F_lbm[2]) ); //TODO forcing term. See above
 
   // todo extend to two or more particles
   if(iq_ == 0)
@@ -277,6 +277,7 @@ void BGK_GuoExtForce_Dynamics2D::macroCollideStream(){
         }
 */
         compute_macro_values(i, j, k);
+
         for(int iq = 0; iq < Lattice2D::q; ++iq){
           
           collision(i, j, k, iq);
@@ -289,6 +290,10 @@ void BGK_GuoExtForce_Dynamics2D::macroCollideStream(){
             if(i == Lattice2D::nx - 1)  Dynamics2D::streamBC_xp(i,j,iq, corner);
             if(j == 0)                  Dynamics2D::streamBC_yn(i,j,iq, corner);
             if(j == Lattice2D::ny - 1)  Dynamics2D::streamBC_yp(i,j,iq, corner);
+//            if(i == 0)                  Dynamics2D::streamBC(i,j,k,iq);
+//            if(i == Lattice2D::nx - 1)  Dynamics2D::streamBC(i,j,k,iq);
+//            if(j == 0)                  Dynamics2D::streamBC(i,j,k,iq);
+//            if(j == Lattice2D::ny - 1)  Dynamics2D::streamBC(i,j,k,iq);
           }else{
             if( (i > 0) && (i < Lattice2D::nx-1) && (j > 0) && (j < Lattice2D::ny-1) && (k > 0) && (k < Lattice2D::nz-1) )
               Dynamics2D::streamBulk(i, j, k, iq);

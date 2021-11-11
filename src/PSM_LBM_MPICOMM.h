@@ -19,6 +19,7 @@ class PSM_LBM_MPI{
 
     private:
         int dimension;
+        int q;
 
     public:
         PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6], int procCoordinates_[3], int dimension_);
@@ -92,7 +93,7 @@ template<typename T> MPI_Datatype PSM_LBM_MPI::get_type()
 template<typename T> void PSM_LBM_MPI::sendRecvData(vector<T> &data_, bool isVector3D, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool periodicInX)
 {
   //int dataSize = 1+2*(int)isVector3D;
-  int dataSize = 9; // TODO: Extend to 3D
+  int dataSize = q; //9; // TODO: Extend to 3D
   int commDataSize = 0;
   int envelopeStart;
   int direction[3] = {0, 0, 0};
@@ -214,8 +215,7 @@ template<typename T> void PSM_LBM_MPI::packData(vector<T> &sendBuf, vector<T> &d
   int envelopeIterSendIndex = 0;
   int sendBufIndex = 0;
 
-  int q = 9;
-
+//  int q = 9;
   for(int iEnvelope = 0; iEnvelope < envelopeWidth; ++iEnvelope){
     for(int i = 0; i < iMax; ++i){
       for(int j = 0; j < jMax; ++j){
@@ -254,7 +254,7 @@ template<typename T> void PSM_LBM_MPI::unpackData(vector<T> &recvBuf, vector<T> 
   int envelopeIterRecvIndex = 0;
   int recvBufIndex = 0;
 
-  int q = 9;
+//  int q = 9;
 
   for(int iEnvelope = 0; iEnvelope < envelopeWidth; ++iEnvelope){
     for(int i = 0; i < iMax; ++i){
