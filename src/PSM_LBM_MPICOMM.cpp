@@ -29,6 +29,7 @@ PSM_LBM_MPI::PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6]
     procCoordinates[0] = procCoordinates_[0];
     procCoordinates[1] = procCoordinates_[1];
     procCoordinates[2] = procCoordinates_[2];
+
 }
 
 PSM_LBM_MPI::~PSM_LBM_MPI() {}

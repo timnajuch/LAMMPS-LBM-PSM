@@ -51,7 +51,8 @@ void BGK_GuoExtForce_Dynamics2D::compute_macro_values(){
 
 
 void BGK_GuoExtForce_Dynamics2D::compute_macro_values(int i_, int j_, int k_){
-  int ind_phys_1D = i_ * Lattice2D::ny + j_ * Lattice2D::nz + k_;
+  //int ind_phys_1D = i_ * Lattice2D::ny + j_ * Lattice2D::nz + k_;
+  int ind_phys_1D = i_ * Lattice2D::ny * Lattice2D::nz + j_ * Lattice2D::nz + k_;
   int ind_phys_2D = i_ * Lattice2D::ny * Lattice2D::nz * 3 + j_*Lattice2D::nz*3 + k_*3;
 
   double rho_tmp = 0.0;
@@ -112,7 +113,7 @@ void BGK_GuoExtForce_Dynamics2D::collision(){
 
           double B = Lattice2D::getSolidFractionOnLattice(ind_phys_1D, 0);
           
-          Lattice2D::set_fcoll(i, j, k, iq, Lattice2D::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll 
+          Lattice2D::set_fcoll(i, j, k, iq, Lattice2D::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll  // ist set_f not f_coll because used in conjunction with streaming() and collision() function (two times all for loops over the lattice)
                   + ( 1.0 - B ) * (Lattice2D::g[iq] / Lattice2D::c) * ( Lattice2D::e[3*iq] * F_lbm[0] + Lattice2D::e[3*iq+1] * F_lbm[1] + Lattice2D::e[3*iq+2] * F_lbm[2] ) ); //TODO forcing term not correct. not g. just use w divided by cs**2
 
           if(iq == 0)
@@ -281,31 +282,39 @@ void BGK_GuoExtForce_Dynamics2D::macroCollideStream(){
         for(int iq = 0; iq < Lattice2D::q; ++iq){
           
           collision(i, j, k, iq);
-          
+
           //if(domain->dimension == 2){
           if(Lattice2D::dimension == 2){
-            if( (i > 0) && (i < Lattice2D::nx-1) && (j > 0) && (j < Lattice2D::ny-1) )
+            if( (i > 0) && (i < Lattice2D::nx-1) && (j > 0) && (j < Lattice2D::ny-1) ){
               Dynamics2D::streamBulk(i, j, k, iq);
-            if(i == 0)                  Dynamics2D::streamBC_xn(i,j,iq, corner);
-            if(i == Lattice2D::nx - 1)  Dynamics2D::streamBC_xp(i,j,iq, corner);
-            if(j == 0)                  Dynamics2D::streamBC_yn(i,j,iq, corner);
-            if(j == Lattice2D::ny - 1)  Dynamics2D::streamBC_yp(i,j,iq, corner);
+            }else{
+              Dynamics2D::streamBC(i,j,k,iq);
+            }
+//            if(i == 0)                  Dynamics2D::streamBC_xn(i,j,iq, corner);
+//            if(i == Lattice2D::nx - 1)  Dynamics2D::streamBC_xp(i,j,iq, corner);
+//            if(j == 0)                  Dynamics2D::streamBC_yn(i,j,iq, corner);
+//            if(j == Lattice2D::ny - 1)  Dynamics2D::streamBC_yp(i,j,iq, corner);
 //            if(i == 0)                  Dynamics2D::streamBC(i,j,k,iq);
 //            if(i == Lattice2D::nx - 1)  Dynamics2D::streamBC(i,j,k,iq);
 //            if(j == 0)                  Dynamics2D::streamBC(i,j,k,iq);
 //            if(j == Lattice2D::ny - 1)  Dynamics2D::streamBC(i,j,k,iq);
           }else{
-            if( (i > 0) && (i < Lattice2D::nx-1) && (j > 0) && (j < Lattice2D::ny-1) && (k > 0) && (k < Lattice2D::nz-1) )
+            if( (i > 0) && (i < Lattice2D::nx-1) && (j > 0) && (j < Lattice2D::ny-1) && (k > 0) && (k < Lattice2D::nz-1) ){
               Dynamics2D::streamBulk(i, j, k, iq);
-            if(i == 0)                  Dynamics2D::streamBC(i,j,k,iq);
-            if(i == Lattice2D::nx - 1)  Dynamics2D::streamBC(i,j,k,iq);
-            if(j == 0)                  Dynamics2D::streamBC(i,j,k,iq);
-            if(j == Lattice2D::ny - 1)  Dynamics2D::streamBC(i,j,k,iq);
-            if(k == 0)                  Dynamics2D::streamBC(i,j,k,iq);
-            if(k == Lattice2D::nz - 1)  Dynamics2D::streamBC(i,j,k,iq);
+            }else{
+              Dynamics2D::streamBC(i,j,k,iq);
+            }
+
+//            if(i == 0)                  Dynamics2D::streamBC(i,j,k,iq);
+//            if(i == Lattice2D::nx - 1)  Dynamics2D::streamBC(i,j,k,iq);
+//            if(j == 0)                  Dynamics2D::streamBC(i,j,k,iq);
+//            if(j == Lattice2D::ny - 1)  Dynamics2D::streamBC(i,j,k,iq);
+//            if(k == 0)                  Dynamics2D::streamBC(i,j,k,iq);
+//            if(k == Lattice2D::nz - 1)  Dynamics2D::streamBC(i,j,k,iq);
+
             //TODO combine bulk and BC streaming?
           }
-            
+
 
 //          if(domain->dimension == 3){
 //            if(k == 0)                  Dynamics2D::streamBC_zn(i,j,k,iq, corner);

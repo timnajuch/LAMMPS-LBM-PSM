@@ -59,7 +59,7 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
             double uNode[3];
             uNode[0] = unitConversion->get_vel_lb(uPart[iPart][0]);
             uNode[1] = unitConversion->get_vel_lb(uPart[iPart][1]);
-            uNode[2] = unitConversion->get_vel_lb(uPart[iPart][3]);
+            uNode[2] = unitConversion->get_vel_lb(uPart[iPart][2]);
             uNode[0] += unitConversion->get_freq_lb(omega[iPart][1])*dz - unitConversion->get_freq_lb(omega[iPart][2])*dy;
             uNode[1] += -unitConversion->get_freq_lb(omega[iPart][0])*dz + unitConversion->get_freq_lb(omega[iPart][2])*dx;
             uNode[2] += unitConversion->get_freq_lb(omega[iPart][0])*dy - unitConversion->get_freq_lb(omega[iPart][1])*dx;

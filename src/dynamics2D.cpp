@@ -11,10 +11,10 @@ Tim Najuch, 2021
 Dynamics2D::Dynamics2D(int nx_, int ny_, int nz_, int q_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_) :
   Lattice2D(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_)
 {
-  for(int i = 0; i < nx; ++i){
-    for(int j = 0; j < ny; ++j){
-      for(int k = 0; k < nz; ++k){
-        for(int iq = 0; iq < q; ++iq){
+  for(int i = 0; i < Lattice2D::nx; ++i){
+    for(int j = 0; j < Lattice2D::ny; ++j){
+      for(int k = 0; k < Lattice2D::nz; ++k){
+        for(int iq = 0; iq < Lattice2D::q; ++iq){
           int ind_phys_1D = i * Lattice2D::ny * Lattice2D::nz + j * Lattice2D::nz + k;
           int ind_phys_2D = (i * Lattice2D::ny * Lattice2D::nz + j * Lattice2D::nz + k)*3;
           int ind_iq = i * Lattice2D::ny * Lattice2D::nz * Lattice2D::q + j * Lattice2D::nz * Lattice2D::q + k*Lattice2D::q + iq;
@@ -283,6 +283,7 @@ void Dynamics2D::streamBulk(int i_, int j_, int k_, int iq_){
 //Lattice2D::set_fcoll( i_ + Lattice2D::e[2*iq_] , j_ + Lattice2D::e[2*iq_+1] , iq_, Lattice2D::get_f(i_, j_, iq_ ) );
 //Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_] , j_ + Lattice2D::e[3*iq_+1] , iq_, k_ + Lattice2D::e[3*iq_+2], Lattice2D::get_f(i_, j_, k_, iq_ ) );
 Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_] , j_ + Lattice2D::e[3*iq_+1] , k_ + Lattice2D::e[3*iq_+2], iq_, Lattice2D::get_f(i_, j_, k_, iq_ ) );
+//Lattice2D::set_f( i_ + Lattice2D::e[3*iq_] , j_ + Lattice2D::e[3*iq_+1] , k_ + Lattice2D::e[3*iq_+2], iq_, Lattice2D::get_fcoll(i_, j_, k_, iq_ ) );
 
 };
 
@@ -319,6 +320,7 @@ void Dynamics2D::streamBC(int i_, int j_, int k_, int iq_)
     &&  Lattice2D::e[3*iq_+2]+k_ >= 0 && Lattice2D::e[3*iq_+2]+k_ <= Lattice2D::nz-1)
     {
       Lattice2D::set_fcoll( i_ + Lattice2D::e[3*iq_], j_ + Lattice2D::e[3*iq_+1], k_ + Lattice2D::e[3*iq_+2], iq_, Lattice2D::get_f(i_, j_, k_, iq_ ) );
+      //Lattice2D::set_f( i_ + Lattice2D::e[3*iq_], j_ + Lattice2D::e[3*iq_+1], k_ + Lattice2D::e[3*iq_+2], iq_, Lattice2D::get_fcoll(i_, j_, k_, iq_ ) );
     }
 }
 

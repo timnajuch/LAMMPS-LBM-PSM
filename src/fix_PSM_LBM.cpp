@@ -122,7 +122,7 @@ void fix_PSM_LBM::init()
       (char *)"hydroForce",     // fix id
       (char *)"all",            // fix group
       (char *)"property/atom",  // fix style: property/atom
-      (char *)"d2_hydroForce",   // name
+      (char *)"d2_hydroForce",  // name
       (char *)"3",              // number of array columns
       (char *)"ghost",          // communicate ghost atom
       (char *)"yes"

@@ -66,8 +66,8 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
   Fhydy = vector<double>(nx*ny*nz,0.0);
   Fhydz = vector<double>(nx*ny*nz,0.0);
   //if (domain->dimension == 3)
-  if (dimension == 3)
-    { Fhydz = vector<double>(nx*ny*nz,0.0); }
+//  if (dimension == 3)
+//    { Fhydz = vector<double>(nx*ny*nz,0.0); }
 
   pData.resize(nx*ny*nz);
 
@@ -201,7 +201,7 @@ void Lattice2D::initialise_domain(double dx_, double dy_, double dz_){
         //int ind_2D = i*ny + j;
         int ind_2D = i*ny*nz + j*nz + k;
 
-        x[ind_2D] = i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx; // TODO: check correctness
+        x[ind_2D] = i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
         y[ind_2D] = j*dy - dy*envelopeWidth + procCoordinates[1]*(ny-2*envelopeWidth)*dy;
         z[ind_2D] = k*dz - dz*envelopeWidth + procCoordinates[2]*(nz-2*envelopeWidth)*dz;
 

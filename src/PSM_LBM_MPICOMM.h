@@ -93,7 +93,7 @@ template<typename T> MPI_Datatype PSM_LBM_MPI::get_type()
 template<typename T> void PSM_LBM_MPI::sendRecvData(vector<T> &data_, bool isVector3D, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool periodicInX)
 {
   //int dataSize = 1+2*(int)isVector3D;
-  int dataSize = q; //9; // TODO: Extend to 3D
+  int dataSize = q;
   int commDataSize = 0;
   int envelopeStart;
   int direction[3] = {0, 0, 0};
@@ -106,16 +106,7 @@ template<typename T> void PSM_LBM_MPI::sendRecvData(vector<T> &data_, bool isVec
 
   MPI_Datatype commDataType = get_type<T>();
   switch(commDirection)
-  {/*
-    case 0: // x-direction
-      commDataSize = dataSize*ny*envelopeWidth;
-      direction[0] = 1;
-      break;
-    case 1: // y-direction
-      commDataSize = dataSize*nx*envelopeWidth;
-      direction[1] = 1;
-      break;*/
-    //case 2: // z-direction // not 3D yet
+  {
     case 0: // x-direction
       if(dimension == 2){
         commDataSize = dataSize*ny*envelopeWidth;
