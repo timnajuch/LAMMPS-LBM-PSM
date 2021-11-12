@@ -85,6 +85,44 @@ void ZouHeBC2D::setZouHeVelBC2D_yp (int iy_, int ix0_, int ix1_, double ux_bc_) 
 };
 
 
+
+void ZouHeBC2D::setZouHeVelBC3D_xn (int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_) {
+  for (int j = iy0_; j <= iy1_; ++j){
+    for (int k = iz0_; k <= iz1_; ++k){
+
+      int ind_iq = ix_ * lattice2D->ny * lattice2D->nz * lattice2D->q + j * lattice2D->nz * lattice2D->q + k * lattice2D->q;
+
+      double rho_tmp =  1.0/(1.0-ux_bc_)*(lattice2D->get_f(ind_iq + 0) + lattice2D->get_f(ind_iq + 3) + lattice2D->get_f(ind_iq + 4) +
+                                          lattice2D->get_f(ind_iq + 5) + lattice2D->get_f(ind_iq + 6) + lattice2D->get_f(ind_iq + 11) +
+                                          lattice2D->get_f(ind_iq + 17) + lattice2D->get_f(ind_iq + 18) + lattice2D->get_f(ind_iq + 12) +
+                                2.0*( lattice2D->get_f(ind_iq + 2) + lattice2D->get_f(ind_iq + 14) + lattice2D->get_f(ind_iq + 8) +
+                                      lattice2D->get_f(ind_iq + 16) + lattice2D->get_f(ind_iq + 10) ) );
+
+      double Nyx = 0.5*(lattice2D->get_f(ind_iq + 3) + lattice2D->get_f(ind_iq + 11) + lattice2D->get_f(ind_iq + 17)
+                        -(lattice2D->get_f(ind_iq + 4) + lattice2D->get_f(ind_iq + 18) + lattice2D->get_f(ind_iq + 12)))
+                   - 1.0/3.0*rho_tmp*uy_bc_;
+
+      double Nzx = 0.5*(lattice2D->get_f(ind_iq + 5) + lattice2D->get_f(ind_iq + 18) + lattice2D->get_f(ind_iq + 11)
+                        -(lattice2D->get_f(ind_iq + 6) + lattice2D->get_f(ind_iq + 17) + lattice2D->get_f(ind_iq + 12)))
+                   - 1.0/3.0*rho_tmp*uz_bc_;
+
+
+      lattice2D->set_f(ind_iq + 1, lattice2D->get_f(ind_iq + 2) + 1.0/3.0*rho_tmp*ux_bc_ );
+
+      lattice2D->set_f(ind_iq + 13, lattice2D->get_f(ind_iq + 14) + rho_tmp/6.0*(ux_bc_ - uy_bc_) - Nyx );
+
+      lattice2D->set_f(ind_iq + 7, lattice2D->get_f(ind_iq + 8) + rho_tmp/6.0*(ux_bc_ + uy_bc_) - Nyx );
+
+      lattice2D->set_f(ind_iq + 9, lattice2D->get_f(ind_iq + 10) + rho_tmp/6.0*(ux_bc_ + uz_bc_) - Nzx );
+
+      lattice2D->set_f(ind_iq + 15, lattice2D->get_f(ind_iq + 16) + rho_tmp/6.0*(ux_bc_ - uz_bc_) + Nzx );
+
+    }
+  }
+};
+
+
+
 void ZouHeBC2D::setZouHeVelBC3D_yn (int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_) {
   for (int i = ix0_; i <= ix1_; ++i){
     for (int k = iz0_; k <= iz1_; ++k){

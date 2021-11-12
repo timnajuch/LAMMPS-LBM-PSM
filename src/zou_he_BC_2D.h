@@ -29,6 +29,7 @@ class ZouHeBC2D {
     void setZouHeVelBC2D_yn(int iy_, int ix0_, int ix1_, double ux_bc_);
     void setZouHeVelBC2D_yp(int iy_, int ix0_, int ix1_, double ux_bc_);
 
+    void setZouHeVelBC3D_xn(int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_);
     void setZouHeVelBC3D_yn(int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_);
     void setZouHeVelBC3D_yp(int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_);
 };
