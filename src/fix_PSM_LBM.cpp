@@ -196,9 +196,10 @@ void fix_PSM_LBM::pre_force(int)
   for(int i=0;i<nPart;i++){
 
     vector<double> fh;
-    fh.resize(2);
+    fh.resize(3);
     fh[0] = 0.0;
     fh[1] = 0.0;
+    fh[2] = 0.0;
 
     vector<double> th;
     th.resize(3);
@@ -229,12 +230,12 @@ void fix_PSM_LBM::pre_force(int)
 
 
     if (i < atom->nlocal){
-      t[i][0] += fh[0];
-      t[i][1] += fh[1];
+      t[i][0] += th[0];
+      t[i][1] += th[1];
       t[i][2] += th[2];
     }else{ // ghost atoms
-      t[i][0] = fh[0];
-      t[i][1] = fh[1];
+      t[i][0] = th[0];
+      t[i][1] = th[1];
       t[i][2] = th[2];
     }
 
