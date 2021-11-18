@@ -39,7 +39,6 @@ Unit_Conversion::Unit_Conversion(double rhof_, double nu_, double lc_, double Re
     forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
     torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
   }
-
 };
 
 Unit_Conversion::~Unit_Conversion(){};

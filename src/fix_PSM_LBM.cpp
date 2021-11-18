@@ -22,6 +22,9 @@ fix_PSM_LBM::fix_PSM_LBM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
   fix_hydroTorque_ = nullptr;
   fix_stresslet_ = nullptr;
 
+  virial_global_flag = virial_peratom_flag = 1;
+  thermo_virial = 1;
+
   tau = 0.7; // default value for BGK relaxation parameter
 
   int iarg = 3;
@@ -100,15 +103,37 @@ void fix_PSM_LBM::init()
   update->dt = unitConversion->get_phys_time(1.0)/((double)nevery);
 
   vector<double> F_lbm(3,0.0); // external forcing such as gravity. not incorporated yet.
+/*
+  if ( fmod(domain->xprd, unitConversion->get_dx()) != 0
+    || fmod(domain->xprd, unitConversion->get_dx()) != 0
+    || fmod(domain->xprd, unitConversion->get_dx()) != 0 ){
+      error->all(FLERR, "Illegal cell width. Division of domain length and cell width has to give an integer.");
+  }
+*/
+double SMALL = 1e-15;
+  if(  pow(((double)((int)(domain->xprd/unitConversion->get_dx())) - domain->xprd/unitConversion->get_dx()), 2.0) > SMALL
+    || pow(((double)((int)(domain->yprd/unitConversion->get_dx())) - domain->yprd/unitConversion->get_dx()), 2.0) > SMALL
+    || pow(((double)((int)(domain->zprd/unitConversion->get_dx())) - domain->zprd/unitConversion->get_dx()), 2.0) > SMALL ){
+      error->all(FLERR, "Illegal cell width. Division of domain length and cell width has to give an integer.");
+  }
+
+  if ( ((int)(domain->xprd/unitConversion->get_dx()+1) % decomposition[0] != 0)
+    || ((int)(domain->yprd/unitConversion->get_dx()+1) % decomposition[1] != 0)
+    || ((int)(domain->zprd/unitConversion->get_dx()+1) % decomposition[2] != 0) ){
+      error->all(FLERR, "Illegal combination of decomposition and lattice cell number. Division of total lattice cell number by domain decomposition has to be even (i.e. modulo == 0) in each direction.");
+  }
+  
+
   int nx = domain->xprd/unitConversion->get_dx()+1;
   int ny = domain->yprd/unitConversion->get_dx()+1;
   int nz = 0;
   if (domain->dimension == 3)
     {nz = domain->zprd/unitConversion->get_dx()+1; }
+
   vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
   vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
 
-  dynamics = new BGK_GuoExtForce_Dynamics2D(tau, nx, ny, nz, 9, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension);
+  dynamics = new BGK_GuoExtForce_Dynamics2D(tau, nx, ny, nz, 9, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension, unitConversion->get_dx());
 
   dynamics->initialise_domain(unitConversion->get_dx(), unitConversion->get_dx(), unitConversion->get_dx());
 
@@ -163,7 +188,7 @@ void fix_PSM_LBM::init()
 }
 
 
-void fix_PSM_LBM::pre_force(int)
+void fix_PSM_LBM::pre_force(int vflag)
 {
   if (update->ntimestep % nevery) return;
   int nPart = atom->nlocal + atom->nghost;
@@ -191,6 +216,8 @@ void fix_PSM_LBM::pre_force(int)
   int hydroTorqueFixID = atom->find_custom((char *)"hydroTorque", flagHT, ncolumnsHT);
   int flagS, ncolumnsS;
   int stressletFixID = atom->find_custom((char *)"stresslet", flagS, ncolumnsS);
+
+  v_init(vflag);
 
 
   for(int i=0;i<nPart;i++){
@@ -243,15 +270,32 @@ void fix_PSM_LBM::pre_force(int)
     // of the first moment of the stress over the surface
     // Stress defined as negative, hence the flipped signs
     // TODO: Check what middle indice of darray stands for. [][1][] gives seg fault
-    virial[0] += stresslet[0];
-    virial[1] += stresslet[1];
-    virial[2] += stresslet[2];
-    virial[3] += stresslet[3] - 0.5*th[2];
-    virial[4] += stresslet[4] + 0.5*th[1];
-    virial[5] += stresslet[5] - 0.5*th[0];
+//    if (i < atom->nlocal){
+      double stresslet_arr[6] = {stresslet[0], stresslet[1], stresslet[2], stresslet[3], stresslet[4], stresslet[5]};
+      v_tally(i, stresslet_arr);
+//    }
 
+/*
+    if (i < atom->nlocal){
+      virial[0] += stresslet[0];
+      virial[1] += stresslet[1];
+      virial[2] += stresslet[2];
+      virial[3] += stresslet[3];// - 0.5*th[2];
+      //virial[4] += stresslet[4];// + 0.5*th[1];
+      virial[4] += th[2];
+      virial[5] += stresslet[5];// - 0.5*th[0];
+    }else{
+      virial[0] = stresslet[0];
+      virial[1] = stresslet[1];
+      virial[2] = stresslet[2];
+      virial[3] = stresslet[3];// - 0.5*th[2];
+      //virial[4] = stresslet[4];// + 0.5*th[1];
+      virial[4] = th[2];
+      virial[5] = stresslet[5];// - 0.5*th[0];
+    }
+*/
   }
-  comm->reverse_comm();
+  comm->reverse_comm();// todo check if sufficient or if i need to define some virtual functions etc
 
 }
 

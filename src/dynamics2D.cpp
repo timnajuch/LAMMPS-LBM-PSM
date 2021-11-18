@@ -8,8 +8,8 @@ Tim Najuch, 2021
 
 #include "dynamics2D.h"
 
-Dynamics2D::Dynamics2D(int nx_, int ny_, int nz_, int q_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_) :
-  Lattice2D(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_)
+Dynamics2D::Dynamics2D(int nx_, int ny_, int nz_, int q_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx_) :
+  Lattice2D(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_, dx_)
 {
   for(int i = 0; i < Lattice2D::nx; ++i){
     for(int j = 0; j < Lattice2D::ny; ++j){

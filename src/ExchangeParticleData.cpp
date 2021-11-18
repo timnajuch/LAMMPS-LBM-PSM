@@ -152,6 +152,7 @@ void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2
 {
     int envelopeWidth = lattice2D_->get_envelopeWidth();
 
+// todo correct xlb etc because it is not necessarily the center of mass
     double x_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[0]-(lattice2D_->getProcOrigin()[0]-(double)envelopeWidth*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_nx()-1.0);
     double y_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[1]-(lattice2D_->getProcOrigin()[1]-(double)envelopeWidth*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_ny()-1.0);
     double z_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[2]-(lattice2D_->getProcOrigin()[2]-(double)envelopeWidth*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_nz()-1.0);
@@ -194,7 +195,6 @@ void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2
           stresslet[3] -= 0.5*(dy*Fhyd[0] + dx*Fhyd[1])*unitConversion->get_torqueFactor();
           stresslet[4] -= 0.5*(dz*Fhyd[0] + dx*Fhyd[2])*unitConversion->get_torqueFactor();
           stresslet[5] -= 0.5*(dz*Fhyd[1] + dy*Fhyd[2])*unitConversion->get_torqueFactor();
-
         }
       }
     }

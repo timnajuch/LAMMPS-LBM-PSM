@@ -9,7 +9,7 @@ Tim Najuch, 2021
 #include "lattice2D.h"
 
 
-Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_){
+Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx){
   envelopeWidth = 1;
   dimension = dimension_;
 
@@ -19,7 +19,7 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
 
   procLength.resize(3);
   procOrigin.resize(3);
-
+/*
   procLength[0] = boxLength_[0]/((double)decomposition[0]);
   procLength[1] = boxLength_[1]/((double)decomposition[1]);
   procLength[2] = 0.0;
@@ -33,7 +33,7 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
   //if (domain->dimension == 3)
   if (dimension == 3)
     { procOrigin[2] = origin_[2] + procCoordinates[2]*boxLength_[2]/((double)decomposition[2]); }
-
+*/
   c = 1.0;
   cs = 1.0/sqrt(3.0);
   csPow2 = 1.0/3.0;
@@ -48,6 +48,10 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
     q = 19;
   }
 //  q = q_;
+
+  procOrigin[0] = origin_[0] + procCoordinates[0]*(nx-2*envelopeWidth)*dx;  //i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
+  procOrigin[1] = origin_[1] + procCoordinates[1]*(ny-2*envelopeWidth)*dx;  //i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
+  procOrigin[2] = origin_[2] + procCoordinates[2]*(nz-2*envelopeWidth)*dx;  //i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
 
   f = vector<double>(nx*ny*nz*q,0.0);
   f0 = vector<double>(nx*ny*nz*q,0.0);

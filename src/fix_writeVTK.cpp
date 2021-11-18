@@ -77,8 +77,9 @@ void WriteVTK::pre_force(int)
   vector<double> u_vtk = fixPSMLBM->dynamics->get_u();
   vector<double> B_vtk = fixPSMLBM->dynamics->get_B();
   double u_infty = fixPSMLBM->unitConversion->get_u_lb();
+  double Uc = fixPSMLBM->unitConversion->get_Uc();
   double ly = 1.0;
-  write_vtk("run.vtk", x_vtk, 1.0/ly, y_vtk, 1.0/ly, z_vtk, 1.0/ly, B_vtk, 1.0, rho_vtk, 1000.0, u_vtk, 1.0/u_infty);
+  write_vtk("run.vtk", x_vtk, 1.0/ly, y_vtk, 1.0/ly, z_vtk, 1.0/ly, B_vtk, 1.0, rho_vtk, 1000.0, u_vtk, Uc/u_infty);
 }
 
 
