@@ -120,7 +120,9 @@ class Lattice2D{
     double get_Fhydx(int index);
     double get_Fhydy(int index);
     double get_Fhydz(int index);
-    
+
+    vector<int> get_procCoordinates();
+
     friend class ZouHeBC2D;
 };
 

@@ -400,3 +400,10 @@ ParticleDataOnLattice Lattice2D::getParticleDataOnLatticeNode(int index)
 {
   return pData[index];
 }
+
+
+vector<int> Lattice2D::get_procCoordinates()
+{
+  vector<int> returnProcCoordinates {procCoordinates[0], procCoordinates[1], procCoordinates[2] };
+  return returnProcCoordinates;
+}

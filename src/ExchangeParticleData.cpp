@@ -19,9 +19,18 @@ ExchangeParticleData::~ExchangeParticleData() {};
 void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double **uPart, double **omega, double *rp, vector<double> boxLength, vector<double> origin)
 {
   for(int iPart = 0; iPart < numberParticles; ++iPart){
+      double x_lb_global = unitConversion->get_pos_lb(xPart[iPart][0])+1.0;
+      double y_lb_global = unitConversion->get_pos_lb(xPart[iPart][1])+1.0;
+      double z_lb_global = unitConversion->get_pos_lb(xPart[iPart][2])+1.0;
+
+      double x_lb_local = x_lb_global - (double)lattice2D_->get_procCoordinates()[0]*((double)lattice2D_->get_nx()-2.0*(double)lattice2D_->get_envelopeWidth());
+      double y_lb_local = y_lb_global - (double)lattice2D_->get_procCoordinates()[1]*((double)lattice2D_->get_ny()-2.0*(double)lattice2D_->get_envelopeWidth());
+      double z_lb_local = z_lb_global - (double)lattice2D_->get_procCoordinates()[2]*((double)lattice2D_->get_nz()-2.0*(double)lattice2D_->get_envelopeWidth());
+
       double x_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[iPart][0]-(lattice2D_->getProcOrigin()[0]-(double)lattice2D_->get_envelopeWidth()*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_nx()-1.0);
       double y_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[iPart][1]-(lattice2D_->getProcOrigin()[1]-(double)lattice2D_->get_envelopeWidth()*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_ny()-1.0);
       double z_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[iPart][2]-(lattice2D_->getProcOrigin()[2]-(double)lattice2D_->get_envelopeWidth()*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_nz()-1.0);
+
       double r_lb = unitConversion->get_radius_lb(rp[iPart]);
 
       int nodeZone[3][2] = {{(int)(x_lb-r_lb)-3, (int)(x_lb+r_lb)+3}, 
@@ -39,7 +48,8 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
 
             int ind_phys_1D = i * lattice2D_->get_ny() * lattice2D_->get_nz() + j * lattice2D_->get_nz() + k;
 
-            double sf = calcSolidFraction(i, j, k, x_lb, y_lb, z_lb, r_lb);
+            //double sf = calcSolidFraction(i, j, k, x_lb, y_lb, z_lb, r_lb);
+            double sf = calcSolidFraction(i, j, k, x_lb_local, y_lb_local, z_lb_local, r_lb);
 
             int id_old = 0;
             double sf_old = 0.0;
@@ -52,10 +62,12 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
             int const decFlag = (sf > 0.001) + 2*(sf_old > 0.001);
             double zeroVel[3] = {0.0, 0.0, 0.0};
 
-            double dx = (double)i - x_lb;
-            double dy = (double)j - y_lb;
-//            double dz = 0.0;
-            double dz = (double)k - z_lb;  
+//            double dx = (double)i - x_lb;
+//            double dy = (double)j - y_lb;
+//            double dz = (double)k - z_lb;  
+            double dx = (double)i - x_lb_local;
+            double dy = (double)j - y_lb_local;
+            double dz = (double)k - z_lb_local;  
             double uNode[3];
             uNode[0] = unitConversion->get_vel_lb(uPart[iPart][0]);
             uNode[1] = unitConversion->get_vel_lb(uPart[iPart][1]);
@@ -70,7 +82,8 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
                 lattice2D_->setParticleOnLattice(ind_phys_1D, 0, zeroVel, 0.0);
                 break;
               case 1: // sf > 0 && sf_old == 0
-                lattice2D_->setParticleOnLattice(ind_phys_1D, tag[iPart], uNode, calcSolidFraction(i, j, k, x_lb, y_lb, z_lb, r_lb));
+                //lattice2D_->setParticleOnLattice(ind_phys_1D, tag[iPart], uNode, calcSolidFraction(i, j, k, x_lb, y_lb, z_lb, r_lb));
+                lattice2D_->setParticleOnLattice(ind_phys_1D, tag[iPart], uNode, calcSolidFraction(i, j, k, x_lb_local, y_lb_local, z_lb_local, r_lb));
                 break;
               case 2: // sf == 0 && sf_old > 0
                 if( id_old == tag[iPart] ) // then particle has left this cell
@@ -78,7 +91,8 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
                 break;
               case 3: // sf > 0 && sf_old > 0
                 if( sf > sf_old || id_old == tag[iPart] )
-                  lattice2D_->setParticleOnLattice(ind_phys_1D, tag[iPart], uNode, calcSolidFraction(i, j, k, x_lb, y_lb, z_lb, r_lb));
+                  //lattice2D_->setParticleOnLattice(ind_phys_1D, tag[iPart], uNode, calcSolidFraction(i, j, k, x_lb, y_lb, z_lb, r_lb));
+                  lattice2D_->setParticleOnLattice(ind_phys_1D, tag[iPart], uNode, calcSolidFraction(i, j, k, x_lb_local, y_lb_local, z_lb_local, r_lb));
                 break;
             }
 
@@ -151,7 +165,25 @@ double ExchangeParticleData::calcSolidFraction(int i, int j, int k, double xP_LB
 void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, double *xPart, double rp, vector<double> &fHydro, vector<double> &tHydro, vector<double> &stresslet)
 {
     int envelopeWidth = lattice2D_->get_envelopeWidth();
+/*
+    double x_lb_global = unitConversion->get_pos_lb(xPart[0]);
+    double y_lb_global = unitConversion->get_pos_lb(xPart[1]);
+    double z_lb_global = unitConversion->get_pos_lb(xPart[2]);
 
+//    double x_lb_local = x_lb_global - (double)lattice2D_->get_procCoordinates()[0]*(double)lattice2D_->get_nx()+1;
+//    double y_lb_local = y_lb_global - (double)lattice2D_->get_procCoordinates()[1]*(double)lattice2D_->get_ny()+1;
+//    double z_lb_local = z_lb_global - (double)lattice2D_->get_procCoordinates()[2]*(double)lattice2D_->get_nz()+1;
+    double x_lb_local = x_lb_global - (double)lattice2D_->get_procCoordinates()[0]*((double)lattice2D_->get_nx()-2.0*(double)lattice2D_->get_envelopeWidth()-1.0);
+    double y_lb_local = y_lb_global - (double)lattice2D_->get_procCoordinates()[1]*((double)lattice2D_->get_ny()-2.0*(double)lattice2D_->get_envelopeWidth()-1.0);
+    double z_lb_local = z_lb_global - (double)lattice2D_->get_procCoordinates()[2]*((double)lattice2D_->get_nz()-2.0*(double)lattice2D_->get_envelopeWidth()-1.0);
+*/
+      double x_lb_global = unitConversion->get_pos_lb(xPart[0])+1.0;
+      double y_lb_global = unitConversion->get_pos_lb(xPart[1])+1.0;
+      double z_lb_global = unitConversion->get_pos_lb(xPart[2])+1.0;
+
+      double x_lb_local = x_lb_global - (double)lattice2D_->get_procCoordinates()[0]*((double)lattice2D_->get_nx()-2.0*(double)lattice2D_->get_envelopeWidth());
+      double y_lb_local = y_lb_global - (double)lattice2D_->get_procCoordinates()[1]*((double)lattice2D_->get_ny()-2.0*(double)lattice2D_->get_envelopeWidth());
+      double z_lb_local = z_lb_global - (double)lattice2D_->get_procCoordinates()[2]*((double)lattice2D_->get_nz()-2.0*(double)lattice2D_->get_envelopeWidth());
 // todo correct xlb etc because it is not necessarily the center of mass
     double x_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[0]-(lattice2D_->getProcOrigin()[0]-(double)envelopeWidth*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_nx()-1.0);
     double y_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[1]-(lattice2D_->getProcOrigin()[1]-(double)envelopeWidth*unitConversion->get_dx())), 0.0), (double)lattice2D_->get_ny()-1.0);
@@ -181,9 +213,12 @@ void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2
           fHydro[1] += Fhyd[1]*unitConversion->get_forceFactor();
           fHydro[2] += Fhyd[2]*unitConversion->get_forceFactor();
 
-          double dx = (double)i - x_lb;
-          double dy = (double)j - y_lb;
-          double dz = (double)k - z_lb;  
+//          double dx = (double)i - x_lb;
+//          double dy = (double)j - y_lb;
+//          double dz = (double)k - z_lb;  
+          double dx = (double)i - x_lb_local;
+          double dy = (double)j - y_lb_local;
+          double dz = (double)k - z_lb_local;  
 
           tHydro[0] += (dy*Fhyd[2] - dz*Fhyd[1])*unitConversion->get_torqueFactor();
           tHydro[1] += (dz*Fhyd[0] - dx*Fhyd[2])*unitConversion->get_torqueFactor();
