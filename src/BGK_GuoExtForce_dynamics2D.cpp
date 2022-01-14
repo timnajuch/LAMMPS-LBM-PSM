@@ -162,20 +162,30 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int k_, int iq_){
   int iq_m = 0;
   if(iq_ > 0)
   {
-    if(iq_ < 5)
-    {
-      iq_m = iq_ < 3 ? iq_ + 2 : iq_ - 2;
-    }
-    else
-    {
-      iq_m = iq_ < 7 ? iq_ + 2 : iq_ - 2;
+    if(Lattice2D::dimension == 2){
+      if(iq_ < 5)
+      {
+        iq_m = iq_ < 3 ? iq_ + 2 : iq_ - 2;
+      }
+      else
+      {
+        iq_m = iq_ < 7 ? iq_ + 2 : iq_ - 2;
+      }
+    } else { //3D
+      if (iq_ % 2 == 0){
+        iq_m = iq_ - 1;
+      } else {
+        iq_m = iq_ + 1;
+      }
     }
   }
   int ind_iq_m = i_ * Lattice2D::ny * Lattice2D::nz * Lattice2D::q + j_ * Lattice2D::nz * Lattice2D::q + k_*Lattice2D::q + iq_m;
-//  Lattice2D::set_f0(i_, j_, k_, iq_m, Dynamics2D::feq(iq_m, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );
+  Lattice2D::set_f0(i_, j_, k_, iq_m, Dynamics2D::feq(iq_m, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );
 
-  double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (Lattice2D::get_f(ind_iq) - Lattice2D::get_f0(ind_iq) );
-  //double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + Lattice2D::get_f(ind_iq_m) - Lattice2D::get_f0(ind_iq_m);
+  //double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (Lattice2D::get_f(ind_iq) - Lattice2D::get_f0(ind_iq) ); //Eq9
+  double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + Lattice2D::get_f(ind_iq_m) - Lattice2D::get_f0(ind_iq_m); //Eq8
+//  if (iq_ == 0)
+//    { solid_coll = 0.0; }
 
   double B = Lattice2D::getSolidFractionOnLattice(ind_phys_1D, 0);
   //double B = Lattice2D::get_B(ind_phys_1D);
