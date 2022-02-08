@@ -106,23 +106,24 @@ class Lattice2D{
 
     //void setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[2], double eps);
     void setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[3], double eps);
+    void setToZero(int index, LAMMPS_NS::tagint pID);
     double getSolidFractionOnLattice(int index, int pID);
     vector<double> getSolidVelocityOnLattice(int index, int pID);
 
     ParticleDataOnLattice getParticleDataOnLatticeNode(int index);
 
-    void set_Fhydx(int index, double Fhydx_);
-    void set_Fhydy(int index, double Fhydy_);
-    void set_Fhydz(int index, double Fhydz_);
-    void add_Fhydx(int index, double Fhydx_);
-    void add_Fhydy(int index, double Fhydy_);
-    void add_Fhydz(int index, double Fhydz_);
+    void set_Fhydx(int index, int pID, double Fhydx_);
+    void set_Fhydy(int index, int pID, double Fhydy_);
+    void set_Fhydz(int index, int pID, double Fhydz_);
+    void add_Fhydx(int index, int pID, double Fhydx_);
+    void add_Fhydy(int index, int pID, double Fhydy_);
+    void add_Fhydz(int index, int pID, double Fhydz_);
     double get_Fhydx(int index);
     double get_Fhydy(int index);
     double get_Fhydz(int index);
-
+ 
     vector<int> get_procCoordinates();
-
+   
     friend class ZouHeBC2D;
 };
 

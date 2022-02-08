@@ -104,6 +104,7 @@ void fix_PSM_LBM::init()
 
   vector<double> F_lbm(3,0.0); // external forcing such as gravity. not incorporated yet.
 /*
+std::cout << "INIT debug: " << fmod(domain->xprd, unitConversion->get_dx()) << " / " << domain->xprd << " / " << unitConversion->get_dx() << " / " << domain->xprd/unitConversion->get_dx() << std::endl;  
   if ( fmod(domain->xprd, unitConversion->get_dx()) != 0
     || fmod(domain->xprd, unitConversion->get_dx()) != 0
     || fmod(domain->xprd, unitConversion->get_dx()) != 0 ){
@@ -243,7 +244,7 @@ void fix_PSM_LBM::pre_force(int vflag)
     stresslet[4] = 0.0;
     stresslet[5] = 0.0;
 
-    exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, atom->x[i], atom->radius[i], fh, th, stresslet);
+    exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, atom->tag[i], atom->x[i], atom->radius[i], fh, th, stresslet);
 
     if (i < atom->nlocal){
       f[i][0] += fh[0];
@@ -294,6 +295,7 @@ void fix_PSM_LBM::pre_force(int vflag)
       virial[5] = stresslet[5];// - 0.5*th[0];
     }
 */
+//std::cout << "virial[3]: " << virial[0] << " / " << virial[1] << " / " << virial[2] << " / " << virial[3] << " / " << virial[4] << " / " << virial[5] << " / " << stresslet[3] << " / " << th[2] << std::endl;
   }
   comm->reverse_comm();// todo check if sufficient or if i need to define some virtual functions etc
 

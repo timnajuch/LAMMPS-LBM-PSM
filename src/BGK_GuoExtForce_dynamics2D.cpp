@@ -78,7 +78,7 @@ void BGK_GuoExtForce_Dynamics2D::compute_macro_values(int i_, int j_, int k_){
   //p[i][j] = rho_tmp*csPow2;
 };
 
-
+/*
 void BGK_GuoExtForce_Dynamics2D::collision(){
   for(int i = 0; i < Lattice2D::nx; ++i){
     for(int j = 0; j < Lattice2D::ny; ++j){
@@ -127,23 +127,23 @@ void BGK_GuoExtForce_Dynamics2D::collision(){
             Lattice2D::add_Fhydz(ind_phys_1D, B * solid_coll * Lattice2D::e[3*iq+2]);
           }
 
-  /*      
-          Lattice2D::set_fcoll(i, j, iq, Lattice2D::get_f(ind_iq) + ( 1.0 - B ) * BGKcoll + B * solid_coll 
-                   + (1.0-1.0/(2.0*tau)) * Lattice2D::w[iq] * Lattice2D::rho[ind_phys_1D] * (
-                     ( (Lattice2D::e[2*iq] - Lattice2D::u[ind_phys_2D]) / (Lattice2D::cs * Lattice2D::cs) 
-                          + (Lattice2D::e[2*iq] * Lattice2D::u[ind_phys_2D] + Lattice2D::e[2*iq+1] * Lattice2D::u[ind_phys_2D+1]) / (pow(Lattice2D::cs,4.0)) 
-                                * Lattice2D::e[2*iq] ) * F_lbm[0]
-                   + (  (Lattice2D::e[2*iq+1] - Lattice2D::u[ind_phys_2D+1]) / (Lattice2D::cs * Lattice2D::cs) 
-                          + (Lattice2D::e[2*iq] * Lattice2D::u[ind_phys_2D] + Lattice2D::e[2*iq+1] * Lattice2D::u[ind_phys_2D+1]) / (pow(Lattice2D::cs,4.0)) 
-                                * Lattice2D::e[2*iq+1] ) * F_lbm[1]) ); 
-  */
+        
+//          Lattice2D::set_fcoll(i, j, iq, Lattice2D::get_f(ind_iq) + ( 1.0 - B ) * BGKcoll + B * solid_coll 
+//                   + (1.0-1.0/(2.0*tau)) * Lattice2D::w[iq] * Lattice2D::rho[ind_phys_1D] * (
+//                     ( (Lattice2D::e[2*iq] - Lattice2D::u[ind_phys_2D]) / (Lattice2D::cs * Lattice2D::cs) 
+//                          + (Lattice2D::e[2*iq] * Lattice2D::u[ind_phys_2D] + Lattice2D::e[2*iq+1] * Lattice2D::u[ind_phys_2D+1]) / (pow(Lattice2D::cs,4.0)) 
+//                                * Lattice2D::e[2*iq] ) * F_lbm[0]
+//                   + (  (Lattice2D::e[2*iq+1] - Lattice2D::u[ind_phys_2D+1]) / (Lattice2D::cs * Lattice2D::cs) 
+//                          + (Lattice2D::e[2*iq] * Lattice2D::u[ind_phys_2D] + Lattice2D::e[2*iq+1] * Lattice2D::u[ind_phys_2D+1]) / (pow(Lattice2D::cs,4.0)) 
+//                                * Lattice2D::e[2*iq+1] ) * F_lbm[1]) ); 
+  
         }
       }
     }
   }
 
 };
-
+*/
 
 void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int k_, int iq_){
         
@@ -152,8 +152,10 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int k_, int iq_){
   int ind_phys_2D = i_ * Lattice2D::ny *Lattice2D::nz* 3 + j_*3*Lattice2D::nz + k_*3;
 
   Lattice2D::set_f0(i_, j_, k_, iq_, Dynamics2D::feq(iq_, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );
-  vector<double> uSolid{Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[0], Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[1], Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[2]};
-  double f0_solid = Dynamics2D::feq(iq_, ind_phys_1D, ind_phys_2D, Lattice2D::get_rho(ind_phys_1D), uSolid);
+  vector<double> uSolid1{Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[0], Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[1], Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[2]};
+  vector<double> uSolid2{Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[3], Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[4], Lattice2D::getSolidVelocityOnLattice(ind_phys_1D, 0)[5]};
+  double f0_solid1 = Dynamics2D::feq(iq_, ind_phys_1D, ind_phys_2D, Lattice2D::get_rho(ind_phys_1D), uSolid1);
+  double f0_solid2 = Dynamics2D::feq(iq_, ind_phys_1D, ind_phys_2D, Lattice2D::get_rho(ind_phys_1D), uSolid2);
 
 
   double BGKcoll = ( Lattice2D::get_f0(ind_iq) - Lattice2D::get_f(ind_iq) ) / tau;
@@ -182,27 +184,45 @@ void BGK_GuoExtForce_Dynamics2D::collision(int i_, int j_, int k_, int iq_){
   int ind_iq_m = i_ * Lattice2D::ny * Lattice2D::nz * Lattice2D::q + j_ * Lattice2D::nz * Lattice2D::q + k_*Lattice2D::q + iq_m;
   Lattice2D::set_f0(i_, j_, k_, iq_m, Dynamics2D::feq(iq_m, ind_phys_1D, ind_phys_2D, Lattice2D::rho, Lattice2D::u) );
 
-  //double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (Lattice2D::get_f(ind_iq) - Lattice2D::get_f0(ind_iq) ); //Eq9
-  double solid_coll = f0_solid - Lattice2D::get_f(ind_iq) + Lattice2D::get_f(ind_iq_m) - Lattice2D::get_f0(ind_iq_m); //Eq8
+  double solid_coll1 = f0_solid1 - Lattice2D::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (Lattice2D::get_f(ind_iq) - Lattice2D::get_f0(ind_iq) ); //Eq9
+  double solid_coll2 = f0_solid2 - Lattice2D::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (Lattice2D::get_f(ind_iq) - Lattice2D::get_f0(ind_iq) ); //Eq9
+  //double solid_coll1 = f0_solid1 - Lattice2D::get_f(ind_iq) + Lattice2D::get_f(ind_iq_m) - Lattice2D::get_f0(ind_iq_m); //Eq8
+  //double solid_coll2 = f0_solid2 - Lattice2D::get_f(ind_iq) + Lattice2D::get_f(ind_iq_m) - Lattice2D::get_f0(ind_iq_m); //Eq8
 //  if (iq_ == 0)
 //    { solid_coll = 0.0; }
 
-  double B = Lattice2D::getSolidFractionOnLattice(ind_phys_1D, 0);
+  //double B = Lattice2D::getSolidFractionOnLattice(ind_phys_1D, 0);
+  double Btmp1 = Lattice2D::getSolidFractionOnLattice(ind_phys_1D, 0);
+  double Btmp2 = Lattice2D::getSolidFractionOnLattice(ind_phys_1D, 1);
   //double B = Lattice2D::get_B(ind_phys_1D);
-        
-  Lattice2D::set_f(i_, j_, k_, iq_, Lattice2D::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll );
-//          + ( 1.0 - B ) * (Lattice2D::g[iq_] / Lattice2D::c) * ( Lattice2D::e[3*iq_] * F_lbm[0] + Lattice2D::e[3*iq_+1] * F_lbm[1] + Lattice2D::e[3*iq_+2] * F_lbm[2]) ); //TODO forcing term. See above
+  
+  double B1 = Btmp1/(Btmp1+Btmp2);
+  double B2 = Btmp2/(Btmp1+Btmp2);
+  
+  double Btot = B1+B2;
+  if(Btot > 1.0)
+  { Btot = 1.0; }
+    
+  Lattice2D::set_f(i_, j_, k_, iq_, Lattice2D::get_f(ind_iq)  + ( 1.0 - Btot ) * BGKcoll  + B1 * solid_coll1 + B2 * solid_coll2 );
+//  Lattice2D::set_f(i_, j_, k_, iq_, Lattice2D::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll );
+////          + ( 1.0 - B ) * (Lattice2D::g[iq_] / Lattice2D::c) * ( Lattice2D::e[3*iq_] * F_lbm[0] + Lattice2D::e[3*iq_+1] * F_lbm[1] + Lattice2D::e[3*iq_+2] * F_lbm[2]) ); //TODO forcing term. See above
 
   // todo extend to two or more particles
   if(iq_ == 0)
   {
-    Lattice2D::set_Fhydx(ind_phys_1D, -B * solid_coll * Lattice2D::e[3*iq_]);
-    Lattice2D::set_Fhydy(ind_phys_1D, -B * solid_coll * Lattice2D::e[3*iq_+1]);
-    Lattice2D::set_Fhydz(ind_phys_1D, -B * solid_coll * Lattice2D::e[3*iq_+2]);
+    Lattice2D::set_Fhydx(ind_phys_1D, 0, -B1 * solid_coll1 * Lattice2D::e[3*iq_]);
+    Lattice2D::set_Fhydy(ind_phys_1D, 0, -B1 * solid_coll1 * Lattice2D::e[3*iq_+1]);
+    Lattice2D::set_Fhydz(ind_phys_1D, 0, -B1 * solid_coll1 * Lattice2D::e[3*iq_+2]);
+    Lattice2D::set_Fhydx(ind_phys_1D, 1, -B2 * solid_coll2 * Lattice2D::e[3*iq_]);
+    Lattice2D::set_Fhydy(ind_phys_1D, 1, -B2 * solid_coll2 * Lattice2D::e[3*iq_+1]);
+    Lattice2D::set_Fhydz(ind_phys_1D, 1, -B2 * solid_coll2 * Lattice2D::e[3*iq_+2]);
   }else{
-    Lattice2D::add_Fhydx(ind_phys_1D, -B * solid_coll * Lattice2D::e[3*iq_]);
-    Lattice2D::add_Fhydy(ind_phys_1D, -B * solid_coll * Lattice2D::e[3*iq_+1]);
-    Lattice2D::add_Fhydz(ind_phys_1D, -B * solid_coll * Lattice2D::e[3*iq_+2]);
+    Lattice2D::add_Fhydx(ind_phys_1D, 0, -B1 * solid_coll1 * Lattice2D::e[3*iq_]);
+    Lattice2D::add_Fhydy(ind_phys_1D, 0, -B1 * solid_coll1 * Lattice2D::e[3*iq_+1]);
+    Lattice2D::add_Fhydz(ind_phys_1D, 0, -B1 * solid_coll1 * Lattice2D::e[3*iq_+2]);
+    Lattice2D::add_Fhydx(ind_phys_1D, 1, -B2 * solid_coll2 * Lattice2D::e[3*iq_]);
+    Lattice2D::add_Fhydy(ind_phys_1D, 1, -B2 * solid_coll2 * Lattice2D::e[3*iq_+1]);
+    Lattice2D::add_Fhydz(ind_phys_1D, 1, -B2 * solid_coll2 * Lattice2D::e[3*iq_+2]);
   }
 
 };

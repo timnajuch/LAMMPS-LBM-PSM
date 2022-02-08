@@ -25,7 +25,7 @@ class BGK_GuoExtForce_Dynamics2D : public Dynamics2D {
     ~BGK_GuoExtForce_Dynamics2D();
 
     void compute_macro_values();
-    void collision();
+ //   void collision();
 
     void initialise_dynamics(double rho_, double ux_, double uy_, double uz_);
 

@@ -58,6 +58,10 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
               id_old = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).particleID[0];
               sf_old = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[0];
             }
+            if (tag[iPart] == lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).particleID[1]){
+              id_old = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).particleID[1];
+              sf_old = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[1];
+            }
 
             int const decFlag = (sf > 0.001) + 2*(sf_old > 0.001);
             double zeroVel[3] = {0.0, 0.0, 0.0};
@@ -79,7 +83,8 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
 
             switch(decFlag){
               case 0: // sf == 0 && sf_old == 0
-                lattice2D_->setParticleOnLattice(ind_phys_1D, 0, zeroVel, 0.0);
+                //lattice2D_->setParticleOnLattice(ind_phys_1D, 0, zeroVel, 0.0);
+                lattice2D_->setToZero(ind_phys_1D, tag[iPart]);
                 break;
               case 1: // sf > 0 && sf_old == 0
                 //lattice2D_->setParticleOnLattice(ind_phys_1D, tag[iPart], uNode, calcSolidFraction(i, j, k, x_lb, y_lb, z_lb, r_lb));
@@ -87,7 +92,8 @@ void ExchangeParticleData::setParticlesOnLattice(Lattice2D *lattice2D_, Unit_Con
                 break;
               case 2: // sf == 0 && sf_old > 0
                 if( id_old == tag[iPart] ) // then particle has left this cell
-                  lattice2D_->setParticleOnLattice(ind_phys_1D, 0, zeroVel, 0.0);
+                  //lattice2D_->setParticleOnLattice(ind_phys_1D, 0, zeroVel, 0.0);
+                  lattice2D_->setToZero(ind_phys_1D, tag[iPart]);
                 break;
               case 3: // sf > 0 && sf_old > 0
                 if( sf > sf_old || id_old == tag[iPart] )
@@ -162,7 +168,7 @@ double ExchangeParticleData::calcSolidFraction(int i, int j, int k, double xP_LB
 };
 
 
-void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, double *xPart, double rp, vector<double> &fHydro, vector<double> &tHydro, vector<double> &stresslet)
+void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2D_, Unit_Conversion *unitConversion, LAMMPS_NS::tagint tag, double *xPart, double rp, vector<double> &fHydro, vector<double> &tHydro, vector<double> &stresslet)
 {
     int envelopeWidth = lattice2D_->get_envelopeWidth();
 /*
@@ -206,8 +212,21 @@ void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2
           int ind_phys_1D = i * lattice2D_->get_ny() * lattice2D_->get_nz() + j * lattice2D_->get_nz() + k;
           
           // Todo extend to two or more particles
-          LAMMPS_NS::tagint pID = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).particleID[0];
-          vector<double> Fhyd = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).hydrodynamicForce;
+          //LAMMPS_NS::tagint pID = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).particleID[0];
+          //vector<double> Fhyd = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).hydrodynamicForce;
+          vector<double> Fhyd{0.0, 0.0, 0.0};
+          if(tag == lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).particleID[0]){
+            Fhyd[0] = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).hydrodynamicForce[0];
+            Fhyd[1] = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).hydrodynamicForce[1];
+            Fhyd[2] = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).hydrodynamicForce[2];
+          }
+          else if(tag == lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).particleID[1]){
+            Fhyd[0] = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).hydrodynamicForce[3];
+            Fhyd[1] = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).hydrodynamicForce[4];
+            Fhyd[2] = lattice2D_->getParticleDataOnLatticeNode(ind_phys_1D).hydrodynamicForce[5];
+          }
+          else { continue; }
+
 
           fHydro[0] += Fhyd[0]*unitConversion->get_forceFactor();
           fHydro[1] += Fhyd[1]*unitConversion->get_forceFactor();
@@ -233,4 +252,5 @@ void ExchangeParticleData::calculateHydrodynamicInteractions(Lattice2D *lattice2
         }
       }
     }
+//    std::cout << "DEBUG stresslet: " << stresslet[3] << " / " << tHydro[2] << " / " << x_lb << " / " << y_lb << " / " << z_lb << " / " << r_lb << " / " << xPart[0] << " / " << xPart[1] << " / " << xPart[2] << " / "<< lattice2D_->get_nx() << " / " << lattice2D_->get_ny() << " / " << lattice2D_->get_nz() << " / " << unitConversion->get_dx() << " / " << lattice2D_->getProcOrigin()[0] << " / " << lattice2D_->getProcOrigin()[1] << " / "<< lattice2D_->getProcOrigin()[2] << std::endl;
 };

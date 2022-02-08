@@ -52,7 +52,7 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
   procOrigin[0] = origin_[0] + procCoordinates[0]*(nx-2*envelopeWidth)*dx;  //i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
   procOrigin[1] = origin_[1] + procCoordinates[1]*(ny-2*envelopeWidth)*dx;  //i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
   procOrigin[2] = origin_[2] + procCoordinates[2]*(nz-2*envelopeWidth)*dx;  //i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
-
+std::cout << "DEBUG LATTICE: " << procOrigin[0] << " / " << procOrigin[1] << " / " << procOrigin[2] << std::endl;
   f = vector<double>(nx*ny*nz*q,0.0);
   f0 = vector<double>(nx*ny*nz*q,0.0);
   fcoll = vector<double>(nx*ny*nz*q,0.0);
@@ -332,40 +332,40 @@ double Lattice2D::get_Fhydz(int index){
   return Fhydz[index];
 };
 
-void Lattice2D::set_Fhydx(int index, double Fhydx_)
+void Lattice2D::set_Fhydx(int index, int pID, double Fhydx_)
 {
   Fhydx[index] = Fhydx_;
-  pData[index].hydrodynamicForce[0] = Fhydx_;
+  pData[index].hydrodynamicForce[3*pID+0] = Fhydx_;
 }
 
-void Lattice2D::set_Fhydy(int index, double Fhydy_)
+void Lattice2D::set_Fhydy(int index, int pID, double Fhydy_)
 {
   Fhydy[index] = Fhydy_;
-  pData[index].hydrodynamicForce[1] = Fhydy_;
+  pData[index].hydrodynamicForce[3*pID+1] = Fhydy_;
 }
 
-void Lattice2D::set_Fhydz(int index, double Fhydz_)
+void Lattice2D::set_Fhydz(int index, int pID, double Fhydz_)
 {
   Fhydz[index] = Fhydz_;
-  pData[index].hydrodynamicForce[2] = Fhydz_;
+  pData[index].hydrodynamicForce[3*pID+2] = Fhydz_;
 }
 
-void Lattice2D::add_Fhydx(int index, double Fhydx_)
+void Lattice2D::add_Fhydx(int index, int pID, double Fhydx_)
 {
   Fhydx[index] += Fhydx_;
-  pData[index].hydrodynamicForce[0] += Fhydx_;
+  pData[index].hydrodynamicForce[3*pID+0] += Fhydx_;
 }
 
-void Lattice2D::add_Fhydy(int index, double Fhydy_)
+void Lattice2D::add_Fhydy(int index, int pID, double Fhydy_)
 {
   Fhydy[index] += Fhydy_;
-  pData[index].hydrodynamicForce[1] += Fhydy_;
+  pData[index].hydrodynamicForce[3*pID+1] += Fhydy_;
 }
 
-void Lattice2D::add_Fhydz(int index, double Fhydz_)
+void Lattice2D::add_Fhydz(int index, int pID, double Fhydz_)
 {
   Fhydz[index] += Fhydz_;
-  pData[index].hydrodynamicForce[2] += Fhydz_;
+  pData[index].hydrodynamicForce[3*pID+2] += Fhydz_;
 }
 
 
@@ -373,26 +373,120 @@ void Lattice2D::add_Fhydz(int index, double Fhydz_)
 //void Lattice2D::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[2], double eps)
 void Lattice2D::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[3], double eps)
 {
-  pData[index].particleID[0] = pID;
-  pData[index].solidFraction[0] = eps;
-  pData[index].particleVelocity[0] = uP[0];
-  pData[index].particleVelocity[1] = uP[1];
-  pData[index].particleVelocity[2] = uP[2];
-  pData[index].hydrodynamicForce[0] = 0.0;
-  pData[index].hydrodynamicForce[1] = 0.0;
-  pData[index].hydrodynamicForce[2] = 0.0;
-  B[index] = pData[index].solidFraction[0];
+  if(pData[index].particleID[0] == pID){
+    pData[index].particleID[0] = pID;
+    pData[index].solidFraction[0] = eps;
+    pData[index].particleVelocity[0] = uP[0];
+    pData[index].particleVelocity[1] = uP[1];
+    pData[index].particleVelocity[2] = uP[2];
+    pData[index].hydrodynamicForce[0] = 0.0;
+    pData[index].hydrodynamicForce[1] = 0.0;
+    pData[index].hydrodynamicForce[2] = 0.0;
+    B[index] = pData[index].solidFraction[0];
+  }
+  if(pData[index].particleID[1] == pID){
+    pData[index].particleID[1] = pID;
+    pData[index].solidFraction[1] = eps;
+    pData[index].particleVelocity[3] = uP[0];
+    pData[index].particleVelocity[4] = uP[1];
+    pData[index].particleVelocity[5] = uP[2];
+    pData[index].hydrodynamicForce[3] = 0.0;
+    pData[index].hydrodynamicForce[4] = 0.0;
+    pData[index].hydrodynamicForce[5] = 0.0;
+    B[index] = pData[index].solidFraction[1];
+  }
+
+  if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[0] == 0){
+    pData[index].particleID[0] = pID;
+    pData[index].solidFraction[0] = eps;
+    pData[index].particleVelocity[0] = uP[0];
+    pData[index].particleVelocity[1] = uP[1];
+    pData[index].particleVelocity[2] = uP[2];
+    pData[index].hydrodynamicForce[0] = 0.0;
+    pData[index].hydrodynamicForce[1] = 0.0;
+    pData[index].hydrodynamicForce[2] = 0.0;
+    B[index] = pData[index].solidFraction[0];
+  }
+  if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[1] == 0){
+    pData[index].particleID[1] = pID;
+    pData[index].solidFraction[1] = eps;
+    pData[index].particleVelocity[3] = uP[0];
+    pData[index].particleVelocity[4] = uP[1];
+    pData[index].particleVelocity[5] = uP[2];
+    pData[index].hydrodynamicForce[3] = 0.0;
+    pData[index].hydrodynamicForce[4] = 0.0;
+    pData[index].hydrodynamicForce[5] = 0.0;
+    B[index] = pData[index].solidFraction[1];
+  }
 }
+
+
+void Lattice2D::setToZero(int index, LAMMPS_NS::tagint pID)
+{
+  if(pData[index].particleID[0] == pID){
+    pData[index].particleID[0] = 0;
+    pData[index].solidFraction[0] = 0.0;
+    pData[index].particleVelocity[0] = 0.0;
+    pData[index].particleVelocity[1] = 0.0;
+    pData[index].particleVelocity[2] = 0.0;
+    pData[index].hydrodynamicForce[0] = 0.0;
+    pData[index].hydrodynamicForce[1] = 0.0;
+    pData[index].hydrodynamicForce[2] = 0.0;
+    B[index] = 0.0;
+  }
+  if(pData[index].particleID[1] == pID){
+    pData[index].particleID[1] = 0;
+    pData[index].solidFraction[1] = 0.0;
+    pData[index].particleVelocity[3] = 0.0;
+    pData[index].particleVelocity[4] = 0.0;
+    pData[index].particleVelocity[5] = 0.0;
+    pData[index].hydrodynamicForce[3] = 0.0;
+    pData[index].hydrodynamicForce[4] = 0.0;
+    pData[index].hydrodynamicForce[5] = 0.0;
+    B[index] = 0.0;
+  }
+}
+
 
 // Todo modify so that it gets the solid fraction of a specific particle ID covering a node
 double Lattice2D::getSolidFractionOnLattice(int index, int pID)
 {
-  return pData[index].solidFraction[0];
+  return pData[index].particleID[pID];
+  /*
+  //if(pData[index].particleID[0] == pID){
+  if(pID == 0){
+    return pData[index].solidFraction[0];
+  }
+  else if(pID == 1){
+    return pData[index].solidFraction[1];
+  }
+  else
+  {
+    return 0;
+  }*/
 }
 
 vector<double> Lattice2D::getSolidVelocityOnLattice(int index, int pID)
 {
-  return pData[index].particleVelocity;
+  vector<double> returnVelVector;
+  returnVelVector.resize(3);
+  if(pData[index].particleID[0] == pID){
+    returnVelVector[0] = pData[index].particleVelocity[0];
+    returnVelVector[1] = pData[index].particleVelocity[1];
+    returnVelVector[2] = pData[index].particleVelocity[2];
+  }
+  else if(pData[index].particleID[1] == pID){
+    returnVelVector[0] = pData[index].particleVelocity[3];
+    returnVelVector[1] = pData[index].particleVelocity[4];
+    returnVelVector[2] = pData[index].particleVelocity[5];
+  }
+  else
+  {
+    returnVelVector[0] = 0.0;
+    returnVelVector[1] = 0.0;
+    returnVelVector[2] = 0.0;
+  }
+  return returnVelVector;
 }
 
 

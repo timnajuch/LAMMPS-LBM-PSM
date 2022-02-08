@@ -40,7 +40,7 @@ class Dynamics2D : public Lattice2D {
 //    void streamBC_zn(int i_, int j_, int iq_, int corner_);
 //    void streamBC_zp(int i_, int j_, int iq_, int corner_);
     void streamBC(int i_, int j_, int k_, int iq_); //3D. above BC function are for 2D
-    virtual void collision() = 0;
+    //virtual void collision() = 0;
 
 };
 
