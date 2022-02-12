@@ -6,8 +6,8 @@ See the README file in the top-level LBM-PSM directory.
 Tim Najuch, 2021
 ------------------------------------------------------*/
 
-#ifndef UNIT_CONVERSION_H
-#define UNIT_CONVERSION_H
+#ifndef LBM_PSM_UNIT_CONVERSION_H
+#define LBM_PSM_UNIT_CONVERSION_H
 
 #include <iostream>
 #include <vector>
@@ -15,7 +15,7 @@ Tim Najuch, 2021
 
 using namespace std;
 
-class Unit_Conversion{
+class UnitConversion{
   private:
     // Input parameters (read in via constructor)
     // Fluid density in physical system
@@ -62,13 +62,13 @@ class Unit_Conversion{
     double forceFactor;
     double torqueFactor;
     // Force converted to LB system
-    //double F_lb[2];
+    //double F_lb[3];
 
     int dimension;
 
   public:
-    Unit_Conversion(double rhof_, double nu_, double lc_, double Re_, int N_, double tau_, int dimension_);
-    ~Unit_Conversion();
+    UnitConversion(double rhof_, double nu_, double lc_, double Re_, int N_, double tau_, int dimension_);
+    ~UnitConversion();
 
     double get_dx();
     double get_Uc();

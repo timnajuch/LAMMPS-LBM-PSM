@@ -6,8 +6,8 @@ See the README file in the top-level LBM-PSM directory.
 Tim Najuch, 2021
 ------------------------------------------------------*/
 
-#ifndef LATTICE_2D_H
-#define LATTICE_2D_H
+#ifndef LBM_PSM_LATTICE_2D_H
+#define LBM_PSM_LATTICE_2D_H
 
 #include <iostream>
 #include <math.h>
@@ -15,11 +15,11 @@ Tim Najuch, 2021
 
 #include "lmptype.h"
 
-#include "particleDataOnLattice.h"
+#include "LBM_PSM_particleDataOnLattice.h"
 
 using namespace std;
 
-class Lattice2D{
+class LBMPSMLattice{
 
   protected:
     int nx, ny, nz;
@@ -75,8 +75,8 @@ class Lattice2D{
     int procCoordinates[3];
 
   public:
-    Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx);
-    ~Lattice2D();
+    LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx);
+    ~LBMPSMLattice();
 
     void initialise_channel_geometry(double wallHeightHalf_, double eps_, double nychannel_, double dx_, double dy_, double dz_);
     void initialise_domain(double dx_, double dy_, double dz_);
@@ -104,7 +104,6 @@ class Lattice2D{
     
     double get_rho(int index);
 
-    //void setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[2], double eps);
     void setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[3], double eps);
     void setToZero(int index, LAMMPS_NS::tagint pID);
     double getSolidFractionOnLattice(int index, int pID);
@@ -124,7 +123,7 @@ class Lattice2D{
  
     vector<int> get_procCoordinates();
    
-    friend class ZouHeBC2D;
+    friend class ZouHeBC;
 };
 
 #endif

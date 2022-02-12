@@ -1,6 +1,6 @@
-#include "PSM_LBM_MPICOMM.h"
+#include "LBM_PSM_MPICOMM.h"
 
-PSM_LBM_MPI::PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6], int procCoordinates_[3], int dimension_)
+LBMPSMMPI::LBMPSMMPI(MPI_Comm world_, int decomposition[3], int procNeigh[6], int procCoordinates_[3], int dimension_)
 {
     world = world_;
     MPI_Comm_size(world, &size);
@@ -32,4 +32,4 @@ PSM_LBM_MPI::PSM_LBM_MPI(MPI_Comm world_, int decomposition[3], int procNeigh[6]
 
 }
 
-PSM_LBM_MPI::~PSM_LBM_MPI() {}
+LBMPSMMPI::~LBMPSMMPI() {}

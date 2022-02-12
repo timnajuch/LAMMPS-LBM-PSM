@@ -12,9 +12,9 @@
 ------------------------------------------------------------------------- */
 
 
-#include "fix_PSM_LBM_BC.h"
+#include "fix_LBM_PSM_BC.h"
 
-fix_PSM_LBM_BC::fix_PSM_LBM_BC(LAMMPS *lmp, int narg, char **arg) :
+fix_LBM_PSM_BC::fix_LBM_PSM_BC(LAMMPS *lmp, int narg, char **arg) :
   Fix(lmp, narg, arg)
 {
   if (narg < 4) error->all(FLERR,"Illegal fix lbm-psm-bc command");
@@ -116,18 +116,18 @@ fix_PSM_LBM_BC::fix_PSM_LBM_BC(LAMMPS *lmp, int narg, char **arg) :
 
   for(int ifix=0; ifix<modify->nfix; ifix++)
     if(strcmp(modify->fix[ifix]->style,"lbm-psm")==0)
-      fixPSMLBM = (fix_PSM_LBM *)modify->fix[ifix];
+      fixLBMPSM = (fix_LBM_PSM *)modify->fix[ifix];
 }
 
 
-fix_PSM_LBM_BC::~fix_PSM_LBM_BC()
+fix_LBM_PSM_BC::~fix_LBM_PSM_BC()
 {
-//  delete zouHe2D;
-//  delete fixPSMLBM;
+//  delete zouHe;
+//  delete fixLBMPSM;
 }
 
 
-int fix_PSM_LBM_BC::setmask()
+int fix_LBM_PSM_BC::setmask()
 {
   int mask = 0;
   mask |= INITIAL_INTEGRATE;
@@ -137,18 +137,18 @@ int fix_PSM_LBM_BC::setmask()
 }
 
 
-void fix_PSM_LBM_BC::init()
+void fix_LBM_PSM_BC::init()
 {
-  zouHe2D = new ZouHeBC2D(fixPSMLBM->dynamics);
+  zouHe = new ZouHeBC(fixLBMPSM->dynamics);
 }
 
 
-void fix_PSM_LBM_BC::pre_force(int)
+void fix_LBM_PSM_BC::pre_force(int)
 {
-  if (update->ntimestep % fixPSMLBM->nevery) return;
+  if (update->ntimestep % fixLBMPSM->nevery) return;
 
-  int envelopeWidth = fixPSMLBM->dynamics->get_envelopeWidth();
-  double u_infty = fixPSMLBM->unitConversion->get_u_lb();
+  int envelopeWidth = fixLBMPSM->dynamics->get_envelopeWidth();
+  double u_infty = fixLBMPSM->unitConversion->get_u_lb();
   double rho_outlet = 1.0;
 
 
@@ -158,12 +158,12 @@ void fix_PSM_LBM_BC::pre_force(int)
   {
     if (lowerVelBC[0] >= 0.0)
     {
-      zouHe2D->setZouHeVelBC2D_xn( envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, u_infty );
+      zouHe->setZouHeVelBC2D_xn( envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, u_infty );
     }
 // Not implemented yet
 //    if (lowerRhoBC[0] >= 0.0)
 //    {
-//      zouHe2D->setZouHeDensBC2D_xn( envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_ny()-1-envelopeWidth,  rho_outlet );
+//      zouHe->setZouHeDensBC2D_xn( envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,  rho_outlet );
 //    }
   }
 
@@ -172,11 +172,11 @@ void fix_PSM_LBM_BC::pre_force(int)
 // Not implemented yet
 //    if (upperVelBC[0] >= 0.0)
 //    {
-//      zouHe2D->setZouHeVelBC2D_xn( envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, u_infty );
+//      zouHe->setZouHeVelBC2D_xn( envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, u_infty );
 //    }
     if (upperRhoBC[0] >= 0.0)
     {
-      zouHe2D->setZouHeDensBC2D_xp( fixPSMLBM->dynamics->get_nx()-1-envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, rho_outlet );
+      zouHe->setZouHeDensBC2D_xp( fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, rho_outlet );
     }
   }
 
@@ -186,12 +186,12 @@ void fix_PSM_LBM_BC::pre_force(int)
   {
     if (lowerVelBC[0] >= 0.0)
     {
-      zouHe2D->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, u_infty );
+      zouHe->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, u_infty );
     }
 // Not implemented yet
 //    if (lowerRhoBC[0] >= 0.0)
 //    {
-//      zouHe2D->setZouHeDensBC2D_yn( );
+//      zouHe->setZouHeDensBC2D_yn( );
 //    }
   }
 
@@ -199,12 +199,12 @@ void fix_PSM_LBM_BC::pre_force(int)
   {
     if (upperVelBC[0] >= 0.0)
     {
-      zouHe2D->setZouHeVelBC2D_yp( fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, u_infty );
+      zouHe->setZouHeVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, u_infty );
     }
 // Not implemented yet
 //    if (upperRhoBC[0] >= 0.0)
 //    {
-//      zouHe2D->setZouHeDensBC2D_xp( fixPSMLBM->dynamics->get_nx()-1-envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, rho_outlet );
+//      zouHe->setZouHeDensBC2D_xp( fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, rho_outlet );
 //    }
   }
 
@@ -220,22 +220,22 @@ void fix_PSM_LBM_BC::pre_force(int)
     if (typeBC == 1)
     {
       if (comm->myloc[1] == 0)
-        //{ zouHe2D->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, -u_infty ); }
-        { zouHe2D->setZouHeVelBC2D_yn( 0+envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_nx()-1-envelopeWidth, -u_infty ); }
+        //{ zouHe->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, -u_infty ); }
+        { zouHe->setZouHeVelBC2D_yn( 0+envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, -u_infty ); }
       if (comm->myloc[1] == comm->procgrid[1]-1)
-        //{ zouHe2D->setZouHeVelBC2D_yp( fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
-        { zouHe2D->setZouHeVelBC2D_yp( fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_nx()-1-envelopeWidth, u_infty ); }
+        //{ zouHe->setZouHeVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
+        { zouHe->setZouHeVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, u_infty ); }
     }
     else if (typeBC == 2)
     {
       if (comm->myloc[0] == 0)
-        { zouHe2D->setZouHeVelBC2D_xn( envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, u_infty ); }
+        { zouHe->setZouHeVelBC2D_xn( envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, u_infty ); }
       if (comm->myloc[0] == comm->procgrid[0]-1)
-        { zouHe2D->setZouHeDensBC2D_xp( fixPSMLBM->dynamics->get_nx()-1-envelopeWidth, envelopeWidth, fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, rho_outlet ); }
+        { zouHe->setZouHeDensBC2D_xp( fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, rho_outlet ); }
       if (comm->myloc[1] == 0)
-        { zouHe2D->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
+        { zouHe->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
       if (comm->myloc[1] == comm->procgrid[1]-1)
-        { zouHe2D->setZouHeVelBC2D_yp( fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
+        { zouHe->setZouHeVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
     }
 
     // External flow
@@ -249,25 +249,25 @@ void fix_PSM_LBM_BC::pre_force(int)
     {
 /*
       if (comm->myloc[1] == 0)
-        { zouHe2D->setZouHeVelBC3D_yn( 0+envelopeWidth, 
-                                       1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, 
-                                       1+envelopeWidth, fixPSMLBM->dynamics->get_nz()-2-envelopeWidth, 
+        { zouHe->setZouHeVelBC3D_yn( 0+envelopeWidth, 
+                                       1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, 
+                                       1+envelopeWidth, fixLBMPSM->dynamics->get_nz()-2-envelopeWidth, 
                                        -u_infty, 0.0, 0.0); }
       if (comm->myloc[1] == comm->procgrid[1]-1)
-        { zouHe2D->setZouHeVelBC3D_yp( fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, 
-                                       1+envelopeWidth, fixPSMLBM->dynamics->get_nx()-2-envelopeWidth, 
-                                       1+envelopeWidth, fixPSMLBM->dynamics->get_nz()-2-envelopeWidth, 
+        { zouHe->setZouHeVelBC3D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 
+                                       1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, 
+                                       1+envelopeWidth, fixLBMPSM->dynamics->get_nz()-2-envelopeWidth, 
                                        u_infty, 0.0, 0.0 ); }
 */
       if (comm->myloc[1] == 0)
-        { zouHe2D->setZouHeVelBC3D_yn( 0+envelopeWidth, 
-                                       envelopeWidth, fixPSMLBM->dynamics->get_nx()-1-envelopeWidth, 
-                                       envelopeWidth, fixPSMLBM->dynamics->get_nz()-1-envelopeWidth, 
+        { zouHe->setZouHeVelBC3D_yn( 0+envelopeWidth, 
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, 
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth, 
                                        -u_infty, 0.0, 0.0); }
       if (comm->myloc[1] == comm->procgrid[1]-1)
-        { zouHe2D->setZouHeVelBC3D_yp( fixPSMLBM->dynamics->get_ny()-1-envelopeWidth, 
-                                       envelopeWidth, fixPSMLBM->dynamics->get_nx()-1-envelopeWidth, 
-                                       envelopeWidth, fixPSMLBM->dynamics->get_nz()-1-envelopeWidth, 
+        { zouHe->setZouHeVelBC3D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, 
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth, 
                                        u_infty, 0.0, 0.0 ); }
     }
   }

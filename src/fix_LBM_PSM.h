@@ -13,12 +13,12 @@
 
 #ifdef FIX_CLASS
 
-FixStyle(lbm-psm,fix_PSM_LBM)
+FixStyle(lbm-psm,fix_LBM_PSM)
 
 #else
 
-#ifndef LMP_FIX_PSM_LBM_FLUID_H
-#define LMP_FIX_PSM_LBM_FLUID_H
+#ifndef LMP_FIX_LBM_PSM_FLUID_H
+#define LMP_FIX_LBM_PSM_FLUID_H
 
 #include <algorithm>
 #include <cmath>
@@ -38,25 +38,24 @@ FixStyle(lbm-psm,fix_PSM_LBM)
 #include "random_mars.h"
 #include "update.h"
 
-#include "BGK_GuoExtForce_dynamics2D.h"
-#include "PSM_LBM_MPICOMM.h"
-#include "fix_PSM_LBM_BC.h"
-#include "ExchangeParticleData.h"
-#include "unit_conversion.h"
+#include "LBM_PSM_BGK_dynamics.h"
+#include "LBM_PSM_MPICOMM.h"
+#include "LBM_PSM_exchangeParticleData.h"
+#include "LBM_PSM_unitConversion.h"
 
 using namespace LAMMPS_NS;
 using namespace FixConst;
 
-class fix_PSM_LBM : public Fix {
+class fix_LBM_PSM : public Fix {
 
   public:
-    fix_PSM_LBM(class LAMMPS *, int, char **);
-    ~fix_PSM_LBM();
+    fix_LBM_PSM(class LAMMPS *, int, char **);
+    ~fix_LBM_PSM();
     int setmask();
     void init();
     void pre_force(int);
 
-    BGK_GuoExtForce_Dynamics2D *dynamics;
+    LBMPSMBGKDynamics *dynamics;
     int get_nx();
     int get_ny();
     vector<double> get_x();
@@ -65,9 +64,9 @@ class fix_PSM_LBM : public Fix {
     vector<double> get_u();
     vector<double> get_B();
 
-    Unit_Conversion *unitConversion;
+    UnitConversion *unitConversion;
     ExchangeParticleData *exchangeParticleData;
-    PSM_LBM_MPI *lbmmpicomm;
+    LBMPSMMPI *lbmmpicomm;
 
     double **get_force_ptr();
     double **get_torque_ptr();

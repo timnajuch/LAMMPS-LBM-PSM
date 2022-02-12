@@ -13,12 +13,12 @@
 
 #ifdef FIX_CLASS
 
-FixStyle(lbm-psm-bc,fix_PSM_LBM_BC)
+FixStyle(lbm-psm-bc,fix_LBM_PSM_BC)
 
 #else
 
-#ifndef LMP_FIX_PSM_LBM_BC_H
-#define LMP_FIX_PSM_LBM_BC_H
+#ifndef LMP_FIX_LBM_PSM_BC_H
+#define LMP_FIX_LBM_PSM_BC_H
 
 #include <algorithm>
 #include <cmath>
@@ -37,25 +37,25 @@ FixStyle(lbm-psm-bc,fix_PSM_LBM_BC)
 #include "random_mars.h"
 #include "update.h"
 
-#include "fix_PSM_LBM.h"
-#include "zou_he_BC_2D.h"
+#include "fix_LBM_PSM.h"
+#include "LBM_PSM_zou_he_BC.h"
 
 using namespace LAMMPS_NS;
 using namespace FixConst;
 using namespace std;
 
-class fix_PSM_LBM_BC : public Fix {
+class fix_LBM_PSM_BC : public Fix {
 
   public:
-    fix_PSM_LBM_BC(class LAMMPS *, int, char **);
-    ~fix_PSM_LBM_BC();
+    fix_LBM_PSM_BC(class LAMMPS *, int, char **);
+    ~fix_LBM_PSM_BC();
     int setmask();
     void init();
     void pre_force(int);
 
-    ZouHeBC2D *zouHe2D;
+    ZouHeBC *zouHe;
 
-    class fix_PSM_LBM *fixPSMLBM;
+    class fix_LBM_PSM *fixLBMPSM;
 
     int typeBC; // 0: periodic set-up, 1: shear set-up, 2: imposed flow in x-direction set-up
 

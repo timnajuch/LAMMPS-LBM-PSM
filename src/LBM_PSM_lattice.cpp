@@ -6,10 +6,10 @@ See the README file in the top-level LBM-PSM directory.
 Tim Najuch, 2021
 ------------------------------------------------------*/
 
-#include "lattice2D.h"
+#include "LBM_PSM_lattice.h"
 
 
-Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx){
+LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx){
   envelopeWidth = 1;
   dimension = dimension_;
 
@@ -19,40 +19,24 @@ Lattice2D::Lattice2D(int nx_, int ny_, int nz_, int q_, int decomposition[3], in
 
   procLength.resize(3);
   procOrigin.resize(3);
-/*
-  procLength[0] = boxLength_[0]/((double)decomposition[0]);
-  procLength[1] = boxLength_[1]/((double)decomposition[1]);
-  procLength[2] = 0.0;
-  //if (domain->dimension == 3)
-  if (dimension == 3)
-    { procLength[2] = boxLength_[2]/((double)decomposition[2]); }
 
-  procOrigin[0] = origin_[0] + procCoordinates[0]*boxLength_[0]/((double)decomposition[0]);
-  procOrigin[1] = origin_[1] + procCoordinates[1]*boxLength_[1]/((double)decomposition[1]);
-  procOrigin[2] = 0.0;
-  //if (domain->dimension == 3)
-  if (dimension == 3)
-    { procOrigin[2] = origin_[2] + procCoordinates[2]*boxLength_[2]/((double)decomposition[2]); }
-*/
   c = 1.0;
   cs = 1.0/sqrt(3.0);
   csPow2 = 1.0/3.0;
   nx = nx_/decomposition[0] + envelopeWidth*2;
   ny = ny_/decomposition[1] + envelopeWidth*2;
   nz = 1;
-  //if (domain->dimension == 3)
   q = 9;
   if (dimension == 3)
   { 
     nz = nz_/decomposition[2] + envelopeWidth*2;
     q = 19;
   }
-//  q = q_;
 
-  procOrigin[0] = origin_[0] + procCoordinates[0]*(nx-2*envelopeWidth)*dx;  //i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
-  procOrigin[1] = origin_[1] + procCoordinates[1]*(ny-2*envelopeWidth)*dx;  //i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
-  procOrigin[2] = origin_[2] + procCoordinates[2]*(nz-2*envelopeWidth)*dx;  //i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
-std::cout << "DEBUG LATTICE: " << procOrigin[0] << " / " << procOrigin[1] << " / " << procOrigin[2] << std::endl;
+  procOrigin[0] = origin_[0] + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
+  procOrigin[1] = origin_[1] + procCoordinates[1]*(ny-2*envelopeWidth)*dx;
+  procOrigin[2] = origin_[2] + procCoordinates[2]*(nz-2*envelopeWidth)*dx;
+
   f = vector<double>(nx*ny*nz*q,0.0);
   f0 = vector<double>(nx*ny*nz*q,0.0);
   fcoll = vector<double>(nx*ny*nz*q,0.0);
@@ -69,9 +53,6 @@ std::cout << "DEBUG LATTICE: " << procOrigin[0] << " / " << procOrigin[1] << " /
   Fhydx = vector<double>(nx*ny*nz,0.0);
   Fhydy = vector<double>(nx*ny*nz,0.0);
   Fhydz = vector<double>(nx*ny*nz,0.0);
-  //if (domain->dimension == 3)
-//  if (dimension == 3)
-//    { Fhydz = vector<double>(nx*ny*nz,0.0); }
 
   pData.resize(nx*ny*nz);
 
@@ -157,10 +138,10 @@ std::cout << "DEBUG LATTICE: " << procOrigin[0] << " / " << procOrigin[1] << " /
 };
 
 
-Lattice2D::~Lattice2D(){};
+LBMPSMLattice::~LBMPSMLattice(){};
 
 
-void Lattice2D::initialise_channel_geometry(double wallHeightHalf_, double eps_, double nychannel_, double dx_, double dy_, double dz_){
+void LBMPSMLattice::initialise_channel_geometry(double wallHeightHalf_, double eps_, double nychannel_, double dx_, double dy_, double dz_){
   dx = dx_;
   dy = dy_;
   dz = dz_;
@@ -193,7 +174,7 @@ void Lattice2D::initialise_channel_geometry(double wallHeightHalf_, double eps_,
 };
 
 
-void Lattice2D::initialise_domain(double dx_, double dy_, double dz_){
+void LBMPSMLattice::initialise_domain(double dx_, double dy_, double dz_){
   dx = dx_;
   dy = dy_;
   dz = dz_;
@@ -202,17 +183,16 @@ void Lattice2D::initialise_domain(double dx_, double dy_, double dz_){
     for(int j = 0; j < ny; ++j){
       for(int k = 0; k < nz; ++k){
 
-        //int ind_2D = i*ny + j;
-        int ind_2D = i*ny*nz + j*nz + k;
+        int index = i*ny*nz + j*nz + k;
 
-        x[ind_2D] = i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
-        y[ind_2D] = j*dy - dy*envelopeWidth + procCoordinates[1]*(ny-2*envelopeWidth)*dy;
-        z[ind_2D] = k*dz - dz*envelopeWidth + procCoordinates[2]*(nz-2*envelopeWidth)*dz;
+        x[index] = i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
+        y[index] = j*dy - dy*envelopeWidth + procCoordinates[1]*(ny-2*envelopeWidth)*dy;
+        z[index] = k*dz - dz*envelopeWidth + procCoordinates[2]*(nz-2*envelopeWidth)*dz;
 
 
-        Fhydx[ind_2D] = 0.0;
-        Fhydy[ind_2D] = 0.0;
-        Fhydz[ind_2D] = 0.0;
+        Fhydx[index] = 0.0;
+        Fhydy[index] = 0.0;
+        Fhydz[index] = 0.0;
       }
     }
   }
@@ -220,149 +200,141 @@ void Lattice2D::initialise_domain(double dx_, double dy_, double dz_){
 };
 
 
-//void Lattice2D::set_f(int i_, int j_, int iq_, double value_){
-void Lattice2D::set_f(int i_, int j_, int k_, int iq_, double value_){
-  //f[i_*ny*q + j_*q + iq_] = value_;
+void LBMPSMLattice::set_f(int i_, int j_, int k_, int iq_, double value_){
   f[i_*ny*nz*q + j_*nz*q + k_*q + iq_] = value_;
 };
 
-void Lattice2D::set_f(int ind_iq_, double value_){
+void LBMPSMLattice::set_f(int ind_iq_, double value_){
   f[ind_iq_] = value_;
 };
 
-void Lattice2D::cp_fcoll_f(){
+void LBMPSMLattice::cp_fcoll_f(){
   f = fcoll;
 };
 
-double Lattice2D::get_f(int i_, int j_, int k_, int iq_){
-  //return f[i_*ny*q + j_*q + iq_];
+double LBMPSMLattice::get_f(int i_, int j_, int k_, int iq_){
   return f[i_*ny*nz*q + j_*nz*q + k_*q + iq_];
 };
 
-double Lattice2D::get_f(int ind_iq_){
+double LBMPSMLattice::get_f(int ind_iq_){
   return f[ind_iq_];
 };
 
- void Lattice2D::set_f0(int i_, int j_, int k_, int iq_, double value_){
-  //f0[i_*ny*q + j_*q + iq_] = value_;
+ void LBMPSMLattice::set_f0(int i_, int j_, int k_, int iq_, double value_){
   f0[i_*ny*nz*q + j_*nz*q + k_*q + iq_] = value_;
 };
 
-//double Lattice2D::get_f0(int i_, int j_, int iq_){
-double Lattice2D::get_f0(int i_, int j_, int k_, int iq_){
+double LBMPSMLattice::get_f0(int i_, int j_, int k_, int iq_){
   return f0[i_*ny*nz*q + j_*nz*q + k_*q + iq_];
 };
 
-double Lattice2D::get_f0(int ind_iq_){
+double LBMPSMLattice::get_f0(int ind_iq_){
   return f0[ind_iq_];
 };
 
-// void Lattice2D::set_fcoll(int i_, int j_, int iq_, double value_){
-void Lattice2D::set_fcoll(int i_, int j_, int k_, int iq_, double value_){
-  //fcoll[i_*ny*q + j_*q + iq_] = value_;
+void LBMPSMLattice::set_fcoll(int i_, int j_, int k_, int iq_, double value_){
   fcoll[i_*ny*nz*q + j_*nz*q + k_*q + iq_] = value_;
 };
 
-double Lattice2D::get_fcoll(int i_, int j_, int k_, int iq_){
-  //return fcoll[i_*ny*q + j_*q + iq_];
+double LBMPSMLattice::get_fcoll(int i_, int j_, int k_, int iq_){
   return fcoll[i_*ny*nz*q + j_*nz*q + k_*q + iq_];
 };
 
-double Lattice2D::get_fcoll(int ind_iq_){
+double LBMPSMLattice::get_fcoll(int ind_iq_){
   return fcoll[ind_iq_];
 };
 
- vector<double> Lattice2D::get_B(){
+ vector<double> LBMPSMLattice::get_B(){
   return B;
 };
 
- vector<double> Lattice2D::get_rho(){
+ vector<double> LBMPSMLattice::get_rho(){
   return rho;
 };
 
- vector<double> Lattice2D::get_x(){
+ vector<double> LBMPSMLattice::get_x(){
   return x;
 };
 
- vector<double> Lattice2D::get_y(){
+ vector<double> LBMPSMLattice::get_y(){
   return y;
 };
 
- vector<double> Lattice2D::get_z(){
+ vector<double> LBMPSMLattice::get_z(){
   return z;
 };
 
- vector<double> Lattice2D::get_u(){
+ vector<double> LBMPSMLattice::get_u(){
   return u;
 };
 
-int Lattice2D::get_nx(){
+int LBMPSMLattice::get_nx(){
   return nx;
 };
 
-int Lattice2D::get_ny(){
+int LBMPSMLattice::get_ny(){
   return ny;
 };
 
-int Lattice2D::get_nz(){
+int LBMPSMLattice::get_nz(){
   return nz;
 };
 
-void Lattice2D::set_B(int index, double B_){
+void LBMPSMLattice::set_B(int index, double B_){
   B[index] = B_;
 };
 
-double Lattice2D::get_B(int index){
+double LBMPSMLattice::get_B(int index){
   return B[index];
 };
 
-double Lattice2D::get_rho(int index){
+double LBMPSMLattice::get_rho(int index){
   return rho[index];
 };
 
-double Lattice2D::get_Fhydx(int index){
+double LBMPSMLattice::get_Fhydx(int index){
   return Fhydx[index];
 };
 
-double Lattice2D::get_Fhydy(int index){
+double LBMPSMLattice::get_Fhydy(int index){
   return Fhydy[index];
 };
 
-double Lattice2D::get_Fhydz(int index){
+double LBMPSMLattice::get_Fhydz(int index){
   return Fhydz[index];
 };
 
-void Lattice2D::set_Fhydx(int index, int pID, double Fhydx_)
+void LBMPSMLattice::set_Fhydx(int index, int pID, double Fhydx_)
 {
   Fhydx[index] = Fhydx_;
   pData[index].hydrodynamicForce[3*pID+0] = Fhydx_;
 }
 
-void Lattice2D::set_Fhydy(int index, int pID, double Fhydy_)
+void LBMPSMLattice::set_Fhydy(int index, int pID, double Fhydy_)
 {
   Fhydy[index] = Fhydy_;
   pData[index].hydrodynamicForce[3*pID+1] = Fhydy_;
 }
 
-void Lattice2D::set_Fhydz(int index, int pID, double Fhydz_)
+void LBMPSMLattice::set_Fhydz(int index, int pID, double Fhydz_)
 {
   Fhydz[index] = Fhydz_;
   pData[index].hydrodynamicForce[3*pID+2] = Fhydz_;
 }
 
-void Lattice2D::add_Fhydx(int index, int pID, double Fhydx_)
+void LBMPSMLattice::add_Fhydx(int index, int pID, double Fhydx_)
 {
   Fhydx[index] += Fhydx_;
   pData[index].hydrodynamicForce[3*pID+0] += Fhydx_;
 }
 
-void Lattice2D::add_Fhydy(int index, int pID, double Fhydy_)
+void LBMPSMLattice::add_Fhydy(int index, int pID, double Fhydy_)
 {
   Fhydy[index] += Fhydy_;
   pData[index].hydrodynamicForce[3*pID+1] += Fhydy_;
 }
 
-void Lattice2D::add_Fhydz(int index, int pID, double Fhydz_)
+void LBMPSMLattice::add_Fhydz(int index, int pID, double Fhydz_)
 {
   Fhydz[index] += Fhydz_;
   pData[index].hydrodynamicForce[3*pID+2] += Fhydz_;
@@ -370,8 +342,7 @@ void Lattice2D::add_Fhydz(int index, int pID, double Fhydz_)
 
 
 // Extend to two or morge particles
-//void Lattice2D::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[2], double eps)
-void Lattice2D::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[3], double eps)
+void LBMPSMLattice::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[3], double eps)
 {
   if(pData[index].particleID[0] == pID){
     pData[index].particleID[0] = pID;
@@ -382,7 +353,6 @@ void Lattice2D::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP
     pData[index].hydrodynamicForce[0] = 0.0;
     pData[index].hydrodynamicForce[1] = 0.0;
     pData[index].hydrodynamicForce[2] = 0.0;
-    B[index] = pData[index].solidFraction[0];
   }
   if(pData[index].particleID[1] == pID){
     pData[index].particleID[1] = pID;
@@ -393,7 +363,6 @@ void Lattice2D::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP
     pData[index].hydrodynamicForce[3] = 0.0;
     pData[index].hydrodynamicForce[4] = 0.0;
     pData[index].hydrodynamicForce[5] = 0.0;
-    B[index] = pData[index].solidFraction[1];
   }
 
   if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[0] == 0){
@@ -405,7 +374,6 @@ void Lattice2D::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP
     pData[index].hydrodynamicForce[0] = 0.0;
     pData[index].hydrodynamicForce[1] = 0.0;
     pData[index].hydrodynamicForce[2] = 0.0;
-    B[index] = pData[index].solidFraction[0];
   }
   if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[1] == 0){
     pData[index].particleID[1] = pID;
@@ -416,12 +384,11 @@ void Lattice2D::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP
     pData[index].hydrodynamicForce[3] = 0.0;
     pData[index].hydrodynamicForce[4] = 0.0;
     pData[index].hydrodynamicForce[5] = 0.0;
-    B[index] = pData[index].solidFraction[1];
   }
 }
 
 
-void Lattice2D::setToZero(int index, LAMMPS_NS::tagint pID)
+void LBMPSMLattice::setToZero(int index, LAMMPS_NS::tagint pID)
 {
   if(pData[index].particleID[0] == pID){
     pData[index].particleID[0] = 0;
@@ -432,7 +399,6 @@ void Lattice2D::setToZero(int index, LAMMPS_NS::tagint pID)
     pData[index].hydrodynamicForce[0] = 0.0;
     pData[index].hydrodynamicForce[1] = 0.0;
     pData[index].hydrodynamicForce[2] = 0.0;
-    B[index] = 0.0;
   }
   if(pData[index].particleID[1] == pID){
     pData[index].particleID[1] = 0;
@@ -443,30 +409,16 @@ void Lattice2D::setToZero(int index, LAMMPS_NS::tagint pID)
     pData[index].hydrodynamicForce[3] = 0.0;
     pData[index].hydrodynamicForce[4] = 0.0;
     pData[index].hydrodynamicForce[5] = 0.0;
-    B[index] = 0.0;
   }
 }
 
 
-// Todo modify so that it gets the solid fraction of a specific particle ID covering a node
-double Lattice2D::getSolidFractionOnLattice(int index, int pID)
+double LBMPSMLattice::getSolidFractionOnLattice(int index, int pID)
 {
   return pData[index].particleID[pID];
-  /*
-  //if(pData[index].particleID[0] == pID){
-  if(pID == 0){
-    return pData[index].solidFraction[0];
-  }
-  else if(pID == 1){
-    return pData[index].solidFraction[1];
-  }
-  else
-  {
-    return 0;
-  }*/
 }
 
-vector<double> Lattice2D::getSolidVelocityOnLattice(int index, int pID)
+vector<double> LBMPSMLattice::getSolidVelocityOnLattice(int index, int pID)
 {
   vector<double> returnVelVector;
   returnVelVector.resize(3);
@@ -490,13 +442,13 @@ vector<double> Lattice2D::getSolidVelocityOnLattice(int index, int pID)
 }
 
 
-ParticleDataOnLattice Lattice2D::getParticleDataOnLatticeNode(int index)
+ParticleDataOnLattice LBMPSMLattice::getParticleDataOnLatticeNode(int index)
 {
   return pData[index];
 }
 
 
-vector<int> Lattice2D::get_procCoordinates()
+vector<int> LBMPSMLattice::get_procCoordinates()
 {
   vector<int> returnProcCoordinates {procCoordinates[0], procCoordinates[1], procCoordinates[2] };
   return returnProcCoordinates;

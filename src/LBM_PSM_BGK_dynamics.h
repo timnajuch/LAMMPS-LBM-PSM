@@ -6,14 +6,14 @@ See the README file in the top-level LBM-PSM directory.
 Tim Najuch, 2021
 ------------------------------------------------------*/
 
-#ifndef BGK_GUOEXTFORCE_DYNAMICS_2D
-#define BGK_GUOEXTFORCE_DYNAMICS_2D
+#ifndef LBMPSM_BGK_DYNAMICS
+#define LBMPSM_BGK_DYNAMICS
 
-#include "lattice2D.h"
-#include "dynamics2D.h"
+#include "LBM_PSM_lattice.h"
+#include "LBM_PSM_dynamics.h"
 #include "domain.h"
 
-class BGK_GuoExtForce_Dynamics2D : public Dynamics2D {
+class LBMPSMBGKDynamics : public LBMPSMDynamics {
   
   private:
     double tau;
@@ -21,11 +21,10 @@ class BGK_GuoExtForce_Dynamics2D : public Dynamics2D {
     int dimension;
 
   public:
-    BGK_GuoExtForce_Dynamics2D(double tau_, int nx_, int ny_, int nz_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx_);
-    ~BGK_GuoExtForce_Dynamics2D();
+    LBMPSMBGKDynamics(double tau_, int nx_, int ny_, int nz_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx_);
+    ~LBMPSMBGKDynamics();
 
     void compute_macro_values();
- //   void collision();
 
     void initialise_dynamics(double rho_, double ux_, double uy_, double uz_);
 

@@ -12,9 +12,9 @@
 ------------------------------------------------------------------------- */
 
 
-#include "fix_PSM_LBM.h"
+#include "fix_LBM_PSM.h"
 
-fix_PSM_LBM::fix_PSM_LBM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
+fix_LBM_PSM::fix_LBM_PSM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg)
 {
   if (narg < 15) error->all(FLERR,"Illegal fix lbm-psm command");
 
@@ -69,13 +69,13 @@ fix_PSM_LBM::fix_PSM_LBM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
 }
 
 
-fix_PSM_LBM::~fix_PSM_LBM()
+fix_LBM_PSM::~fix_LBM_PSM()
 {
   delete dynamics;
 }
 
 
-int fix_PSM_LBM::setmask()
+int fix_LBM_PSM::setmask()
 {
   int mask = 0;
   mask |= INITIAL_INTEGRATE;
@@ -85,7 +85,7 @@ int fix_PSM_LBM::setmask()
 }
 
 
-void fix_PSM_LBM::init()
+void fix_LBM_PSM::init()
 {
   int decomposition[3] = {comm->procgrid[0], comm->procgrid[1], comm->procgrid[2]};
   int procCoordinates[3] = {comm->myloc[0], comm->myloc[1], comm->myloc[2]};
@@ -96,22 +96,14 @@ void fix_PSM_LBM::init()
   procNeigh[3] = comm->procneigh[1][1];
   procNeigh[4] = comm->procneigh[2][0];
   procNeigh[5] = comm->procneigh[2][1]; 
-  lbmmpicomm = new PSM_LBM_MPI(world, decomposition, procNeigh, procCoordinates, domain->dimension);
+  lbmmpicomm = new LBMPSMMPI(world, decomposition, procNeigh, procCoordinates, domain->dimension);
 
-  unitConversion = new Unit_Conversion(rho, nu, lc, Re, Nlc, tau, domain->dimension);
+  unitConversion = new UnitConversion(rho, nu, lc, Re, Nlc, tau, domain->dimension);
 
   update->dt = unitConversion->get_phys_time(1.0)/((double)nevery);
 
   vector<double> F_lbm(3,0.0); // external forcing such as gravity. not incorporated yet.
-/*
-std::cout << "INIT debug: " << fmod(domain->xprd, unitConversion->get_dx()) << " / " << domain->xprd << " / " << unitConversion->get_dx() << " / " << domain->xprd/unitConversion->get_dx() << std::endl;  
-  if ( fmod(domain->xprd, unitConversion->get_dx()) != 0
-    || fmod(domain->xprd, unitConversion->get_dx()) != 0
-    || fmod(domain->xprd, unitConversion->get_dx()) != 0 ){
-      error->all(FLERR, "Illegal cell width. Division of domain length and cell width has to give an integer.");
-  }
-*/
-double SMALL = 1e-15;
+  double SMALL = 1e-15;
   if(  pow(((double)((int)(domain->xprd/unitConversion->get_dx()+0.5)) - domain->xprd/unitConversion->get_dx()), 2.0) > SMALL
     || pow(((double)((int)(domain->yprd/unitConversion->get_dx()+0.5)) - domain->yprd/unitConversion->get_dx()), 2.0) > SMALL
     || pow(((double)((int)(domain->zprd/unitConversion->get_dx()+0.5)) - domain->zprd/unitConversion->get_dx()), 2.0) > SMALL ){
@@ -134,7 +126,7 @@ double SMALL = 1e-15;
   vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
   vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
 
-  dynamics = new BGK_GuoExtForce_Dynamics2D(tau, nx, ny, nz, 9, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension, unitConversion->get_dx());
+  dynamics = new LBMPSMBGKDynamics(tau, nx, ny, nz, 9, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension, unitConversion->get_dx());
 
   dynamics->initialise_domain(unitConversion->get_dx(), unitConversion->get_dx(), unitConversion->get_dx());
 
@@ -189,7 +181,7 @@ double SMALL = 1e-15;
 }
 
 
-void fix_PSM_LBM::pre_force(int vflag)
+void fix_LBM_PSM::pre_force(int vflag)
 {
   if (update->ntimestep % nevery) return;
   int nPart = atom->nlocal + atom->nghost;
@@ -219,7 +211,6 @@ void fix_PSM_LBM::pre_force(int vflag)
   int stressletFixID = atom->find_custom((char *)"stresslet", flagS, ncolumnsS);
 
   v_init(vflag);
-
 
   for(int i=0;i<nPart;i++){
 
@@ -267,94 +258,68 @@ void fix_PSM_LBM::pre_force(int vflag)
       t[i][2] = th[2];
     }
 
-    // Torque added because it is the antisymmetric part 
-    // of the first moment of the stress over the surface
-    // Stress defined as negative, hence the flipped signs
-    // TODO: Check what middle indice of darray stands for. [][1][] gives seg fault
-//    if (i < atom->nlocal){
       double stresslet_arr[6] = {stresslet[0], stresslet[1], stresslet[2], stresslet[3], stresslet[4], stresslet[5]};
       v_tally(i, stresslet_arr);
-//    }
 
-/*
-    if (i < atom->nlocal){
-      virial[0] += stresslet[0];
-      virial[1] += stresslet[1];
-      virial[2] += stresslet[2];
-      virial[3] += stresslet[3];// - 0.5*th[2];
-      //virial[4] += stresslet[4];// + 0.5*th[1];
-      virial[4] += th[2];
-      virial[5] += stresslet[5];// - 0.5*th[0];
-    }else{
-      virial[0] = stresslet[0];
-      virial[1] = stresslet[1];
-      virial[2] = stresslet[2];
-      virial[3] = stresslet[3];// - 0.5*th[2];
-      //virial[4] = stresslet[4];// + 0.5*th[1];
-      virial[4] = th[2];
-      virial[5] = stresslet[5];// - 0.5*th[0];
-    }
-*/
-//std::cout << "virial[3]: " << virial[0] << " / " << virial[1] << " / " << virial[2] << " / " << virial[3] << " / " << virial[4] << " / " << virial[5] << " / " << stresslet[3] << " / " << th[2] << std::endl;
   }
   comm->reverse_comm();// todo check if sufficient or if i need to define some virtual functions etc
 
 }
 
 
-int fix_PSM_LBM::get_nx()
+int fix_LBM_PSM::get_nx()
 {
   return dynamics->get_nx();
 }
 
 
-int fix_PSM_LBM::get_ny()
+int fix_LBM_PSM::get_ny()
 {
   return dynamics->get_ny();
 }
 
 
-vector<double> fix_PSM_LBM::get_x()
+vector<double> fix_LBM_PSM::get_x()
 {
   return dynamics->get_x();
 }
 
 
-vector<double> fix_PSM_LBM::get_y()
+vector<double> fix_LBM_PSM::get_y()
 {
   return dynamics->get_y();
 }
 
 
-vector<double> fix_PSM_LBM::get_rho()
+vector<double> fix_LBM_PSM::get_rho()
 {
   return dynamics->get_rho();
 }
 
 
-vector<double> fix_PSM_LBM::get_u()
+vector<double> fix_LBM_PSM::get_u()
 {
   return dynamics->get_u();
 }
 
 
-vector<double> fix_PSM_LBM::get_B()
+vector<double> fix_LBM_PSM::get_B()
 {
   return dynamics->get_B();
 }
 
 
-double **fix_PSM_LBM::get_force_ptr()
+double **fix_LBM_PSM::get_force_ptr()
 {
   return fix_hydroForce_->array_atom;
 }
 
-double **fix_PSM_LBM::get_torque_ptr()
+double **fix_LBM_PSM::get_torque_ptr()
 {
   return fix_hydroTorque_->array_atom;
 }
 
-double **fix_PSM_LBM::get_stresslet_ptr()
+double **fix_LBM_PSM::get_stresslet_ptr()
 {
   return fix_stresslet_->array_atom;
 }

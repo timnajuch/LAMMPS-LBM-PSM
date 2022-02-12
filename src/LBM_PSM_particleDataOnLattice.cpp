@@ -6,7 +6,7 @@ See the README file in the top-level LBM-PSM directory.
 Tim Najuch, 2021
 ------------------------------------------------------*/
 
-#include "particleDataOnLattice.h"
+#include "LBM_PSM_particleDataOnLattice.h"
 
 
 ParticleDataOnLattice::ParticleDataOnLattice()

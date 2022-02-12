@@ -6,8 +6,8 @@ See the README file in the top-level LBM-PSM directory.
 Tim Najuch, 2021
 ------------------------------------------------------*/
 
-#ifndef PARTDATALATTICE_H
-#define PARTDATALATTICE_H
+#ifndef LBMPSM_PARTDATALATTICE_H
+#define LBMPSM_PARTDATALATTICE_H
 
 #include <iostream>
 #include <vector>

@@ -6,9 +6,9 @@ See the README file in the top-level LBM-PSM directory.
 Tim Najuch, 2021
 ------------------------------------------------------*/
 
-#include "unit_conversion.h"
+#include "LBM_PSM_unitConversion.h"
 
-Unit_Conversion::Unit_Conversion(double rhof_, double nu_, double lc_, double Re_, int N_, double tau_, int dimension_) : rhof(rhof_), nu(nu_), lc(lc_), Re(Re_), N(N_), tau(tau_), dimension(dimension_) {
+UnitConversion::UnitConversion(double rhof_, double nu_, double lc_, double Re_, int N_, double tau_, int dimension_) : rhof(rhof_), nu(nu_), lc(lc_), Re(Re_), N(N_), tau(tau_), dimension(dimension_) {
    
   Uc_d = 1.0;
   Lc_d = 1.0;
@@ -31,7 +31,6 @@ Unit_Conversion::Unit_Conversion(double rhof_, double nu_, double lc_, double Re
   // forceFacdoubleor is doubleo scale dp/dx (nodouble doublehe force). units of dp/dx = kg/(m^2s^2) (force F = kg/m/s^2). 
   // Hence, we need additionally "/ (pow(lc,2)*pow(dx_d,2))" to scale correctly
   // TODO check units for 2D and 3D
-  //if(domain->dimension == 2){
   if(dimension == 2){
     forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
     torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
@@ -41,49 +40,49 @@ Unit_Conversion::Unit_Conversion(double rhof_, double nu_, double lc_, double Re
   }
 };
 
-Unit_Conversion::~Unit_Conversion(){};
+UnitConversion::~UnitConversion(){};
 
 
-double Unit_Conversion::get_dx(){
+double UnitConversion::get_dx(){
   return dx;
 };
 
 
-double Unit_Conversion::get_Uc(){
+double UnitConversion::get_Uc(){
   return Uc;
 };
 
-double Unit_Conversion::get_radius_lb(double rp){
+double UnitConversion::get_radius_lb(double rp){
   return rp/dx;
 }
 
-double Unit_Conversion::get_u_lb(){
+double UnitConversion::get_u_lb(){
   return u_lb;
 };
 
-double Unit_Conversion::get_vel_lb(double vel_phys){
+double UnitConversion::get_vel_lb(double vel_phys){
   return vel_phys / Uc * u_lb;
 };
 
-double Unit_Conversion::get_freq_lb(double freq_phys){
+double UnitConversion::get_freq_lb(double freq_phys){
   return freq_phys * tc * dt_d;
 };
 
-double Unit_Conversion::get_pos_lb(double pos_phys){
+double UnitConversion::get_pos_lb(double pos_phys){
   //return pos_phys*N/lc;
   return pos_phys/dx;
 }
 
 
-double Unit_Conversion::get_forceFactor(){
+double UnitConversion::get_forceFactor(){
   return forceFactor;
 };
 
-double Unit_Conversion::get_torqueFactor(){
+double UnitConversion::get_torqueFactor(){
   return torqueFactor;
 };
 
-std::vector<double> Unit_Conversion::get_force_lb_2D(std::vector<double> F_phys_2D_){
+std::vector<double> UnitConversion::get_force_lb_2D(std::vector<double> F_phys_2D_){
   std::vector<double> F_lb(3,0.0);
   F_lb[0] = F_phys_2D_[0]/forceFactor;
   F_lb[1] = F_phys_2D_[1]/forceFactor;
@@ -92,10 +91,10 @@ std::vector<double> Unit_Conversion::get_force_lb_2D(std::vector<double> F_phys_
   return F_lb;
 };
 
-double Unit_Conversion::get_phys_time(double time_lb){
+double UnitConversion::get_phys_time(double time_lb){
   return time_lb * dt_d * tc;
 }
     
-double Unit_Conversion::get_dt_d(){
+double UnitConversion::get_dt_d(){
   return dt_d;
 }

@@ -6,23 +6,23 @@ See the README file in the top-level LBM-PSM directory.
 Tim Najuch, 2021
 ------------------------------------------------------*/
 
-#ifndef ZOU_HE_BC_2D_H
-#define ZOU_HE_BC_2D_H
+#ifndef ZOU_HE_BC_H
+#define ZOU_HE_BC_H
 
 #include <iostream>
 #include <vector>
 #include <math.h>
-#include "lattice2D.h"
+#include "LBM_PSM_lattice.h"
 
 using namespace std;
 
-class ZouHeBC2D {
+class ZouHeBC {
   private:
-    Lattice2D *lattice2D;
+    LBMPSMLattice *lattice;
     
   public:
-    ZouHeBC2D(Lattice2D *lattice2D_);
-    ~ZouHeBC2D();
+    ZouHeBC(LBMPSMLattice *lattice_);
+    ~ZouHeBC();
     
     void setZouHeVelBC2D_xn(int ix_, int iy0_, int iy1_, double ux_bc_);
     void setZouHeDensBC2D_xp(int ix_, int iy0_, int iy1_, double rho_bc_);
