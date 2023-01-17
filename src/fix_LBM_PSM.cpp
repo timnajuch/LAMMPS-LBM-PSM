@@ -115,13 +115,13 @@ void fix_LBM_PSM::init()
     || pow(((double)((int)(domain->zprd/unitConversion->get_dx()+0.5)) - domain->zprd/unitConversion->get_dx()), 2.0) > SMALL ){
       error->all(FLERR, "Illegal cell width. Division of domain length and cell width has to give an integer.");
   }
-
+/*
   if ( ((int)(domain->xprd/unitConversion->get_dx()+1.5) % decomposition[0] != 0)
     || ((int)(domain->yprd/unitConversion->get_dx()+1.5) % decomposition[1] != 0)
     || ((int)(domain->zprd/unitConversion->get_dx()+1.5) % decomposition[2] != 0) ){
       error->all(FLERR, "Illegal combination of decomposition and lattice cell number. Division of total lattice cell number by domain decomposition has to be even (i.e. modulo == 0) in each direction.");
   }
-  
+*/  
 
   int nx = domain->xprd/unitConversion->get_dx()+1.5;
   int ny = domain->yprd/unitConversion->get_dx()+1.5;

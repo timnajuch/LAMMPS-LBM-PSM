@@ -20,6 +20,7 @@ Tim Najuch, 2022
 #include "lmptype.h"
 
 #include "LBM_PSM_particleDataOnLattice.h"
+#include "LBM_PSM_MPICOMM.h"
 
 using namespace std;
 
@@ -28,6 +29,13 @@ class LBMPSMLattice{
   protected:
     int nx, ny, nz;
     int q;
+
+    vector<int> nxLocal;
+    vector<int> nyLocal;
+    vector<int> nzLocal;
+    vector<int> nxLocalGrid;
+    vector<int> nyLocalGrid;
+    vector<int> nzLocalGrid;
 
     int envelopeWidth;
     int dimension;
@@ -107,6 +115,10 @@ class LBMPSMLattice{
     int get_ny();
     int get_nz();
     int get_envelopeWidth(){ return envelopeWidth; }
+
+    int get_nxLocal(int iProcIndex);
+    int get_nyLocal(int jProcIndex);
+    int get_nzLocal(int kProcIndex);
 
     vector<double>& getVector_f(){ return f; }
 
