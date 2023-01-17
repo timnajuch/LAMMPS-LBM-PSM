@@ -42,6 +42,7 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decompositio
     }
   }
   //nxLocal[procCoordinates[0]] = nx;
+
   //ny = ny_/decomposition[1] + envelopeWidth*2;
   if ( ny_ % decomposition[1] == 0){
     ny = ny_/decomposition[1] + envelopeWidth*2;

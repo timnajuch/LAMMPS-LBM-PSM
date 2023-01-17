@@ -123,14 +123,25 @@ void fix_LBM_PSM::init()
   }
 */  
 
+  
   int nx = domain->xprd/unitConversion->get_dx()+1.5;
+  if (domain->xperiodic == true)
+    { nx -= 1; }
   int ny = domain->yprd/unitConversion->get_dx()+1.5;
+  if (domain->yperiodic == true)
+    { ny -= 1; }
   int nz = 0;
   if (domain->dimension == 3)
-    { nz = domain->zprd/unitConversion->get_dx()+1.5; }
+  {
+    nz = domain->zprd/unitConversion->get_dx()+1.5;
+    if (domain->zperiodic == true)
+      { nz -= 1; }
+  }
 
   vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
   vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
+  if (domain->dimension == 2)
+    { origin[2] = 0.0; }
 
   dynamics = new LBMPSMBGKDynamics(tau, nx, ny, nz, 9, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension, unitConversion->get_dx());
 
@@ -168,6 +179,8 @@ void fix_LBM_PSM::post_force(int vflag)
       }
     }
   }else{
+    comm->forward_comm();
+
     int nPart = atom->nlocal + atom->nghost;
     vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
     vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
@@ -241,6 +254,9 @@ void fix_LBM_PSM::post_force(int vflag)
 
       double stresslet_arr[6] = {stresslet[0], stresslet[1], stresslet[2], stresslet[3], stresslet[4], stresslet[5]};
       v_tally(i, stresslet_arr);
+
+      //comm->reverse_comm_fix(this);
+      comm->reverse_comm();
     }
   }
 }
