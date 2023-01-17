@@ -53,8 +53,6 @@ class WriteVTK : public Fix{
 
   void write_vtk(string name_, vector<double> &x_, double x0_, vector<double> &y_, double y0_, vector<double> &z_, double z0_, vector<double> &B_, double B0_, vector<double> &rho_, double rho0_, vector<double> &u_, double u0_);
 
-  void write_profile(string name_, int ix_, vector<double> &y_, double y0_, vector<double> &B_, double B0_, vector<double> &rho_, double rho0_, vector<double> &u_, double u0_);
-
   void scale_vector(vector<double> &vec_, double scaling_);
 
   class fix_LBM_PSM *fixLBMPSM;

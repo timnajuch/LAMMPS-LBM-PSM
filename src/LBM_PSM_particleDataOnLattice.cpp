@@ -37,6 +37,6 @@ ParticleDataOnLattice::ParticleDataOnLattice()
   hydrodynamicForce[3] = 0.0;
   hydrodynamicForce[4] = 0.0;
   hydrodynamicForce[5] = 0.0;
-};
+}
 
-ParticleDataOnLattice::~ParticleDataOnLattice() {};
+ParticleDataOnLattice::~ParticleDataOnLattice() {}

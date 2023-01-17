@@ -12,9 +12,9 @@ Tim Najuch, 2022
 
 #include "LBM_PSM_zou_he_BC.h"
 
-ZouHeBC::ZouHeBC (LBMPSMLattice *lattice_) : lattice(lattice_) {};
+ZouHeBC::ZouHeBC (LBMPSMLattice *lattice_) : lattice(lattice_) {}
 
-ZouHeBC::~ZouHeBC () {};
+ZouHeBC::~ZouHeBC () {}
 
 
 void ZouHeBC::setZouHeVelBC2D_xn (int ix_, int iy0_, int iy1_, double ux_bc_) {
@@ -32,7 +32,7 @@ void ZouHeBC::setZouHeVelBC2D_xn (int ix_, int iy0_, int iy1_, double ux_bc_) {
 
     lattice->set_f(ind_iq + 1, lattice->get_f(ind_iq + 3) + 2.0/3.0*rho_tmp*ux_bc_ );
   }
-};
+}
 
 
 void ZouHeBC::setZouHeDensBC2D_xp (int ix_, int iy0_, int iy1_, double rho_bc_) {
@@ -50,7 +50,7 @@ void ZouHeBC::setZouHeDensBC2D_xp (int ix_, int iy0_, int iy1_, double rho_bc_) 
                           
     lattice->set_f(ind_iq + 3, lattice->get_f(ind_iq + 1) - 2.0/3.0*rho_bc_*ux_tmp );
   }
-};
+}
 
 
 void ZouHeBC::setZouHeVelBC2D_yn (int iy_, int ix0_, int ix1_, double ux_bc_) {
@@ -68,7 +68,7 @@ void ZouHeBC::setZouHeVelBC2D_yn (int iy_, int ix0_, int ix1_, double ux_bc_) {
 
     lattice->set_f(ind_iq + 2, lattice->get_f(ind_iq + 4) );
   }
-};
+}
 
 
 void ZouHeBC::setZouHeVelBC2D_yp (int iy_, int ix0_, int ix1_, double ux_bc_) {
@@ -86,7 +86,7 @@ void ZouHeBC::setZouHeVelBC2D_yp (int iy_, int ix0_, int ix1_, double ux_bc_) {
 
     lattice->set_f(ind_iq + 4, lattice->get_f(ind_iq + 2) );
   }
-};
+}
 
 
 
@@ -123,7 +123,7 @@ void ZouHeBC::setZouHeVelBC3D_xn (int ix_, int iy0_, int iy1_, int iz0_, int iz1
 
     }
   }
-};
+}
 
 
 
@@ -160,7 +160,7 @@ void ZouHeBC::setZouHeVelBC3D_xp (int ix_, int iy0_, int iy1_, int iz0_, int iz1
 
     }
   }
-};
+}
 
 
 
@@ -197,7 +197,7 @@ void ZouHeBC::setZouHeDensBC3D_xp (int ix_, int iy0_, int iy1_, int iz0_, int iz
 
     }
   }
-};
+}
 
 
 
@@ -234,7 +234,7 @@ void ZouHeBC::setZouHeVelBC3D_yn (int iy_, int ix0_, int ix1_, int iz0_, int iz1
 
     }
   }
-};
+}
 
 
 void ZouHeBC::setZouHeVelBC3D_yp (int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_) {
@@ -270,7 +270,7 @@ void ZouHeBC::setZouHeVelBC3D_yp (int iy_, int ix0_, int ix1_, int iz0_, int iz1
 
     }
   }
-};
+}
 
 
 void ZouHeBC::setZouHeVelBC3D_zn (int iz_, int ix0_, int ix1_, int iy0_, int iy1_, double ux_bc_, double uy_bc_, double uz_bc_) {
@@ -306,7 +306,7 @@ void ZouHeBC::setZouHeVelBC3D_zn (int iz_, int ix0_, int ix1_, int iy0_, int iy1
 
     }
   }
-};
+}
 
 
 void ZouHeBC::setZouHeVelBC3D_zp (int iz_, int ix0_, int ix1_, int iy0_, int iy1_, double ux_bc_, double uy_bc_, double uz_bc_) {
@@ -342,4 +342,4 @@ void ZouHeBC::setZouHeVelBC3D_zp (int iz_, int ix0_, int ix1_, int iy0_, int iy1
 
     }
   }
-};
+}

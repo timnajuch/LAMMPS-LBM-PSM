@@ -27,7 +27,7 @@ class ZouHeBC {
   public:
     ZouHeBC(LBMPSMLattice *lattice_);
     ~ZouHeBC();
-    
+
     void setZouHeVelBC2D_xn(int ix_, int iy0_, int iy1_, double ux_bc_);
     void setZouHeDensBC2D_xp(int ix_, int iy0_, int iy1_, double rho_bc_);
     void setZouHeVelBC2D_yn(int iy_, int ix0_, int ix1_, double ux_bc_);

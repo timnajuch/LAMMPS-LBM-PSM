@@ -52,7 +52,7 @@ void WriteVTK::init()
   nx = fixLBMPSM->dynamics->get_nx();
   ny = fixLBMPSM->dynamics->get_ny();
   nz = fixLBMPSM->dynamics->get_nz();
-
+/*
   vector<double> x_vtk = fixLBMPSM->dynamics->get_x();
   vector<double> y_vtk = fixLBMPSM->dynamics->get_y();
   vector<double> z_vtk = fixLBMPSM->dynamics->get_z();
@@ -68,13 +68,14 @@ void WriteVTK::init()
   double ly = 1.0;
 
   write_vtk("init.vtk", x_vtk, 1.0/ly, y_vtk, 1.0/ly, z_vtk, 1.0/ly, B_vtk, 1.0, rho_vtk, 1000.0, u_vtk, 1.0/u_infty);
+*/
 }
 
 
 void WriteVTK::pre_force(int)
 {
   if (update->ntimestep % nevery) return;
-  vector<double> x_vtk = fixLBMPSM->dynamics->get_x();
+/*  vector<double> x_vtk = fixLBMPSM->dynamics->get_x();
   vector<double> y_vtk = fixLBMPSM->dynamics->get_y();
   vector<double> z_vtk = fixLBMPSM->dynamics->get_z();
   vector<double> rho_vtk = fixLBMPSM->dynamics->get_rho();
@@ -84,15 +85,26 @@ void WriteVTK::pre_force(int)
   for (int i = 0; i < nx*ny*nz; ++i){
     B_vtk[i] = fixLBMPSM->dynamics->getParticleDataOnLatticeNode(i).solidFraction[0] + fixLBMPSM->dynamics->getParticleDataOnLatticeNode(i).solidFraction[1];
   }
+*/
   double u_infty = fixLBMPSM->unitConversion->get_u_lb();
   double Uc = fixLBMPSM->unitConversion->get_Uc();
-  double ly = 1.0;
+//  double ly = 1.0;
+
 
   ostringstream timeStringTmp;
   timeStringTmp << "flowField_" << setw(10) << setfill('0') << update->ntimestep << ".vtk";
   string timeString(timeStringTmp.str());
 
-  write_vtk(timeString, x_vtk, 1.0/ly, y_vtk, 1.0/ly, z_vtk, 1.0/ly, B_vtk, 1.0, rho_vtk, 1000.0, u_vtk, Uc/u_infty);
+//  write_vtk(timeString, x_vtk, 1.0/ly, y_vtk, 1.0/ly, z_vtk, 1.0/ly, B_vtk, 1.0, rho_vtk, 1000.0, u_vtk, Uc/u_infty);
+
+  write_vtk(timeString,
+            fixLBMPSM->dynamics->get_x_reference(), 1.0,
+            fixLBMPSM->dynamics->get_y_reference(), 1.0,
+            fixLBMPSM->dynamics->get_z_reference(), 1.0,
+            fixLBMPSM->dynamics->get_B_reference(), 1.0,
+            fixLBMPSM->dynamics->get_rho_reference(), fixLBMPSM->get_rho(),
+            fixLBMPSM->dynamics->get_u_reference(), Uc/u_infty);
+
 }
 
 
@@ -103,6 +115,14 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
   if(domain->dimension == 3){
     nzLoopStart = envelopeWidth;
     nzLoopEnd = nz-envelopeWidth;
+  }
+
+  vector<double> B_clip;
+  B_clip.resize(nx*ny*nz);
+  for (int i = 0; i < nx*ny*nz; ++i){
+    B_clip[i] = fixLBMPSM->dynamics->getParticleDataOnLatticeNode(i).solidFraction[0] + fixLBMPSM->dynamics->getParticleDataOnLatticeNode(i).solidFraction[1];
+    if (B_clip[i] > 1.0)
+      { B_clip[i] = 1.0; }
   }
 
   vector<double> x0;
@@ -123,7 +143,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
   MPI_Gather(&x_[0], nx*ny*nz, MPI_DOUBLE, &x0[0], nx*ny*nz, MPI_DOUBLE, 0, world);
   MPI_Gather(&y_[0], nx*ny*nz, MPI_DOUBLE, &y0[0], nx*ny*nz, MPI_DOUBLE, 0, world);
   MPI_Gather(&z_[0], nx*ny*nz, MPI_DOUBLE, &z0[0], nx*ny*nz, MPI_DOUBLE, 0, world);
-  MPI_Gather(&B_[0], nx*ny*nz, MPI_DOUBLE, &B0[0], nx*ny*nz, MPI_DOUBLE, 0, world);
+  MPI_Gather(&B_clip[0], nx*ny*nz, MPI_DOUBLE, &B0[0], nx*ny*nz, MPI_DOUBLE, 0, world);
   MPI_Gather(&rho_[0], nx*ny*nz, MPI_DOUBLE, &rho0[0], nx*ny*nz, MPI_DOUBLE, 0, world);
   MPI_Gather(&u_[0], nx*ny*nz*3, MPI_DOUBLE, &u0[0], nx*ny*nz*3, MPI_DOUBLE, 0, world);
 
@@ -292,18 +312,6 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
   }
 };
 
-
-// TODO extend to 3D if needed
-void WriteVTK::write_profile(string name_, int ix_, vector<double> &y_, double y0_, vector<double> &B_, double B0_, vector<double> &rho_, double rho0_, vector<double> &u_, double u0_){
-  ofstream ovel;
-  ovel.open(name_);
-  ovel << "y ux_(Dimensionless) uy_(Dimensionless) rho B" << "\n";
-  for(int j=0; j<ny*decomposition[1]; j++){
-    ovel << y_[ix_*ny*decomposition[1]+j]*y0_ << " " << u_[ix_*ny*decomposition[1]*2 + j*2]*u0_ << " " << u_[ix_*ny*decomposition[1]*2 + j*2+1]*u0_ << " " << rho_[ix_*ny*decomposition[1]+j]*rho0_ << 
-      " " << B_[ix_*ny*decomposition[1]+j]*B0_ << "\n";
-  }
-  ovel.close();
-};
 
 
 void WriteVTK::scale_vector(vector<double> &vec_, double scaling_){

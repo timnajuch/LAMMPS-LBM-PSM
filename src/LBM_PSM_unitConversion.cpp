@@ -38,19 +38,19 @@ UnitConversion::UnitConversion(double rhof_, double nu_, double lc_, double Re_,
     forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);
     torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);
   }
-};
+}
 
 UnitConversion::~UnitConversion(){};
 
 
 double UnitConversion::get_dx(){
   return dx;
-};
+}
 
 
 double UnitConversion::get_Uc(){
   return Uc;
-};
+}
 
 double UnitConversion::get_radius_lb(double rp){
   return rp/dx;
@@ -58,15 +58,15 @@ double UnitConversion::get_radius_lb(double rp){
 
 double UnitConversion::get_u_lb(){
   return u_lb;
-};
+}
 
 double UnitConversion::get_vel_lb(double vel_phys){
   return vel_phys / Uc * u_lb;
-};
+}
 
 double UnitConversion::get_freq_lb(double freq_phys){
   return freq_phys * tc * dt_d;
-};
+}
 
 double UnitConversion::get_pos_lb(double pos_phys){
   return pos_phys/dx;
@@ -75,11 +75,11 @@ double UnitConversion::get_pos_lb(double pos_phys){
 
 double UnitConversion::get_forceFactor(){
   return forceFactor;
-};
+}
 
 double UnitConversion::get_torqueFactor(){
   return torqueFactor;
-};
+}
 
 std::vector<double> UnitConversion::get_force_lb_2D(std::vector<double> F_phys_2D_){
   std::vector<double> F_lb(3,0.0);
@@ -88,7 +88,7 @@ std::vector<double> UnitConversion::get_force_lb_2D(std::vector<double> F_phys_2
   F_lb[2] = F_phys_2D_[2]/forceFactor;
 
   return F_lb;
-};
+}
 
 double UnitConversion::get_phys_time(double time_lb){
   return time_lb * dt_d * tc;

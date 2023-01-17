@@ -13,10 +13,10 @@ Tim Najuch, 2022
 #include "LBM_PSM_BGK_dynamics.h"
 
 LBMPSMBGKDynamics::LBMPSMBGKDynamics(double tau_, int nx_, int ny_, int nz_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx_) :
-  LBMPSMDynamics(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_, dx_), tau(tau_), F_lbm(F_lbm_) {};
+  LBMPSMDynamics(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_, dx_), tau(tau_), F_lbm(F_lbm_) {}
 
 
-LBMPSMBGKDynamics::~LBMPSMBGKDynamics(){};
+LBMPSMBGKDynamics::~LBMPSMBGKDynamics(){}
 
 
 void LBMPSMBGKDynamics::compute_macro_values(){
@@ -51,7 +51,7 @@ void LBMPSMBGKDynamics::compute_macro_values(){
       }
     }
   }
-};
+}
 
 
 void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_){
@@ -75,7 +75,7 @@ void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_){
   LBMPSMLattice::u[ind_phys_2D] = jx/rho_tmp;
   LBMPSMLattice::u[ind_phys_2D+1] = jy/rho_tmp;
   LBMPSMLattice::u[ind_phys_2D+2] = jz/rho_tmp;
-};
+}
 
 
 void LBMPSMBGKDynamics::collision(int i_, int j_, int k_, int iq_){
@@ -180,7 +180,7 @@ void LBMPSMBGKDynamics::collision(int i_, int j_, int k_, int iq_){
     LBMPSMLattice::add_Fhydz(ind_phys_1D, 1, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_+2]);
   }
 
-};
+}
 
 
 void  LBMPSMBGKDynamics::initialise_dynamics(double rho_, double ux_, double uy_, double uz_){
@@ -196,7 +196,6 @@ void  LBMPSMBGKDynamics::initialise_dynamics(double rho_, double ux_, double uy_
         LBMPSMLattice::u[ind_phys_2D+2] = uz_;
 
         for(int iq = 0; iq < LBMPSMLattice::q; ++iq){
-            int ind_iq = i * LBMPSMLattice::ny * LBMPSMLattice::nz * LBMPSMLattice::q + j * LBMPSMLattice::nz *LBMPSMLattice::q + k*LBMPSMLattice::q + iq; 
 
             LBMPSMLattice::set_f0(i, j, k, iq, LBMPSMDynamics::feq(iq, ind_phys_1D, ind_phys_2D, LBMPSMLattice::rho, LBMPSMLattice::u) );
             LBMPSMLattice::set_f(i, j, k, iq, LBMPSMDynamics::feq(iq, ind_phys_1D, ind_phys_2D, LBMPSMLattice::rho, LBMPSMLattice::u) );
@@ -207,7 +206,7 @@ void  LBMPSMBGKDynamics::initialise_dynamics(double rho_, double ux_, double uy_
     }
   }
 
-};
+}
 
 
 void LBMPSMBGKDynamics::macroCollideStream(){
@@ -241,4 +240,4 @@ void LBMPSMBGKDynamics::macroCollideStream(){
 
   LBMPSMLattice::cp_fcoll_f();
 
-};
+}

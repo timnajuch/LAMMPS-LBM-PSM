@@ -25,8 +25,6 @@ LBMPSMMPI::LBMPSMMPI(MPI_Comm world_, int decomposition[3], int procNeigh[6], in
       q = 19;
     }
 
-    int periodicity[3] = {1, 1, 1};
-
     dimensions[0] = decomposition[0];
     dimensions[1] = decomposition[1];
     dimensions[2] = decomposition[2];

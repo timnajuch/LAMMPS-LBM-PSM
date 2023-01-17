@@ -29,12 +29,13 @@ using namespace std;
 class ExchangeParticleData {
   private: 
     int dimension;
+    vector<double> origin;
 
   public:
-    ExchangeParticleData(int dimension_);
+    ExchangeParticleData(int dimension_, vector<double> origin_);
     ~ExchangeParticleData();
 
-    void setParticlesOnLattice(LBMPSMLattice *lattice_, UnitConversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double **uPart, double **omega, double *rp, vector<double> boxLength, vector<double> origin);
+    void setParticlesOnLattice(LBMPSMLattice *lattice_, UnitConversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double **uPart, double **omega, double *rp);
     double calcSolidFraction(int i, int j, int k, double xP_LB, double yP_LB, double zP_LB, double rP_LB);
     void calculateHydrodynamicInteractions(LBMPSMLattice *lattice_, UnitConversion *unitConversion, LAMMPS_NS::tagint tag, double *xPart, double rp, vector<double> &fHydro, vector<double> &tHydro, vector<double> &stresslet);
 

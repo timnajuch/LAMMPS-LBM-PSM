@@ -21,7 +21,6 @@ LBMPSMDynamics::LBMPSMDynamics(int nx_, int ny_, int nz_, int q_, int decomposit
         for(int iq = 0; iq < LBMPSMLattice::q; ++iq){
           int ind_phys_1D = i * LBMPSMLattice::ny * LBMPSMLattice::nz + j * LBMPSMLattice::nz + k;
           int ind_phys_2D = (i * LBMPSMLattice::ny * LBMPSMLattice::nz + j * LBMPSMLattice::nz + k)*3;
-          int ind_iq = i * LBMPSMLattice::ny * LBMPSMLattice::nz * LBMPSMLattice::q + j * LBMPSMLattice::nz * LBMPSMLattice::q + k*LBMPSMLattice::q + iq;
 
           LBMPSMLattice::set_f0(i, j, k, iq, LBMPSMDynamics::feq(iq, ind_phys_1D, ind_phys_2D, LBMPSMLattice::rho, LBMPSMLattice::u) );
           LBMPSMLattice::set_f(i, j, k, iq, LBMPSMDynamics::feq(iq, ind_phys_1D, ind_phys_2D, LBMPSMLattice::rho, LBMPSMLattice::u) );
@@ -30,7 +29,7 @@ LBMPSMDynamics::LBMPSMDynamics(int nx_, int ny_, int nz_, int q_, int decomposit
       }
     }
   }
-};
+}
 
 
 LBMPSMDynamics::~LBMPSMDynamics(){};
@@ -54,7 +53,7 @@ double LBMPSMDynamics::feq(int iq_, double rho, vector<double> u){
 
 void LBMPSMDynamics::streamBulk(int i_, int j_, int k_, int iq_){
   LBMPSMLattice::set_fcoll( i_ + LBMPSMLattice::e[3*iq_] , j_ + LBMPSMLattice::e[3*iq_+1] , k_ + LBMPSMLattice::e[3*iq_+2], iq_, LBMPSMLattice::get_f(i_, j_, k_, iq_ ) );
-};
+}
 
 
 void LBMPSMDynamics::streamBC(int i_, int j_, int k_, int iq_)

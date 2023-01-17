@@ -138,7 +138,7 @@ void fix_LBM_PSM::init()
 
   dynamics->initialise_dynamics(1.0, 0.0, 0.0, 0.0);
 
-  exchangeParticleData = new ExchangeParticleData(domain->dimension);
+  exchangeParticleData = new ExchangeParticleData(domain->dimension, origin);
 
   for (int i=0; i<atom->nmax; i++){
     for (int j=0; j<6; j++){
@@ -172,7 +172,7 @@ void fix_LBM_PSM::post_force(int vflag)
     vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
     vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
 
-    exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->v, atom->omega, atom->radius, boxLength, origin);
+    exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->v, atom->omega, atom->radius);
 
     if(domain->dimension == 2){
       lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
@@ -243,6 +243,12 @@ void fix_LBM_PSM::post_force(int vflag)
       v_tally(i, stresslet_arr);
     }
   }
+}
+
+
+double fix_LBM_PSM::get_rho()
+{
+    return rho;
 }
 
 

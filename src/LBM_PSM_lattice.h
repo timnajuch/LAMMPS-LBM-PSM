@@ -92,6 +92,13 @@ class LBMPSMLattice{
     vector<double> get_z();
     vector<double> get_u();
 
+    vector<double>& get_B_reference();
+    vector<double>& get_rho_reference();
+    vector<double>& get_x_reference();
+    vector<double>& get_y_reference();
+    vector<double>& get_z_reference();
+    vector<double>& get_u_reference();
+
     vector<double> getProcOrigin(){ return procOrigin; }
     vector<double> getProcLength(){ return procLength; }
     int* getProcCoordinates(){ return procCoordinates; }

@@ -54,6 +54,8 @@ class fix_LBM_PSM : public Fix {
     void init();
     void post_force(int);
 
+    double get_rho();
+
     LBMPSMBGKDynamics *dynamics;
 
     UnitConversion *unitConversion;
@@ -68,16 +70,16 @@ class fix_LBM_PSM : public Fix {
     double Re;          // Reynolds number of system (based on characteristic velocity, characteristic length, and fluid viscosity)
     double tau;         // BGK relaxation parameter (optional, default is tau = 0.7)
 
-  void grow_arrays(int);
-  void copy_arrays(int, int, int);
-  int pack_exchange(int, double *);
-  int unpack_exchange(int, double *);
+    void grow_arrays(int);
+    void copy_arrays(int, int, int);
+    int pack_exchange(int, double *);
+    int unpack_exchange(int, double *);
 
-  int pack_reverse_comm_size(int, int);
-  int pack_reverse_comm(int, int, double *);
-  void unpack_reverse_comm(int, int *, double *);
+    int pack_reverse_comm_size(int, int);
+    int pack_reverse_comm(int, int, double *);
+    void unpack_reverse_comm(int, int *, double *);
 
-  double **hydrodynamicInteractions;
+    double **hydrodynamicInteractions;
 
 };
 

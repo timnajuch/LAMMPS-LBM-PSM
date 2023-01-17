@@ -139,10 +139,10 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decompositio
         };
   }
 
-};
+}
 
 
-LBMPSMLattice::~LBMPSMLattice(){};
+LBMPSMLattice::~LBMPSMLattice(){}
 
 
 void LBMPSMLattice::initialise_channel_geometry(double wallHeightHalf_, double eps_, double nychannel_, double dx_, double dy_, double dz_){
@@ -175,7 +175,7 @@ void LBMPSMLattice::initialise_channel_geometry(double wallHeightHalf_, double e
       }
     }
   }
-};
+}
 
 
 void LBMPSMLattice::initialise_domain(double dx_, double dy_, double dz_){
@@ -217,116 +217,140 @@ void LBMPSMLattice::initialise_domain(double dx_, double dy_, double dz_){
     }
   }
 
-};
+}
 
 
 void LBMPSMLattice::set_f(int i_, int j_, int k_, int iq_, double value_){
   f[i_*ny*nz*q + j_*nz*q + k_*q + iq_] = value_;
-};
+}
 
 void LBMPSMLattice::set_f(int ind_iq_, double value_){
   f[ind_iq_] = value_;
-};
+}
 
 void LBMPSMLattice::cp_fcoll_f(){
   f = fcoll;
-};
+}
 
 double LBMPSMLattice::get_f(int i_, int j_, int k_, int iq_){
   return f[i_*ny*nz*q + j_*nz*q + k_*q + iq_];
-};
+}
 
 double LBMPSMLattice::get_f(int ind_iq_){
   return f[ind_iq_];
-};
+}
 
  void LBMPSMLattice::set_f0(int i_, int j_, int k_, int iq_, double value_){
   f0[i_*ny*nz*q + j_*nz*q + k_*q + iq_] = value_;
-};
+}
 
 double LBMPSMLattice::get_f0(int i_, int j_, int k_, int iq_){
   return f0[i_*ny*nz*q + j_*nz*q + k_*q + iq_];
-};
+}
 
 double LBMPSMLattice::get_f0(int ind_iq_){
   return f0[ind_iq_];
-};
+}
 
 void LBMPSMLattice::set_fcoll(int i_, int j_, int k_, int iq_, double value_){
   fcoll[i_*ny*nz*q + j_*nz*q + k_*q + iq_] = value_;
-};
+}
 
 double LBMPSMLattice::get_fcoll(int i_, int j_, int k_, int iq_){
   return fcoll[i_*ny*nz*q + j_*nz*q + k_*q + iq_];
-};
+}
 
 double LBMPSMLattice::get_fcoll(int ind_iq_){
   return fcoll[ind_iq_];
-};
+}
 
  vector<double> LBMPSMLattice::get_B(){
   return B;
-};
+}
 
  vector<double> LBMPSMLattice::get_rho(){
   return rho;
-};
+}
 
  vector<double> LBMPSMLattice::get_x(){
   return x;
-};
+}
 
  vector<double> LBMPSMLattice::get_y(){
   return y;
-};
+}
 
  vector<double> LBMPSMLattice::get_z(){
   return z;
-};
+}
 
  vector<double> LBMPSMLattice::get_u(){
   return u;
-};
+}
+
+vector<double>& LBMPSMLattice::get_B_reference(){
+  return B;
+}
+
+ vector<double>& LBMPSMLattice::get_rho_reference(){
+  return rho;
+}
+
+ vector<double>& LBMPSMLattice::get_x_reference(){
+  return x;
+}
+
+ vector<double>& LBMPSMLattice::get_y_reference(){
+  return y;
+}
+
+ vector<double>& LBMPSMLattice::get_z_reference(){
+  return z;
+}
+
+ vector<double>& LBMPSMLattice::get_u_reference(){
+  return u;
+}
 
 int LBMPSMLattice::get_nx(){
   return nx;
-};
+}
 
 int LBMPSMLattice::get_ny(){
   return ny;
-};
+}
 
 int LBMPSMLattice::get_nz(){
   return nz;
-};
+}
 
 void LBMPSMLattice::set_B(int index, double B_){
   B[index] = B_;
-};
+}
 
 double LBMPSMLattice::get_B(int index){
   return B[index];
-};
+}
 
 double LBMPSMLattice::get_rho(int index){
   return rho[index];
-};
+}
 
 double LBMPSMLattice::get_u(int index){
   return u[index];
-};
+}
 
 double LBMPSMLattice::get_Fhydx(int index){
   return Fhydx[index];
-};
+}
 
 double LBMPSMLattice::get_Fhydy(int index){
   return Fhydy[index];
-};
+}
 
 double LBMPSMLattice::get_Fhydz(int index){
   return Fhydz[index];
-};
+}
 
 void LBMPSMLattice::set_Fhydx(int index, int pID, double Fhydx_)
 {

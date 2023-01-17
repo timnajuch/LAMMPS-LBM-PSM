@@ -13,27 +13,25 @@ Tim Najuch, 2022
 #include "LBM_PSM_exchangeParticleData.h"
 #include "domain.h"
 
-ExchangeParticleData::ExchangeParticleData(int dimension_){
+ExchangeParticleData::ExchangeParticleData(int dimension_, vector<double> origin_){
   dimension = dimension_;
-};
+  origin = origin_;
+}
 
-ExchangeParticleData::~ExchangeParticleData() {};
+ExchangeParticleData::~ExchangeParticleData() {}
 
 
-void ExchangeParticleData::setParticlesOnLattice(LBMPSMLattice *lattice_, UnitConversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double **uPart, double **omega, double *rp, vector<double> boxLength, vector<double> origin)
+void ExchangeParticleData::setParticlesOnLattice(LBMPSMLattice *lattice_, UnitConversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double **uPart, double **omega, double *rp)
 {
   for(int iPart = 0; iPart < numberParticles; ++iPart){
-      double x_lb_global = unitConversion->get_pos_lb(xPart[iPart][0]);
-      double y_lb_global = unitConversion->get_pos_lb(xPart[iPart][1]);
-      double z_lb_global = unitConversion->get_pos_lb(xPart[iPart][2]);
+      double x_lb_global = unitConversion->get_pos_lb(xPart[iPart][0]-origin[0]);
+      double y_lb_global = unitConversion->get_pos_lb(xPart[iPart][1]-origin[1]);
+      double z_lb_global = unitConversion->get_pos_lb(xPart[iPart][2]-origin[2]);
 
       double x_lb_local = x_lb_global - ((double)lattice_->get_procCoordinates()[0]*((double)lattice_->get_nx()-2.0*(double)lattice_->get_envelopeWidth())-1);
       double y_lb_local = y_lb_global - ((double)lattice_->get_procCoordinates()[1]*((double)lattice_->get_ny()-2.0*(double)lattice_->get_envelopeWidth())-1);
       double z_lb_local = z_lb_global - ((double)lattice_->get_procCoordinates()[2]*((double)lattice_->get_nz()-2.0*(double)lattice_->get_envelopeWidth())-1);
 
-      double x_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[iPart][0]-(lattice_->getProcOrigin()[0]-(double)lattice_->get_envelopeWidth()*unitConversion->get_dx())), 0.0), (double)lattice_->get_nx()-1.0);
-      double y_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[iPart][1]-(lattice_->getProcOrigin()[1]-(double)lattice_->get_envelopeWidth()*unitConversion->get_dx())), 0.0), (double)lattice_->get_ny()-1.0);
-      double z_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[iPart][2]-(lattice_->getProcOrigin()[2]-(double)lattice_->get_envelopeWidth()*unitConversion->get_dx())), 0.0), (double)lattice_->get_nz()-1.0);
       double r_lb = unitConversion->get_radius_lb(rp[iPart]);
 
       int nodeZone[3][2] = {{(int)(x_lb_local-r_lb)-5, (int)(x_lb_local+r_lb)+5},
@@ -42,9 +40,9 @@ void ExchangeParticleData::setParticlesOnLattice(LBMPSMLattice *lattice_, UnitCo
       for (int i = 0; i < 2; i++){
           nodeZone[0][i] = fmin(fmax(nodeZone[0][i],0),lattice_->get_nx());
           nodeZone[1][i] = fmin(fmax(nodeZone[1][i],0),lattice_->get_ny());
-          nodeZone[2][i] = fmin(fmax(nodeZone[2][i],0),lattice_->get_nz());
+          nodeZone[2][i] = fmax(fmin(fmax(nodeZone[2][i],0),lattice_->get_nz()), i); // most outer fmax needed for 2D, otherwise the nodeZone limits are both zero which results in no innermost for loop
       }
-      
+
       for(int i = nodeZone[0][0]; i < nodeZone[0][1]; ++i){
         for(int j = nodeZone[1][0]; j < nodeZone[1][1]; ++j){
           for(int k = nodeZone[2][0]; k < nodeZone[2][1]; ++k){
@@ -65,7 +63,6 @@ void ExchangeParticleData::setParticlesOnLattice(LBMPSMLattice *lattice_, UnitCo
             }
 
             int const decFlag = (sf > 0.00001) + 2*(sf_old > 0.00001);
-            double zeroVel[3] = {0.0, 0.0, 0.0};
 
             double dx = (double)i - x_lb_local;
             double dy = (double)j - y_lb_local;
@@ -99,7 +96,7 @@ void ExchangeParticleData::setParticlesOnLattice(LBMPSMLattice *lattice_, UnitCo
         }
       }
   }
-};
+}
 
 
 
@@ -128,7 +125,12 @@ double ExchangeParticleData::calcSolidFraction(int i, int j, int k, double xP_LB
     if(dist < rM*rM) return  1.0;
 
     double rSq = rP_LB*rP_LB;
-    double dx_sq[slicesPerDim], dy_sq[slicesPerDim], dz_sq[slicesPerDim];
+    std::vector<double> dx_sq;
+    std::vector<double> dy_sq;
+    std::vector<double> dz_sq;
+    dx_sq.resize(slicesPerDim);
+    dy_sq.resize(slicesPerDim);
+    dz_sq.resize(slicesPerDim);
 
     for(int i = 0; i < slicesPerDim; ++i){
       double delta = -0.5 + ((double)i+0.5)*sliceWidth;
@@ -155,23 +157,20 @@ double ExchangeParticleData::calcSolidFraction(int i, int j, int k, double xP_LB
     }
 
     return fraction*((double)n);
-};
+}
 
 
 void ExchangeParticleData::calculateHydrodynamicInteractions(LBMPSMLattice *lattice_, UnitConversion *unitConversion, LAMMPS_NS::tagint tag, double *xPart, double rp, vector<double> &fHydro, vector<double> &tHydro, vector<double> &stresslet)
 {
     int envelopeWidth = lattice_->get_envelopeWidth();
-    double x_lb_global = unitConversion->get_pos_lb(xPart[0]);
-    double y_lb_global = unitConversion->get_pos_lb(xPart[1]);
-    double z_lb_global = unitConversion->get_pos_lb(xPart[2]);
+    double x_lb_global = unitConversion->get_pos_lb(xPart[0]-origin[0]);
+    double y_lb_global = unitConversion->get_pos_lb(xPart[1]-origin[1]);
+    double z_lb_global = unitConversion->get_pos_lb(xPart[2]-origin[2]);
 
     double x_lb_local = x_lb_global - ((double)lattice_->get_procCoordinates()[0]*((double)lattice_->get_nx()-2.0*(double)lattice_->get_envelopeWidth())-1);
     double y_lb_local = y_lb_global - ((double)lattice_->get_procCoordinates()[1]*((double)lattice_->get_ny()-2.0*(double)lattice_->get_envelopeWidth())-1);
     double z_lb_local = z_lb_global - ((double)lattice_->get_procCoordinates()[2]*((double)lattice_->get_nz()-2.0*(double)lattice_->get_envelopeWidth())-1);
 
-    double x_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[0]-(lattice_->getProcOrigin()[0]-(double)envelopeWidth*unitConversion->get_dx())), 0.0), (double)lattice_->get_nx()-1.0);
-    double y_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[1]-(lattice_->getProcOrigin()[1]-(double)envelopeWidth*unitConversion->get_dx())), 0.0), (double)lattice_->get_ny()-1.0);
-    double z_lb = fmin(fmax(unitConversion->get_pos_lb(xPart[2]-(lattice_->getProcOrigin()[2]-(double)envelopeWidth*unitConversion->get_dx())), 0.0), (double)lattice_->get_nz()-1.0);
     double r_lb = unitConversion->get_radius_lb(rp);
 
     int nodeZone[3][2] = {{(int)(x_lb_local-r_lb)-5, (int)(x_lb_local+r_lb)+5},
@@ -180,7 +179,7 @@ void ExchangeParticleData::calculateHydrodynamicInteractions(LBMPSMLattice *latt
     for (int i = 0; i < 2; i++){
         nodeZone[0][i] = fmin(fmax(nodeZone[0][i],envelopeWidth),lattice_->get_nx()-envelopeWidth);
         nodeZone[1][i] = fmin(fmax(nodeZone[1][i],envelopeWidth),lattice_->get_ny()-envelopeWidth);
-        nodeZone[2][i] = fmax(fmin(fmax(nodeZone[2][i],envelopeWidth),lattice_->get_nz()-envelopeWidth), i); // most outer fmax needed for 2D otherwise nodeZone limits both zero resulting in no innermost for loop
+        nodeZone[2][i] = fmax(fmin(fmax(nodeZone[2][i],envelopeWidth),lattice_->get_nz()-envelopeWidth), i); // most outer fmax needed for 2D, otherwise the nodeZone limits are both zero which results in no innermost for loop
     }
 
     for(int i = nodeZone[0][0]; i < nodeZone[0][1]; ++i){
@@ -223,4 +222,4 @@ void ExchangeParticleData::calculateHydrodynamicInteractions(LBMPSMLattice *latt
         }
       }
     }
-};
+}

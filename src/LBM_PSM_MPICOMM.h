@@ -1,7 +1,11 @@
 /*------------------------------------------------------ 
 This file is part of the LAMMPS-LBM-PSM project.
 
-See the README file in the top-level LBM-PSM directory.
+LAMMPS-LBM-PSM is an open-source project distributed
+under the GNU General Public License.
+
+See the README and License file in the top-level 
+LAMMPS-LBM-PSM directory for more details.
 
 Tim Najuch, 2022
 ------------------------------------------------------*/
@@ -37,7 +41,7 @@ class LBMPSMMPI{
         MPI_Status status;
 
         template<typename T> MPI_Datatype get_type();
-        template<typename T> void sendRecvData(vector<T> &data_, bool isVector3D, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool periodicInX);
+        template<typename T> void sendRecvData(vector<T> &data_, bool isVector3D, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic);
         template<typename T> void packData(vector<T> &sendBuf, vector<T> &data, int direction[3], int envelopeIterSend[3],
                                            int envlopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth);
         template<typename T> void unpackData(vector<T> &recvBuf, vector<T> &data, int direction[3], int envelopeIterRecv[3],
@@ -89,7 +93,7 @@ template<typename T> MPI_Datatype LBMPSMMPI::get_type()
 }
 
 
-template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, bool isVector3D, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool periodicInX)
+template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, bool isVector3D, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic)
 {
   int dataSize = q;
   int commDataSize = 0;
@@ -150,7 +154,7 @@ template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, bool isVecto
                &recvBuf1[0], commDataSize, commDataType, sendRank[commDirection][0], 0,
                world, &status);
 
-  if(procCoordinates[commDirection] != 0 || (periodicInX == true))
+  if(procCoordinates[commDirection] != 0 || (isPeriodic == true))
   {
     envelopeStart = direction[0]*envelopeIterRecv[0] +
                     direction[1]*envelopeIterRecv[1] +
@@ -181,7 +185,7 @@ template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, bool isVecto
                &recvBuf2[0], commDataSize, commDataType, sendRank[commDirection][1], 0,
                world, &status);
 
-  if(procCoordinates[commDirection] != dimensions[commDirection]-1 || (periodicInX == true))
+  if(procCoordinates[commDirection] != dimensions[commDirection]-1 || (isPeriodic == true))
   {
     envelopeStart = direction[0]*envelopeIterRecv[0] +
                     direction[1]*envelopeIterRecv[1] +
