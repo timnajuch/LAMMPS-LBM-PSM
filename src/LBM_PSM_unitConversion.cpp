@@ -1,9 +1,13 @@
 /*------------------------------------------------------ 
-This file is part of the LBM-PSM project.
+This file is part of the LAMMPS-LBM-PSM project.
 
-See the README file in the top-level LBM-PSM directory.
+LAMMPS-LBM-PSM is an open-source project distributed
+under the GNU General Public License.
 
-Tim Najuch, 2021
+See the README and License file in the top-level 
+LAMMPS-LBM-PSM directory for more details.
+
+Tim Najuch, 2022
 ------------------------------------------------------*/
 
 #include "LBM_PSM_unitConversion.h"

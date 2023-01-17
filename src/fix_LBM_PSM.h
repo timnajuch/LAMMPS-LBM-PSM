@@ -1,15 +1,14 @@
-/* -*- c++ -*- -----------------------------------------------------------
-   LAMMPS 2003 (July 31) - Molecular Dynamics Simulator
-   Sandia National Laboratories, www.cs.sandia.gov/~sjplimp/lammps.html
-   Steve Plimpton, sjplimp@sandia.gov
+/*------------------------------------------------------ 
+This file is part of the LAMMPS-LBM-PSM project.
 
-   Copyright (2003) Sandia Corporation.  Under the terms of Contract
-   DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-   certain rights in this software.  This software is distributed under
-   the GNU General Public License.
+LAMMPS-LBM-PSM is an open-source project distributed
+under the GNU General Public License.
 
-   For more info, see the README file in the top-level LAMMPS directory.
------------------------------------------------------------------------- */
+See the README and License file in the top-level 
+LAMMPS-LBM-PSM directory for more details.
+
+Tim Najuch, 2022
+------------------------------------------------------*/
 
 #ifdef FIX_CLASS
 

@@ -1,9 +1,9 @@
 /*------------------------------------------------------ 
-This file is part of the LBM-PSM project.
+This file is part of the LAMMPS-LBM-PSM project.
 
 See the README file in the top-level LBM-PSM directory.
 
-Tim Najuch, 2021
+Tim Najuch, 2022
 ------------------------------------------------------*/
 
 #ifndef LBM_PSM_MPICOMM_H

@@ -1,3 +1,15 @@
+/*------------------------------------------------------ 
+This file is part of the LAMMPS-LBM-PSM project.
+
+LAMMPS-LBM-PSM is an open-source project distributed
+under the GNU General Public License.
+
+See the README and License file in the top-level 
+LAMMPS-LBM-PSM directory for more details.
+
+Tim Najuch, 2022
+------------------------------------------------------*/
+
 #include "LBM_PSM_MPICOMM.h"
 
 LBMPSMMPI::LBMPSMMPI(MPI_Comm world_, int decomposition[3], int procNeigh[6], int procCoordinates_[3], int dimension_)

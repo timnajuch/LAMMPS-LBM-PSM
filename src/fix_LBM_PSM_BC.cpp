@@ -1,15 +1,14 @@
-/* ----------------------------------------------------------------------
-   LAMMPS - Large-scale Atomic/Molecular Massively Parallel Simulator
-   http://lammps.sandia.gov, Sandia National Laboratories
-   Steve Plimpton, sjplimp@sandia.gov
+/*------------------------------------------------------ 
+This file is part of the LAMMPS-LBM-PSM project.
 
-   Copyright (2003) Sandia Corporation.  Under the terms of Contract
-   DE-AC04-94AL85000 with Sandia Corporation, the U.S. Government retains
-   certain rights in this software.  This software is distributed under
-   the GNU General Public License.
+LAMMPS-LBM-PSM is an open-source project distributed
+under the GNU General Public License.
 
-   See the README file in the top-level LAMMPS directory.
-------------------------------------------------------------------------- */
+See the README and License file in the top-level 
+LAMMPS-LBM-PSM directory for more details.
+
+Tim Najuch, 2022
+------------------------------------------------------*/
 
 
 #include "fix_LBM_PSM_BC.h"
