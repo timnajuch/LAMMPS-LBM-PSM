@@ -53,24 +53,13 @@ class fix_LBM_PSM : public Fix {
     ~fix_LBM_PSM();
     int setmask();
     void init();
-    void pre_force(int);
+    void post_force(int);
 
     LBMPSMBGKDynamics *dynamics;
-    int get_nx();
-    int get_ny();
-    vector<double> get_x();
-    vector<double> get_y();
-    vector<double> get_rho();
-    vector<double> get_u();
-    vector<double> get_B();
 
     UnitConversion *unitConversion;
     ExchangeParticleData *exchangeParticleData;
     LBMPSMMPI *lbmmpicomm;
-
-    double **get_force_ptr();
-    double **get_torque_ptr();
-    double **get_stresslet_ptr();
 
   private:
     int Nlc;            // Number of lattice grid nodes discretising the characteristic length lc
@@ -80,12 +69,18 @@ class fix_LBM_PSM : public Fix {
     double Re;          // Reynolds number of system (based on characteristic velocity, characteristic length, and fluid viscosity)
     double tau;         // BGK relaxation parameter (optional, default is tau = 0.7)
 
-    class FixPropertyAtom *fix_hydroForce_;
-    class FixPropertyAtom *fix_hydroTorque_;
-    class FixPropertyAtom *fix_stresslet_; 
+  void grow_arrays(int);
+  void copy_arrays(int, int, int);
+  int pack_exchange(int, double *);
+  int unpack_exchange(int, double *);
+
+  int pack_reverse_comm_size(int, int);
+  int pack_reverse_comm(int, int, double *);
+  void unpack_reverse_comm(int, int *, double *);
+
+  double **hydrodynamicInteractions;
+
 };
 
 #endif
 #endif
-
-// TODO add comminucation of hyd force etc to ghost atoms every step (otherwise only communicated when neighborl list newly build)

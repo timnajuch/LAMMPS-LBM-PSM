@@ -34,9 +34,7 @@ WriteVTK::~WriteVTK() {};
 int WriteVTK::setmask()
 {
   int mask =0;
-  mask |= INITIAL_INTEGRATE;
   mask |= PRE_FORCE;
-  mask |= END_OF_STEP;
   return mask;
 }
 
@@ -56,17 +54,16 @@ void WriteVTK::init()
   vector<double> z_vtk = fixLBMPSM->dynamics->get_z();
   vector<double> rho_vtk = fixLBMPSM->dynamics->get_rho();
   vector<double> u_vtk = fixLBMPSM->dynamics->get_u();
-/*
+
   vector<double> B_vtk;
   B_vtk.resize(nx*ny*nz);
   for (int i = 0; i < nx*ny*nz; ++i){
-    B_vtk[i] = fixLBMPSM->dynamics->getSolidFractionOnLattice(i, 0) + fixLBMPSM->dynamics->getSolidFractionOnLattice(i, 1);
+    B_vtk[i] = fixLBMPSM->dynamics->getParticleDataOnLatticeNode(i).solidFraction[0] + fixLBMPSM->dynamics->getParticleDataOnLatticeNode(i).solidFraction[1];
   }
   double u_infty = 1.0;
   double ly = 1.0;
 
   write_vtk("init.vtk", x_vtk, 1.0/ly, y_vtk, 1.0/ly, z_vtk, 1.0/ly, B_vtk, 1.0, rho_vtk, 1000.0, u_vtk, 1.0/u_infty);
-*/
 }
 
 
@@ -81,7 +78,7 @@ void WriteVTK::pre_force(int)
   vector<double> B_vtk;
   B_vtk.resize(nx*ny*nz);
   for (int i = 0; i < nx*ny*nz; ++i){
-    B_vtk[i] = fixLBMPSM->dynamics->getSolidFractionOnLattice(i, 0) + fixLBMPSM->dynamics->getSolidFractionOnLattice(i, 1);
+    B_vtk[i] = fixLBMPSM->dynamics->getParticleDataOnLatticeNode(i).solidFraction[0] + fixLBMPSM->dynamics->getParticleDataOnLatticeNode(i).solidFraction[1];
   }
   double u_infty = fixLBMPSM->unitConversion->get_u_lb();
   double Uc = fixLBMPSM->unitConversion->get_Uc();

@@ -68,13 +68,9 @@ void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_){
   }
   LBMPSMLattice::rho[ind_phys_1D] = rho_tmp;
 
-//      jx += F_lbm[0]/2.0;
-//      jy += F_lbm[1]/2.0;
   LBMPSMLattice::u[ind_phys_2D] = jx/rho_tmp;
   LBMPSMLattice::u[ind_phys_2D+1] = jy/rho_tmp;
   LBMPSMLattice::u[ind_phys_2D+2] = jz/rho_tmp;
-
-  //p[i][j] = rho_tmp*csPow2;
 };
 
 
@@ -85,14 +81,37 @@ void LBMPSMBGKDynamics::collision(int i_, int j_, int k_, int iq_){
   int ind_phys_2D = i_ * LBMPSMLattice::ny *LBMPSMLattice::nz* 3 + j_*3*LBMPSMLattice::nz + k_*3;
 
   LBMPSMLattice::set_f0(i_, j_, k_, iq_, LBMPSMDynamics::feq(iq_, ind_phys_1D, ind_phys_2D, LBMPSMLattice::rho, LBMPSMLattice::u) );
-  vector<double> uSolid1{LBMPSMLattice::getSolidVelocityOnLattice(ind_phys_1D, 0)[0], LBMPSMLattice::getSolidVelocityOnLattice(ind_phys_1D, 0)[1], LBMPSMLattice::getSolidVelocityOnLattice(ind_phys_1D, 0)[2]};
-  vector<double> uSolid2{LBMPSMLattice::getSolidVelocityOnLattice(ind_phys_1D, 0)[3], LBMPSMLattice::getSolidVelocityOnLattice(ind_phys_1D, 0)[4], LBMPSMLattice::getSolidVelocityOnLattice(ind_phys_1D, 0)[5]};
-  double f0_solid1 = LBMPSMDynamics::feq(iq_, ind_phys_1D, ind_phys_2D, LBMPSMLattice::get_rho(ind_phys_1D), uSolid1);
-  double f0_solid2 = LBMPSMDynamics::feq(iq_, ind_phys_1D, ind_phys_2D, LBMPSMLattice::get_rho(ind_phys_1D), uSolid2);
 
+  LAMMPS_NS::tagint pID1 = getParticleDataOnLatticeNode(ind_phys_1D).particleID[0];
+  LAMMPS_NS::tagint pID2 = getParticleDataOnLatticeNode(ind_phys_1D).particleID[1];
+  double Btmp1 = 0.0;
+  double Btmp2 = 0.0;
+  vector<double> uSolid1{0.0, 0.0, 0.0};
+  vector<double> uSolid2{0.0, 0.0, 0.0};
+
+  if (pID1 > 0){
+    Btmp1 = LBMPSMLattice::getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[0];
+    //double eps1 = LBMPSMLattice::getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[0];
+    //Btmp1 = eps1*(tau-0.5)/(1.0-eps1+tau-0.5);
+    uSolid1[0] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[0];
+    uSolid1[1] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[1];
+    uSolid1[2] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[2];
+  }
+  if (pID2 > 0){
+    Btmp2 = LBMPSMLattice::getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[1];
+    //double eps2 = LBMPSMLattice::getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[1];
+    //Btmp2 = eps2*(tau-0.5)/(1.0-eps2+tau-0.5);
+    uSolid2[0] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[3];
+    uSolid2[1] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[4];
+    uSolid2[2] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[5];
+  }
+
+  double f0_solid1 = LBMPSMDynamics::feq(iq_, LBMPSMLattice::get_rho(ind_phys_1D), uSolid1);
+  double f0_solid2 = LBMPSMDynamics::feq(iq_, LBMPSMLattice::get_rho(ind_phys_1D), uSolid2);
 
   double BGKcoll = ( LBMPSMLattice::get_f0(ind_iq) - LBMPSMLattice::get_f(ind_iq) ) / tau;
-
+/*
+  // Eq8
   int iq_m = 0;
   if(iq_ > 0)
   {
@@ -114,22 +133,23 @@ void LBMPSMBGKDynamics::collision(int i_, int j_, int k_, int iq_){
     }
   }
   int ind_iq_m = i_ * LBMPSMLattice::ny * LBMPSMLattice::nz * LBMPSMLattice::q + j_ * LBMPSMLattice::nz * LBMPSMLattice::q + k_*LBMPSMLattice::q + iq_m;
-  LBMPSMLattice::set_f0(i_, j_, k_, iq_m, LBMPSMDynamics::feq(iq_m, ind_phys_1D, ind_phys_2D, LBMPSMLattice::rho, LBMPSMLattice::u) );
+  //LBMPSMLattice::set_f0(i_, j_, k_, iq_m, LBMPSMDynamics::feq(iq_m, ind_phys_1D, ind_phys_2D, LBMPSMLattice::rho, LBMPSMLattice::u) );
 
-  double solid_coll1 = f0_solid1 - LBMPSMLattice::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (LBMPSMLattice::get_f(ind_iq) - LBMPSMLattice::get_f0(ind_iq) ); //Eq9
-  double solid_coll2 = f0_solid2 - LBMPSMLattice::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (LBMPSMLattice::get_f(ind_iq) - LBMPSMLattice::get_f0(ind_iq) ); //Eq9
   //double solid_coll1 = f0_solid1 - LBMPSMLattice::get_f(ind_iq) + LBMPSMLattice::get_f(ind_iq_m) - LBMPSMLattice::get_f0(ind_iq_m); //Eq8
   //double solid_coll2 = f0_solid2 - LBMPSMLattice::get_f(ind_iq) + LBMPSMLattice::get_f(ind_iq_m) - LBMPSMLattice::get_f0(ind_iq_m); //Eq8
-//  if (iq_ == 0)
-//    { solid_coll = 0.0; }
+  vector<double> uF{LBMPSMLattice::get_u(ind_phys_2D), LBMPSMLattice::get_u(ind_phys_2D+1), LBMPSMLattice::get_u(ind_phys_2D+2)};
+  double solid_coll1 = f0_solid1 - LBMPSMLattice::get_f(ind_iq) + LBMPSMLattice::get_f(ind_iq_m) - LBMPSMDynamics::feq(iq_m, LBMPSMLattice::get_rho(ind_phys_1D), uF); //Eq8
+  double solid_coll2 = f0_solid2 - LBMPSMLattice::get_f(ind_iq) + LBMPSMLattice::get_f(ind_iq_m) - LBMPSMDynamics::feq(iq_m, LBMPSMLattice::get_rho(ind_phys_1D), uF); //Eq8
+*/  
+  // Eq9
+  double solid_coll1 = f0_solid1 - LBMPSMLattice::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (LBMPSMLattice::get_f(ind_iq) - LBMPSMLattice::get_f0(ind_iq) ); //Eq9
+  double solid_coll2 = f0_solid2 - LBMPSMLattice::get_f(ind_iq) + ( 1.0 - 1.0/tau) * (LBMPSMLattice::get_f(ind_iq) - LBMPSMLattice::get_f0(ind_iq) ); //Eq9
 
-  double Btmp1 = LBMPSMLattice::getSolidFractionOnLattice(ind_phys_1D, 0);
-  double Btmp2 = LBMPSMLattice::getSolidFractionOnLattice(ind_phys_1D, 1);
-  double Btot = Btmp1+Btmp2;
+  double Btot = Btmp1 + Btmp2;
   
-  double B1 = 0.0;
-  double B2 = 0.0;
-  if(Btot > 0.0){
+  double B1 = Btmp1;
+  double B2 = Btmp2;
+  if(Btot > 1.0){
     B1 = Btmp1/Btot;
     B2 = Btmp2/Btot;
   }
@@ -138,8 +158,6 @@ void LBMPSMBGKDynamics::collision(int i_, int j_, int k_, int iq_){
   { Btot = 1.0; }
     
   LBMPSMLattice::set_f(i_, j_, k_, iq_, LBMPSMLattice::get_f(ind_iq)  + ( 1.0 - Btot ) * BGKcoll  + B1 * solid_coll1 + B2 * solid_coll2 );
-//  LBMPSMLattice::set_f(i_, j_, k_, iq_, LBMPSMLattice::get_f(ind_iq)  + ( 1.0 - B ) * BGKcoll  + B * solid_coll );
-////          + ( 1.0 - B ) * (LBMPSMLattice::g[iq_] / LBMPSMLattice::c) * ( LBMPSMLattice::e[3*iq_] * F_lbm[0] + LBMPSMLattice::e[3*iq_+1] * F_lbm[1] + LBMPSMLattice::e[3*iq_+2] * F_lbm[2]) ); //TODO forcing term. See above
 
   if(iq_ == 0)
   {
@@ -171,7 +189,7 @@ void  LBMPSMBGKDynamics::initialise_dynamics(double rho_, double ux_, double uy_
         LBMPSMLattice::rho[ind_phys_1D] = rho_;
         LBMPSMLattice::u[ind_phys_2D] = ux_;
         LBMPSMLattice::u[ind_phys_2D+1] = uy_;
-        LBMPSMLattice::u[ind_phys_2D+3] = uz_;
+        LBMPSMLattice::u[ind_phys_2D+2] = uz_;
 
         for(int iq = 0; iq < LBMPSMLattice::q; ++iq){
             int ind_iq = i * LBMPSMLattice::ny * LBMPSMLattice::nz * LBMPSMLattice::q + j * LBMPSMLattice::nz *LBMPSMLattice::q + k*LBMPSMLattice::q + iq; 

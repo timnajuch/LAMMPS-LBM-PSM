@@ -103,11 +103,13 @@ class LBMPSMLattice{
     double get_B(int index);
     
     double get_rho(int index);
+    double get_u(int index);
 
     void setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[3], double eps);
     void setToZero(int index, LAMMPS_NS::tagint pID);
     double getSolidFractionOnLattice(int index, int pID);
     vector<double> getSolidVelocityOnLattice(int index, int pID);
+    vector<double> getSolidVelocityOnLattice(int index);
 
     ParticleDataOnLattice getParticleDataOnLatticeNode(int index);
 

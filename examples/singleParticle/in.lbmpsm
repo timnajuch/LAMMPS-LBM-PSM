@@ -5,14 +5,14 @@ atom_style		sphere
 atom_modify		map array
 atom_modify 	sort 0 0.003
 
-dimension 2 
+#dimension 2 
 
 comm_modify	cutoff 0.001 vel yes
 
-boundary		f f p
+boundary		p f p
 newton			off
 
-processors      1 2 1 map cart
+processors      1 1 1 map cart
 region			box block 0. 0.005 0. 0.005 0. 0.005 units box
 create_box		1 box
 
@@ -27,18 +27,18 @@ timestep       0.001
 pair_style		none
 
 fix lbDYN all lbm-psm every 1 Nlc 11 lc 0.0005 rho 1000.0 nu 0.0001 Re 0.1 tau 0.7 
-#fix lbBC all lbm-psm-bc shear
-fix lbBC all lbm-psm-bc xFlow
-fix lbVTK all lbm-psm-vtk
+fix lbBC all lbm-psm-bc shear
+#fix lbBC all lbm-psm-bc xFlow
+fix lbVTK all lbm-psm-vtk every 100
 
-#fix             integrate all nve/sphere
+fix             integrate all nve/sphere
 #fix f2d all enforce2d
-dump           	iddump all custom 1 s.p id type diameter mass x y z vx vy vz fx fy fz tqx tqy tqz omegax omegay omegaz #f_hydroForce[0]
+dump           	iddump all custom 10 s.p id type diameter mass x y z vx vy vz fx fy fz tqx tqy tqz omegax omegay omegaz #f_hydroForce[0]
 
 # thermo settings
 compute			1 all erotate/sphere
 thermo_style	custom step atoms ke
-thermo			1000
+thermo			100
 thermo_modify	lost ignore norm no flush yes
 compute_modify	thermo_temp dynamic yes
 

@@ -18,25 +18,21 @@ UnitConversion::UnitConversion(double rhof_, double nu_, double lc_, double Re_,
   nu_lb = (tau_-0.5)*csPow2;
 
   dx = lc_/(double)(N_-1);
-  dx_d = Lc_d/(double)N_;
+  dx_d = Lc_d/(double)(N_-1);
 
-  Uc = Re*nu/lc_;
-  u_lb = Re_*nu_lb/(double)N_;
-  //double dx_d = dx_d*u_lb/Uc_d;
-  //double dt_d = lc_/Uc;
+  Uc = Re_*nu_/lc_;
+  u_lb = Re_*nu_lb/(double)(N_-1);
   dt_d = dx_d*u_lb/Uc_d;
 
   tc = lc_/Uc;
 
-  // forceFacdoubleor is doubleo scale dp/dx (nodouble doublehe force). units of dp/dx = kg/(m^2s^2) (force F = kg/m/s^2). 
-  // Hence, we need additionally "/ (pow(lc,2)*pow(dx_d,2))" to scale correctly
   // TODO check units for 2D and 3D
   if(dimension == 2){
-    forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
-    torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
+    forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);
+    torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);
   }else{
-    forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
-    torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);// / (pow(lc_,3)*pow(dx_d,3));
+    forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);
+    torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);
   }
 };
 
@@ -69,7 +65,6 @@ double UnitConversion::get_freq_lb(double freq_phys){
 };
 
 double UnitConversion::get_pos_lb(double pos_phys){
-  //return pos_phys*N/lc;
   return pos_phys/dx;
 }
 

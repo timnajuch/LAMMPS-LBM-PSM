@@ -189,10 +189,26 @@ void LBMPSMLattice::initialise_domain(double dx_, double dy_, double dz_){
         y[index] = j*dy - dy*envelopeWidth + procCoordinates[1]*(ny-2*envelopeWidth)*dy;
         z[index] = k*dz - dz*envelopeWidth + procCoordinates[2]*(nz-2*envelopeWidth)*dz;
 
-
         Fhydx[index] = 0.0;
         Fhydy[index] = 0.0;
         Fhydz[index] = 0.0;
+
+        pData[index].particleID[0] = 0;
+        pData[index].solidFraction[0] = 0.0;
+        pData[index].particleVelocity[0] = 0.0;
+        pData[index].particleVelocity[1] = 0.0;
+        pData[index].particleVelocity[2] = 0.0;
+        pData[index].hydrodynamicForce[0] = 0.0;
+        pData[index].hydrodynamicForce[1] = 0.0;
+        pData[index].hydrodynamicForce[2] = 0.0;
+        pData[index].particleID[1] = 0;
+        pData[index].solidFraction[1] = 0.0;
+        pData[index].particleVelocity[3] = 0.0;
+        pData[index].particleVelocity[4] = 0.0;
+        pData[index].particleVelocity[5] = 0.0;
+        pData[index].hydrodynamicForce[3] = 0.0;
+        pData[index].hydrodynamicForce[4] = 0.0;
+        pData[index].hydrodynamicForce[5] = 0.0;
       }
     }
   }
@@ -292,6 +308,10 @@ double LBMPSMLattice::get_rho(int index){
   return rho[index];
 };
 
+double LBMPSMLattice::get_u(int index){
+  return u[index];
+};
+
 double LBMPSMLattice::get_Fhydx(int index){
   return Fhydx[index];
 };
@@ -354,7 +374,7 @@ void LBMPSMLattice::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, doubl
     pData[index].hydrodynamicForce[1] = 0.0;
     pData[index].hydrodynamicForce[2] = 0.0;
   }
-  if(pData[index].particleID[1] == pID){
+  else if(pData[index].particleID[1] == pID){
     pData[index].particleID[1] = pID;
     pData[index].solidFraction[1] = eps;
     pData[index].particleVelocity[3] = uP[0];
@@ -364,8 +384,7 @@ void LBMPSMLattice::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, doubl
     pData[index].hydrodynamicForce[4] = 0.0;
     pData[index].hydrodynamicForce[5] = 0.0;
   }
-
-  if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[0] == 0){
+  else if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[0] == 0){
     pData[index].particleID[0] = pID;
     pData[index].solidFraction[0] = eps;
     pData[index].particleVelocity[0] = uP[0];
@@ -375,7 +394,7 @@ void LBMPSMLattice::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, doubl
     pData[index].hydrodynamicForce[1] = 0.0;
     pData[index].hydrodynamicForce[2] = 0.0;
   }
-  if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[1] == 0){
+  else if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[1] == 0){
     pData[index].particleID[1] = pID;
     pData[index].solidFraction[1] = eps;
     pData[index].particleVelocity[3] = uP[0];
@@ -400,7 +419,7 @@ void LBMPSMLattice::setToZero(int index, LAMMPS_NS::tagint pID)
     pData[index].hydrodynamicForce[1] = 0.0;
     pData[index].hydrodynamicForce[2] = 0.0;
   }
-  if(pData[index].particleID[1] == pID){
+  else if(pData[index].particleID[1] == pID){
     pData[index].particleID[1] = 0;
     pData[index].solidFraction[1] = 0.0;
     pData[index].particleVelocity[3] = 0.0;
@@ -415,7 +434,7 @@ void LBMPSMLattice::setToZero(int index, LAMMPS_NS::tagint pID)
 
 double LBMPSMLattice::getSolidFractionOnLattice(int index, int pID)
 {
-  return pData[index].particleID[pID];
+  return pData[index].solidFraction[pID];
 }
 
 vector<double> LBMPSMLattice::getSolidVelocityOnLattice(int index, int pID)
@@ -439,6 +458,12 @@ vector<double> LBMPSMLattice::getSolidVelocityOnLattice(int index, int pID)
     returnVelVector[2] = 0.0;
   }
   return returnVelVector;
+}
+
+
+vector<double> LBMPSMLattice::getSolidVelocityOnLattice(int index)
+{
+  return pData[index].particleVelocity;
 }
 
 

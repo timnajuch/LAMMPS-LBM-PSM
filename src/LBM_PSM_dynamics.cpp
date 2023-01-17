@@ -40,7 +40,7 @@ double LBMPSMDynamics::feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, vector<d
 }
 
 
-double LBMPSMDynamics::feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, double rho, vector<double> u){
+double LBMPSMDynamics::feq(int iq_, double rho, vector<double> u){
   return rho * LBMPSMLattice::w[iq_] * 
         (1.0 + ( LBMPSMLattice::e[3*iq_] * u[0] + LBMPSMLattice::e[3*iq_+1] * u[1] + LBMPSMLattice::e[3*iq_+2] * u[2]) / (pow(LBMPSMLattice::cs, 2.0))
         + pow( LBMPSMLattice::e[3*iq_] * u[0] + LBMPSMLattice::e[3*iq_+1] * u[1] + LBMPSMLattice::e[iq_*3+2] * u[2], 2.0) / (2.0*pow(LBMPSMLattice::cs, 4.0))

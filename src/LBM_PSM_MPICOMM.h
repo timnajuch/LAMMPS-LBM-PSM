@@ -12,6 +12,7 @@ Tim Najuch, 2021
 #include <iostream>
 #include <vector>
 #include "mpi.h"
+#include <typeinfo>
 
 using namespace std;
 

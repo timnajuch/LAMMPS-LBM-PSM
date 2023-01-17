@@ -130,9 +130,7 @@ fix_LBM_PSM_BC::~fix_LBM_PSM_BC()
 int fix_LBM_PSM_BC::setmask()
 {
   int mask = 0;
-  mask |= INITIAL_INTEGRATE;
-  mask |= PRE_FORCE;
-  mask |= END_OF_STEP;
+  mask |= POST_FORCE;
   return mask;
 }
 
@@ -143,7 +141,7 @@ void fix_LBM_PSM_BC::init()
 }
 
 
-void fix_LBM_PSM_BC::pre_force(int)
+void fix_LBM_PSM_BC::post_force(int)
 {
   if (update->ntimestep % fixLBMPSM->nevery) return;
 
@@ -220,10 +218,8 @@ void fix_LBM_PSM_BC::pre_force(int)
     if (typeBC == 1)
     {
       if (comm->myloc[1] == 0)
-        //{ zouHe->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, -u_infty ); }
         { zouHe->setZouHeVelBC2D_yn( 0+envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, -u_infty ); }
       if (comm->myloc[1] == comm->procgrid[1]-1)
-        //{ zouHe->setZouHeVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
         { zouHe->setZouHeVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, u_infty ); }
     }
     else if (typeBC == 2)
@@ -237,37 +233,19 @@ void fix_LBM_PSM_BC::pre_force(int)
       if (comm->myloc[1] == comm->procgrid[1]-1)
         { zouHe->setZouHeVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
     }
-
-    // External flow
-  //  if (procCoordinates[0] == 0)
-  //    { boundaries.setZouHeVelBC2D_xn(  envelopeWidth,                      envelopeWidth, dynamics.get_ny()-1-envelopeWidth, u_infty    ); }
-  //  if (procCoordinates[0] == decomposition[0]-1)
-  //    { boundaries.setZouHeDensBC2D_xp( dynamics.get_nx()-1-envelopeWidth,  envelopeWidth, dynamics.get_ny()-1-envelopeWidth, rho_outlet ); }
   }else{
     // Shear
     if (typeBC == 1)
     {
-/*
       if (comm->myloc[1] == 0)
-        { zouHe->setZouHeVelBC3D_yn( 0+envelopeWidth, 
-                                       1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, 
-                                       1+envelopeWidth, fixLBMPSM->dynamics->get_nz()-2-envelopeWidth, 
+        { zouHe->setZouHeVelBC3D_yn( 0+envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
                                        -u_infty, 0.0, 0.0); }
       if (comm->myloc[1] == comm->procgrid[1]-1)
-        { zouHe->setZouHeVelBC3D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 
-                                       1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, 
-                                       1+envelopeWidth, fixLBMPSM->dynamics->get_nz()-2-envelopeWidth, 
-                                       u_infty, 0.0, 0.0 ); }
-*/
-      if (comm->myloc[1] == 0)
-        { zouHe->setZouHeVelBC3D_yn( 0+envelopeWidth, 
-                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, 
-                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth, 
-                                       -u_infty, 0.0, 0.0); }
-      if (comm->myloc[1] == comm->procgrid[1]-1)
-        { zouHe->setZouHeVelBC3D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 
-                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, 
-                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth, 
+        { zouHe->setZouHeVelBC3D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
                                        u_infty, 0.0, 0.0 ); }
     }
   }

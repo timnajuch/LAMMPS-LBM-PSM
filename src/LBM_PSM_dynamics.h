@@ -24,7 +24,7 @@ class LBMPSMDynamics : public LBMPSMLattice {
     ~LBMPSMDynamics();
 
     double feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, vector<double> &rho_, vector<double> &u_);
-    double feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, double rho, vector<double> u);
+    double feq(int iq_, double rho, vector<double> u);
 
     void streamBulk(int i_, int j_, int k_, int iq_);
     void streamBC(int i_, int j_, int k_, int iq_);

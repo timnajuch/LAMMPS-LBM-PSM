@@ -51,7 +51,7 @@ class fix_LBM_PSM_BC : public Fix {
     ~fix_LBM_PSM_BC();
     int setmask();
     void init();
-    void pre_force(int);
+    void post_force(int);
 
     ZouHeBC *zouHe;
 

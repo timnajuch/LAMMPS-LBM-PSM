@@ -18,12 +18,9 @@ fix_LBM_PSM::fix_LBM_PSM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
 {
   if (narg < 15) error->all(FLERR,"Illegal fix lbm-psm command");
 
-  fix_hydroForce_ = nullptr;
-  fix_hydroTorque_ = nullptr;
-  fix_stresslet_ = nullptr;
-
   virial_global_flag = virial_peratom_flag = 1;
   thermo_virial = 1;
+  comm_reverse = 6;
 
   tau = 0.7; // default value for BGK relaxation parameter
 
@@ -66,21 +63,32 @@ fix_LBM_PSM::fix_LBM_PSM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
       iarg += 2;
     } else error->all(FLERR,"Illegal fix lbm-psm command");
   }
+
+  // Allocate memory for storage of forces so that hydrodynamic interaction forces can be still imposed for timesteps between LBM calculations
+  hydrodynamicInteractions = nullptr;
+  grow_arrays(atom->nmax);
+  atom->add_callback(Atom::GROW);
+
+  for (int i=0; i<atom->nmax; i++){
+    for (int j=0; j<6; j++){
+      hydrodynamicInteractions[i][j] = 0.0;
+    }
+  }
+
 }
 
 
 fix_LBM_PSM::~fix_LBM_PSM()
 {
   delete dynamics;
+  memory->destroy(hydrodynamicInteractions);
 }
 
 
 int fix_LBM_PSM::setmask()
 {
   int mask = 0;
-  mask |= INITIAL_INTEGRATE;
-  mask |= PRE_FORCE;
-  mask |= END_OF_STEP;
+  mask |= POST_FORCE;
   return mask;
 }
 
@@ -117,11 +125,11 @@ void fix_LBM_PSM::init()
   }
   
 
-  int nx = domain->xprd/unitConversion->get_dx()+1;
-  int ny = domain->yprd/unitConversion->get_dx()+1;
+  int nx = domain->xprd/unitConversion->get_dx()+1.5;
+  int ny = domain->yprd/unitConversion->get_dx()+1.5;
   int nz = 0;
   if (domain->dimension == 3)
-    {nz = domain->zprd/unitConversion->get_dx()+1; }
+    { nz = domain->zprd/unitConversion->get_dx()+1.5; }
 
   vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
   vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
@@ -134,210 +142,206 @@ void fix_LBM_PSM::init()
 
   exchangeParticleData = new ExchangeParticleData(domain->dimension);
 
-  if(!fix_hydroForce_)
-  {
-    char *fixarg[] = {
-      (char *)"hydroForce",     // fix id
-      (char *)"all",            // fix group
-      (char *)"property/atom",  // fix style: property/atom
-      (char *)"d2_hydroForce",  // name
-      (char *)"3",              // number of array columns
-      (char *)"ghost",          // communicate ghost atom
-      (char *)"yes"
-    };
- 
-    modify->add_fix(7, fixarg, 1);
-    fix_hydroForce_ = (FixPropertyAtom *) modify->fix[modify->nfix-1];
-  }
-
-  if(!fix_hydroTorque_)
-  {
-    char *fixarg[] = {
-      (char *)"hydroTorque",    // fix id
-      (char *)"all",            // fix group
-      (char *)"property/atom",  // fix style: property/atom
-      (char *)"d_hydroTorque",  // name
-      (char *)"ghost",          // communicate ghost atom
-      (char *)"yes"
-    };
-    modify->add_fix(6, fixarg, 1);
-    fix_hydroTorque_ = (FixPropertyAtom *) modify->fix[modify->nfix-1];
-  }
-
-  if(!fix_stresslet_)
-  {
-    char *fixarg[] = {
-      (char *)"stresslet",      // fix id
-      (char *)"all",            // fix group
-      (char *)"property/atom",  // fix style: property/atom
-      (char *)"d2_stresslet",   // name
-      (char *)"6",              // number of array columns
-      (char *)"ghost",          // communicate ghost atom
-      (char *)"yes"
-    };
-    modify->add_fix(7, fixarg, 1);
-    fix_stresslet_ = (FixPropertyAtom *) modify->fix[modify->nfix-1];
+  for (int i=0; i<atom->nmax; i++){
+    for (int j=0; j<6; j++){
+      hydrodynamicInteractions[i][j] = 0.0;
+    }
   }
 }
 
 
-void fix_LBM_PSM::pre_force(int vflag)
+
+void fix_LBM_PSM::post_force(int vflag)
 {
-  if (update->ntimestep % nevery) return;
-  int nPart = atom->nlocal + atom->nghost;
-  vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
-  vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
-  exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->v, atom->omega, atom->radius, boxLength, origin);
+  if (update->ntimestep % nevery)
+  {
+    double **f = atom->f;
+    double **t = atom->torque;
 
-  if(domain->dimension == 2){
-    lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
-    lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic);
+    int nPart = atom->nlocal + atom->nghost;
+    for(int i=0;i<nPart;i++){
+      if (i < atom->nlocal){
+        f[i][0] += hydrodynamicInteractions[i][0];
+        f[i][1] += hydrodynamicInteractions[i][1];
+        f[i][2] += hydrodynamicInteractions[i][2];
+        t[i][0] += hydrodynamicInteractions[i][3];
+        t[i][1] += hydrodynamicInteractions[i][4];
+        t[i][2] += hydrodynamicInteractions[i][5];
+      }
+    }
   }else{
-    lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->xperiodic);
-    lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->yperiodic);
-    lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
-  }
+    int nPart = atom->nlocal + atom->nghost;
+    vector<double> boxLength{domain->xprd, domain->yprd, domain->zprd};
+    vector<double> origin{domain->boxlo[0], domain->boxlo[1], domain->boxlo[2]};
 
-  dynamics->macroCollideStream();
+    exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->v, atom->omega, atom->radius, boxLength, origin);
 
-  double **f = atom->f;
-  double **t = atom->torque;
-
-  int flagHF, ncolumnsHF;
-  int hydroForceFixID = atom->find_custom((char *)"hydroForce", flagHF, ncolumnsHF);
-  int flagHT, ncolumnsHT;
-  int hydroTorqueFixID = atom->find_custom((char *)"hydroTorque", flagHT, ncolumnsHT);
-  int flagS, ncolumnsS;
-  int stressletFixID = atom->find_custom((char *)"stresslet", flagS, ncolumnsS);
-
-  v_init(vflag);
-
-  for(int i=0;i<nPart;i++){
-
-    vector<double> fh;
-    fh.resize(3);
-    fh[0] = 0.0;
-    fh[1] = 0.0;
-    fh[2] = 0.0;
-
-    vector<double> th;
-    th.resize(3);
-    th[0] = 0.0;
-    th[1] = 0.0;
-    th[2] = 0.0;
-
-    vector<double> stresslet;
-    stresslet.resize(6);
-    stresslet[0] = 0.0;
-    stresslet[1] = 0.0;
-    stresslet[2] = 0.0;
-    stresslet[3] = 0.0;
-    stresslet[4] = 0.0;
-    stresslet[5] = 0.0;
-
-    exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, atom->tag[i], atom->x[i], atom->radius[i], fh, th, stresslet);
-
-    if (i < atom->nlocal){
-      f[i][0] += fh[0];
-      f[i][1] += fh[1];
-      f[i][2] += fh[2];
-    }else{ // ghost atoms
-      f[i][0] = fh[0];
-      f[i][1] = fh[1];
-      f[i][2] = fh[2];
+    if(domain->dimension == 2){
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic);
+    }else{
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->xperiodic);
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->yperiodic);
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
     }
 
+    dynamics->macroCollideStream();
 
-    if (i < atom->nlocal){
-      t[i][0] += th[0];
-      t[i][1] += th[1];
-      t[i][2] += th[2];
-    }else{ // ghost atoms
-      t[i][0] = th[0];
-      t[i][1] = th[1];
-      t[i][2] = th[2];
-    }
+    double **f = atom->f;
+    double **t = atom->torque;
+    v_init(vflag);
+
+    for(int i=0;i<nPart;i++){
+      vector<double> fh;
+      fh.resize(3);
+      fh[0] = 0.0;
+      fh[1] = 0.0;
+      fh[2] = 0.0;
+
+      vector<double> th;
+      th.resize(3);
+      th[0] = 0.0;
+      th[1] = 0.0;
+      th[2] = 0.0;
+
+      vector<double> stresslet;
+      stresslet.resize(6);
+      stresslet[0] = 0.0;
+      stresslet[1] = 0.0;
+      stresslet[2] = 0.0;
+      stresslet[3] = 0.0;
+      stresslet[4] = 0.0;
+      stresslet[5] = 0.0;
+
+      exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, atom->tag[i], atom->x[i], atom->radius[i], fh, th, stresslet);
+
+      if (i < atom->nlocal){
+        f[i][0] += fh[0];
+        f[i][1] += fh[1];
+        f[i][2] += fh[2];
+      }else{ // ghost atoms
+        f[i][0] = fh[0];
+        f[i][1] = fh[1];
+        f[i][2] = fh[2];
+      }
+
+      if (i < atom->nlocal){
+        t[i][0] += th[0];
+        t[i][1] += th[1];
+        t[i][2] += th[2];
+      }else{ // ghost atoms
+        t[i][0] = th[0];
+        t[i][1] = th[1];
+        t[i][2] = th[2];
+      }
+      hydrodynamicInteractions[i][0] = fh[0];
+      hydrodynamicInteractions[i][1] = fh[1];
+      hydrodynamicInteractions[i][2] = fh[2];
+      hydrodynamicInteractions[i][3] = th[0];
+      hydrodynamicInteractions[i][4] = th[1];
+      hydrodynamicInteractions[i][5] = th[2];
 
       double stresslet_arr[6] = {stresslet[0], stresslet[1], stresslet[2], stresslet[3], stresslet[4], stresslet[5]};
       v_tally(i, stresslet_arr);
-
+    }
   }
-  comm->reverse_comm();// todo check if sufficient or if i need to define some virtual functions etc
-
 }
 
 
-int fix_LBM_PSM::get_nx()
+//==========================================================================
+//   allocate atom-based array
+//==========================================================================
+void fix_LBM_PSM::grow_arrays(int nmax)
 {
-  return dynamics->get_nx();
+  memory->grow(hydrodynamicInteractions,nmax,6,"fix_LBM_PSM:hydrodynamicInteractions");
 }
 
-
-int fix_LBM_PSM::get_ny()
+//==========================================================================
+//   copy values within local atom-based array
+//==========================================================================
+void fix_LBM_PSM::copy_arrays(int i, int j, int /*delflag*/)
 {
-  return dynamics->get_ny();
+  hydrodynamicInteractions[j][0] = hydrodynamicInteractions[i][0];
+  hydrodynamicInteractions[j][1] = hydrodynamicInteractions[i][1];
+  hydrodynamicInteractions[j][2] = hydrodynamicInteractions[i][2];
+  hydrodynamicInteractions[j][3] = hydrodynamicInteractions[i][3];
+  hydrodynamicInteractions[j][4] = hydrodynamicInteractions[i][4];
+  hydrodynamicInteractions[j][5] = hydrodynamicInteractions[i][5];
 }
 
-
-vector<double> fix_LBM_PSM::get_x()
+//==========================================================================
+//   pack values in local atom-based array for exchange with another proc
+//==========================================================================
+int fix_LBM_PSM::pack_exchange(int i, double *buf)
 {
-  return dynamics->get_x();
+  buf[0] = hydrodynamicInteractions[i][0];
+  buf[1] = hydrodynamicInteractions[i][1];
+  buf[2] = hydrodynamicInteractions[i][2];
+  buf[3] = hydrodynamicInteractions[i][3];
+  buf[4] = hydrodynamicInteractions[i][4];
+  buf[5] = hydrodynamicInteractions[i][5];
+
+  return 6;
 }
 
 
-vector<double> fix_LBM_PSM::get_y()
+int fix_LBM_PSM::pack_reverse_comm_size(int n, int first)
 {
-  return dynamics->get_y();
+  int i,last;
+
+  int m = 0;
+  last = first + n;
+
+  for (i = first; i < last; i++)
+    m += 6;
+
+  return m;
 }
 
 
-vector<double> fix_LBM_PSM::get_rho()
+//==========================================================================
+//   unpack values in local atom-based array from exchange with another proc
+//==========================================================================
+int fix_LBM_PSM::unpack_exchange(int nlocal, double *buf)
 {
-  return dynamics->get_rho();
+  hydrodynamicInteractions[nlocal][0] = buf[0];
+  hydrodynamicInteractions[nlocal][1] = buf[1];
+  hydrodynamicInteractions[nlocal][2] = buf[2];
+  hydrodynamicInteractions[nlocal][3] = buf[3];
+  hydrodynamicInteractions[nlocal][4] = buf[4];
+  hydrodynamicInteractions[nlocal][5] = buf[5];
+
+  return 6;
 }
 
 
-vector<double> fix_LBM_PSM::get_u()
+int fix_LBM_PSM::pack_reverse_comm(int n, int first, double *buf)
 {
-  return dynamics->get_u();
-}
+  int i,k,last;
 
+  int m = 0;
+  last = first + n;
 
-vector<double> fix_LBM_PSM::get_B()
-{
-  return dynamics->get_B();
-}
-
-
-double **fix_LBM_PSM::get_force_ptr()
-{
-  return fix_hydroForce_->array_atom;
-}
-
-double **fix_LBM_PSM::get_torque_ptr()
-{
-  return fix_hydroTorque_->array_atom;
-}
-
-double **fix_LBM_PSM::get_stresslet_ptr()
-{
-  return fix_stresslet_->array_atom;
-}
-
-
-/*
-  void FixLbCouplingOnetoone::post_run()
-  {
-    // need one very last forward_comm to make sure 
-    // that velocities on owned and ghost particles match
-    timer->stamp();
-    comm->forward_comm();
-    timer->stamp(TIME_COMM);
+  for (i = first; i < last; i++) {
+    for (k = 0; k < 6; k++){
+      buf[m++] = hydrodynamicInteractions[i][k];
+    }
   }
-  void FixLbCouplingOnetoone::comm_force_torque()
-  {
-    fix_dragforce_->do_reverse_comm();
-    fix_hdtorque_->do_reverse_comm();
-    fix_stresslet_->do_reverse_comm();
+
+  return m;
+}
+
+
+void fix_LBM_PSM::unpack_reverse_comm(int n, int *list, double *buf)
+{
+  int i,j,k,kk,ncount;
+
+  int m = 0;
+
+  for (i = 0; i < n; i++) {
+    for (k = 0; k < 6; k++){
+      j = list[i];
+      hydrodynamicInteractions[j][k] += buf[m++];
+    }
   }
-*/
+}
