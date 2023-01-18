@@ -165,19 +165,19 @@ void LBMPSMBGKDynamics::collision(int i_, int j_, int k_, int iq_){
 
   if(iq_ == 0)
   {
-    LBMPSMLattice::set_Fhydx(ind_phys_1D, 0, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_]);
-    LBMPSMLattice::set_Fhydy(ind_phys_1D, 0, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_+1]);
-    LBMPSMLattice::set_Fhydz(ind_phys_1D, 0, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_+2]);
-    LBMPSMLattice::set_Fhydx(ind_phys_1D, 1, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_]);
-    LBMPSMLattice::set_Fhydy(ind_phys_1D, 1, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_+1]);
-    LBMPSMLattice::set_Fhydz(ind_phys_1D, 1, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_+2]);
+    LBMPSMLattice::set_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_], 0);
+    LBMPSMLattice::set_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_+1], 1);
+    LBMPSMLattice::set_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_+2], 2);
+    LBMPSMLattice::set_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_], 0);
+    LBMPSMLattice::set_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_+1], 1);
+    LBMPSMLattice::set_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_+2], 2);
   }else{
-    LBMPSMLattice::add_Fhydx(ind_phys_1D, 0, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_]);
-    LBMPSMLattice::add_Fhydy(ind_phys_1D, 0, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_+1]);
-    LBMPSMLattice::add_Fhydz(ind_phys_1D, 0, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_+2]);
-    LBMPSMLattice::add_Fhydx(ind_phys_1D, 1, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_]);
-    LBMPSMLattice::add_Fhydy(ind_phys_1D, 1, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_+1]);
-    LBMPSMLattice::add_Fhydz(ind_phys_1D, 1, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_+2]);
+    LBMPSMLattice::add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_], 0);
+    LBMPSMLattice::add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_+1], 1);
+    LBMPSMLattice::add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * LBMPSMLattice::e[3*iq_+2], 2);
+    LBMPSMLattice::add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_], 0);
+    LBMPSMLattice::add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_+1], 1);
+    LBMPSMLattice::add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * LBMPSMLattice::e[3*iq_+2], 2);
   }
 
 }

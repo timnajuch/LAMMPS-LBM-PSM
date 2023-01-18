@@ -63,10 +63,6 @@ class LBMPSMLattice{
     vector<double> u;
     vector<double> us;
 
-    vector<double> Fhydx;
-    vector<double> Fhydy;
-    vector<double> Fhydz;
-
     vector<ParticleDataOnLattice> pData;
 
     void set_f(int i_, int j_, int k_, int iq_, double value_);
@@ -136,15 +132,8 @@ class LBMPSMLattice{
 
     ParticleDataOnLattice getParticleDataOnLatticeNode(int index);
 
-    void set_Fhydx(int index, int pID, double Fhydx_);
-    void set_Fhydy(int index, int pID, double Fhydy_);
-    void set_Fhydz(int index, int pID, double Fhydz_);
-    void add_Fhydx(int index, int pID, double Fhydx_);
-    void add_Fhydy(int index, int pID, double Fhydy_);
-    void add_Fhydz(int index, int pID, double Fhydz_);
-    double get_Fhydx(int index);
-    double get_Fhydy(int index);
-    double get_Fhydz(int index);
+    void add_Fhyd(int index, LAMMPS_NS::tagint pID, double Fhyd, int dir);
+    void set_Fhyd(int index, LAMMPS_NS::tagint pID, double Fhyd, int dir);
  
     vector<int> get_procCoordinates();
    

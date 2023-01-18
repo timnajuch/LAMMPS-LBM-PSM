@@ -233,7 +233,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
 */
   int nxTotal = 0;
   for(int iproc = 0; iproc < decomposition[0]; iproc++){
-      nxTotal += fixLBMPSM->dynamics->get_nxLocal(iproc); }//std::cout << "rank, nxLocal, i, decomposition: " << comm->me << " / " << fixLBMPSM->dynamics->get_nxLocal(i) << " / " << i << " / " << decomposition[0] << std::endl;}
+      nxTotal += fixLBMPSM->dynamics->get_nxLocal(iproc); }
 
   int nyTotal = 0;
     for(int jproc = 0; jproc < decomposition[1]; jproc++){
@@ -248,7 +248,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
   //MPI_Allreduce(MPI_IN_PLACE, &nzTotal, 1, MPI_INT, MPI_SUM, world);
 
   if(comm->me == 0){
-    std::cout << "nxTotal, nyTotal, nzTotal: " << nxTotal << " / " << nyTotal << " / " << nzTotal << std::endl;
+
   //vector<double> point_id(nx*decomposition[0]*ny*decomposition[1]*nz*decomposition[2], 0.0);
 
   vector<double> x_vtk = x0;

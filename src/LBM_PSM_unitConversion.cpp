@@ -32,7 +32,7 @@ UnitConversion::UnitConversion(double rhof_, double nu_, double lc_, double Re_,
 
   if(dimension == 2){
     // TODO check units for 2D
-    forceFactor = rhof_ * pow(lc_,3)/pow(tc,2) * pow(dx_d,3)/pow(dt_d,2);
+    forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);
     torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);
   }else{
     forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);

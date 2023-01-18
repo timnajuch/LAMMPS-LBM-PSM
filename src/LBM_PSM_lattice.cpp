@@ -120,10 +120,6 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decompositio
   u = vector<double>(nx*ny*nz*3,0.0);
   us = vector<double>(nx*ny*nz*3,0.0);
 
-  Fhydx = vector<double>(nx*ny*nz,0.0);
-  Fhydy = vector<double>(nx*ny*nz,0.0);
-  Fhydz = vector<double>(nx*ny*nz,0.0);
-
   pData.resize(nx*ny*nz);
 
   if(q == 9){
@@ -234,8 +230,6 @@ void LBMPSMLattice::initialise_channel_geometry(double wallHeightHalf_, double e
           B[ind_2D] = 0.0;
         }
 
-        Fhydx[ind_2D] = 0.0;
-        Fhydy[ind_2D] = 0.0;
         //rho[ind_2D] = 1.0;
      
       }
@@ -267,10 +261,6 @@ void LBMPSMLattice::initialise_domain(double dx_, double dy_, double dz_){
         x[index] = i*dx - dx*envelopeWidth + (nxTotal - procCoordinates[0]*2*envelopeWidth)*dx;
         y[index] = j*dy - dy*envelopeWidth + (nyTotal - procCoordinates[1]*2*envelopeWidth)*dy;
         z[index] = k*dz - dz*envelopeWidth + (nzTotal - procCoordinates[2]*2*envelopeWidth)*dz;
-
-        Fhydx[index] = 0.0;
-        Fhydy[index] = 0.0;
-        Fhydz[index] = 0.0;
 
         pData[index].particleID[0] = 0;
         pData[index].solidFraction[0] = 0.0;
@@ -427,56 +417,35 @@ double LBMPSMLattice::get_u(int index){
   return u[index];
 }
 
-double LBMPSMLattice::get_Fhydx(int index){
-  return Fhydx[index];
-}
 
-double LBMPSMLattice::get_Fhydy(int index){
-  return Fhydy[index];
-}
-
-double LBMPSMLattice::get_Fhydz(int index){
-  return Fhydz[index];
-}
-
-void LBMPSMLattice::set_Fhydx(int index, int pID, double Fhydx_)
+void LBMPSMLattice::set_Fhyd(int index, LAMMPS_NS::tagint pID, double Fhyd, int dir)
 {
-  Fhydx[index] = Fhydx_;
-  pData[index].hydrodynamicForce[3*pID+0] = Fhydx_;
+  if(pData[index].particleID[0] == pID){
+    pData[index].hydrodynamicForce[3*0+dir] = Fhyd;
+  }
+  else if(pData[index].particleID[1] == pID){
+    pData[index].hydrodynamicForce[3*1+dir] = Fhyd;
+  }
+  else if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[0] == 0){
+    pData[index].hydrodynamicForce[3*0+dir] = Fhyd;
+  }
+  else if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[1] == 0){
+    pData[index].hydrodynamicForce[3*1+dir] = Fhyd;
+  }
 }
 
-void LBMPSMLattice::set_Fhydy(int index, int pID, double Fhydy_)
+
+void LBMPSMLattice::add_Fhyd(int index, LAMMPS_NS::tagint pID, double Fhyd, int dir)
 {
-  Fhydy[index] = Fhydy_;
-  pData[index].hydrodynamicForce[3*pID+1] = Fhydy_;
-}
-
-void LBMPSMLattice::set_Fhydz(int index, int pID, double Fhydz_)
-{
-  Fhydz[index] = Fhydz_;
-  pData[index].hydrodynamicForce[3*pID+2] = Fhydz_;
-}
-
-void LBMPSMLattice::add_Fhydx(int index, int pID, double Fhydx_)
-{
-  Fhydx[index] += Fhydx_;
-  pData[index].hydrodynamicForce[3*pID+0] += Fhydx_;
-}
-
-void LBMPSMLattice::add_Fhydy(int index, int pID, double Fhydy_)
-{
-  Fhydy[index] += Fhydy_;
-  pData[index].hydrodynamicForce[3*pID+1] += Fhydy_;
-}
-
-void LBMPSMLattice::add_Fhydz(int index, int pID, double Fhydz_)
-{
-  Fhydz[index] += Fhydz_;
-  pData[index].hydrodynamicForce[3*pID+2] += Fhydz_;
+  if(pData[index].particleID[0] == pID){
+    pData[index].hydrodynamicForce[3*0+dir] += Fhyd;
+  }
+  else if(pData[index].particleID[1] == pID){
+    pData[index].hydrodynamicForce[3*1+dir] += Fhyd;
+  }
 }
 
 
-// Extend to two or morge particles
 void LBMPSMLattice::setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[3], double eps)
 {
   if(pData[index].particleID[0] == pID){
