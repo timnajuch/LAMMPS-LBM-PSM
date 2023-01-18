@@ -47,15 +47,11 @@ class LBMPSMLattice{
     double c, cs , csPow2;
     
     double dx, dy, dz;
-
   
     vector<double> f;
     vector<double> f0;
     vector<double> fcoll;
 
-
-    vector<double> procOrigin;
-    vector<double> procLength;
     vector<double> x, y, z;
     vector<double> rho;
     vector<double> B;
@@ -86,7 +82,6 @@ class LBMPSMLattice{
     LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx);
     ~LBMPSMLattice();
 
-    void initialise_channel_geometry(double wallHeightHalf_, double eps_, double nychannel_, double dx_, double dy_, double dz_);
     void initialise_domain(double dx_, double dy_, double dz_);
 
     vector<double> get_B();
@@ -103,8 +98,6 @@ class LBMPSMLattice{
     vector<double>& get_z_reference();
     vector<double>& get_u_reference();
 
-    vector<double> getProcOrigin(){ return procOrigin; }
-    vector<double> getProcLength(){ return procLength; }
     int* getProcCoordinates(){ return procCoordinates; }
 
     int get_nx();

@@ -21,9 +21,6 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decompositio
   procCoordinates[1] = procCoordinates_[1];
   procCoordinates[2] = procCoordinates_[2];
 
-  procLength.resize(3); // todo check if needed
-  procOrigin.resize(3);
-
   nxLocal.resize(decomposition[0]*decomposition[1]*decomposition[2]);
   nyLocal.resize(decomposition[0]*decomposition[1]*decomposition[2]);
   nzLocal.resize(decomposition[0]*decomposition[1]*decomposition[2]);
@@ -102,10 +99,6 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decompositio
     int procIndex = iproc*decomposition[1]*decomposition[2] + jproc*decomposition[2] + kproc;
     nzLocalGrid[kproc] = nzLocal[procIndex];
   }
-
-  procOrigin[0] = origin_[0] + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
-  procOrigin[1] = origin_[1] + procCoordinates[1]*(ny-2*envelopeWidth)*dx;
-  procOrigin[2] = origin_[2] + procCoordinates[2]*(nz-2*envelopeWidth)*dx;
 
   f = vector<double>(nx*ny*nz*q,0.0);
   f0 = vector<double>(nx*ny*nz*q,0.0);
@@ -205,37 +198,6 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decompositio
 
 
 LBMPSMLattice::~LBMPSMLattice(){}
-
-
-void LBMPSMLattice::initialise_channel_geometry(double wallHeightHalf_, double eps_, double nychannel_, double dx_, double dy_, double dz_){
-  dx = dx_;
-  dy = dy_;
-  dz = dz_;
-  
-  for(int i = 0; i < nx; ++i){
-    for(int j = 0; j < ny; ++j){
-      for(int k = 0; k < nz; ++k){
-// todo exten the stuf within the loops to 3D 
-        int ind_2D = i*ny + j;
-
-        x[ind_2D] = i*dx - dx*envelopeWidth + procCoordinates[0]*(nx-2*envelopeWidth)*dx;
-        y[ind_2D] = -(wallHeightHalf_-1.0+0.5+1.0*eps_)*dy+j*dy + procCoordinates[1]*(ny-2*envelopeWidth)*dy - dy*envelopeWidth;
-
-        // Walls placed on horizontal boundaries
-        if((j < (int)(0.0+wallHeightHalf_)) || (j > (int)(ny-1.0-wallHeightHalf_))){
-          B[ind_2D] = 1.0;
-        }else if((j == (int)(0.0+wallHeightHalf_)) || (j == (int)(ny-1.0-wallHeightHalf_))){
-          B[ind_2D] = eps_;
-        }else{
-          B[ind_2D] = 0.0;
-        }
-
-        //rho[ind_2D] = 1.0;
-     
-      }
-    }
-  }
-}
 
 
 void LBMPSMLattice::initialise_domain(double dx_, double dy_, double dz_){
