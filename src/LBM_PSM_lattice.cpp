@@ -13,7 +13,7 @@ Tim Najuch, 2022
 #include "LBM_PSM_lattice.h"
 
 
-LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx){
+LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_){
   envelopeWidth = 1;
   dimension = dimension_;
 
@@ -38,9 +38,7 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decompositio
       nx = ((int)(nx_/decomposition[0])) + nx_ - ((int)(nx_/decomposition[0]))*decomposition[0] + envelopeWidth*2;
     }
   }
-  //nxLocal[procCoordinates[0]] = nx;
 
-  //ny = ny_/decomposition[1] + envelopeWidth*2;
   if ( ny_ % decomposition[1] == 0){
     ny = ny_/decomposition[1] + envelopeWidth*2;
   }else{
@@ -50,13 +48,11 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decompositio
       ny = ((int)(ny_/decomposition[1])) + ny_ - ((int)(ny_/decomposition[1]))*decomposition[1] + envelopeWidth*2;
     }
   }
-  //nyLocal[procCoordinates[1]] = ny;
 
   nz = 1;
   q = 9;
   if (dimension == 3)
-  { 
-    //nz = nz_/decomposition[2] + envelopeWidth*2;
+  {
     if ( nz_ % decomposition[2] == 0){
       nz = nz_/decomposition[2] + envelopeWidth*2;
     }else{
@@ -66,7 +62,6 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decompositio
         nz = ((int)(nz_/decomposition[2])) + nz_ - ((int)(nz_/decomposition[2]))*decomposition[2] + envelopeWidth*2;
       }
     }
-    //nzLocal[procCoordinates[2]] = nz;
 
     q = 19;
   }
@@ -103,6 +98,10 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decompositio
   f = vector<double>(nx*ny*nz*q,0.0);
   f0 = vector<double>(nx*ny*nz*q,0.0);
   fcoll = vector<double>(nx*ny*nz*q,0.0);
+
+  origin_global.push_back(origin_[0]);
+  origin_global.push_back(origin_[1]);
+  origin_global.push_back(origin_[2]);
 
   B = vector<double>(nx*ny*nz,0.0);
   rho = vector<double>(nx*ny*nz,0.0);
@@ -220,9 +219,9 @@ void LBMPSMLattice::initialise_domain(double dx_, double dy_, double dz_){
 
         int index = i*ny*nz + j*nz + k;
 
-        x[index] = i*dx - dx*envelopeWidth + (nxTotal - procCoordinates[0]*2*envelopeWidth)*dx;
-        y[index] = j*dy - dy*envelopeWidth + (nyTotal - procCoordinates[1]*2*envelopeWidth)*dy;
-        z[index] = k*dz - dz*envelopeWidth + (nzTotal - procCoordinates[2]*2*envelopeWidth)*dz;
+        x[index] = origin_global[0] + i*dx - dx*envelopeWidth + (nxTotal - procCoordinates[0]*2*envelopeWidth)*dx;
+        y[index] = origin_global[1] + j*dy - dy*envelopeWidth + (nyTotal - procCoordinates[1]*2*envelopeWidth)*dy;
+        z[index] = origin_global[2] + k*dz - dz*envelopeWidth + (nzTotal - procCoordinates[2]*2*envelopeWidth)*dz;
 
         pData[index].particleID[0] = 0;
         pData[index].solidFraction[0] = 0.0;

@@ -12,8 +12,8 @@ Tim Najuch, 2022
 
 #include "LBM_PSM_BGK_dynamics.h"
 
-LBMPSMBGKDynamics::LBMPSMBGKDynamics(double tau_, int nx_, int ny_, int nz_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx_) :
-  LBMPSMDynamics(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_, dx_), tau(tau_), F_lbm(F_lbm_) {}
+LBMPSMBGKDynamics::LBMPSMBGKDynamics(double tau_, int nx_, int ny_, int nz_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_) :
+  LBMPSMDynamics(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_), tau(tau_), F_lbm(F_lbm_) {}
 
 
 LBMPSMBGKDynamics::~LBMPSMBGKDynamics(){}

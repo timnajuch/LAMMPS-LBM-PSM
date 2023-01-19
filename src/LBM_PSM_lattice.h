@@ -52,6 +52,7 @@ class LBMPSMLattice{
     vector<double> f0;
     vector<double> fcoll;
 
+    vector<double> origin_global;
     vector<double> x, y, z;
     vector<double> rho;
     vector<double> B;
@@ -79,7 +80,7 @@ class LBMPSMLattice{
     int procCoordinates[3];
 
   public:
-    LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_, double dx);
+    LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_);
     ~LBMPSMLattice();
 
     void initialise_domain(double dx_, double dy_, double dz_);

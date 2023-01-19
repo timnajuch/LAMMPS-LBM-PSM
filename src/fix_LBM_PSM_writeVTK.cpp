@@ -52,6 +52,18 @@ void WriteVTK::init()
   nx = fixLBMPSM->dynamics->get_nx();
   ny = fixLBMPSM->dynamics->get_ny();
   nz = fixLBMPSM->dynamics->get_nz();
+
+  ostringstream timeStringTmp;  
+  timeStringTmp << "flowField_" << setw(10) << setfill('0') << "0" << ".vtk";
+  string timeString(timeStringTmp.str());
+
+  write_vtk(timeString,
+            fixLBMPSM->dynamics->get_x_reference(), 1.0,
+            fixLBMPSM->dynamics->get_y_reference(), 1.0,
+            fixLBMPSM->dynamics->get_z_reference(), 1.0,
+            fixLBMPSM->dynamics->get_B_reference(), 1.0,
+            fixLBMPSM->dynamics->get_rho_reference(), fixLBMPSM->get_rho(),
+            fixLBMPSM->dynamics->get_u_reference(), 0.0);
 }
 
 
