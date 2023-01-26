@@ -108,6 +108,15 @@ void fix_LBM_PSM::init()
 
   update->dt = unitConversion->get_phys_time(1.0)/((double)nevery);
 
+  double Ma = unitConversion->get_u_lb()/(1.0/sqrt(3.0));
+  if (Ma > 0.3){
+    error->all(FLERR,"Mach number is Ma > 0.3. Aborting simulation. Choose parameters which give Ma < 0.3 for stability reasons.");
+  }
+  else{  
+    std::string mesg = fmt::format("Mach number is Ma = {:.2}\n", Ma);
+    utils::logmesg(lmp,mesg);
+  }
+
   vector<double> F_lbm(3,0.0); // external forcing such as gravity. not incorporated yet.
   double SMALL = 1e-15;
   if(  pow(((double)((int)(domain->xprd/unitConversion->get_dx()+0.5)) - domain->xprd/unitConversion->get_dx()), 2.0) > SMALL
@@ -159,16 +168,14 @@ void fix_LBM_PSM::post_force(int vflag)
     double **f = atom->f;
     double **t = atom->torque;
 
-    int nPart = atom->nlocal + atom->nghost;
+    int nPart = atom->nlocal;
     for(int i=0;i<nPart;i++){
-      if (i < atom->nlocal){
         f[i][0] += hydrodynamicInteractions[i][0];
         f[i][1] += hydrodynamicInteractions[i][1];
         f[i][2] += hydrodynamicInteractions[i][2];
         t[i][0] += hydrodynamicInteractions[i][3];
         t[i][1] += hydrodynamicInteractions[i][4];
         t[i][2] += hydrodynamicInteractions[i][5];
-      }
     }
   }else{
     comm->forward_comm();
@@ -237,6 +244,7 @@ void fix_LBM_PSM::post_force(int vflag)
         t[i][1] = th[1];
         t[i][2] = th[2];
       }
+
       hydrodynamicInteractions[i][0] = fh[0];
       hydrodynamicInteractions[i][1] = fh[1];
       hydrodynamicInteractions[i][2] = fh[2];
@@ -246,9 +254,10 @@ void fix_LBM_PSM::post_force(int vflag)
 
       double stresslet_arr[6] = {stresslet[0], stresslet[1], stresslet[2], stresslet[3], stresslet[4], stresslet[5]};
       v_tally(i, stresslet_arr);
-
-      comm->reverse_comm();
+      
     }
+    comm->reverse_comm();
+    comm->reverse_comm_fix(this,0);
   }
 }
 
