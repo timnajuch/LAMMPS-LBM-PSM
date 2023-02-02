@@ -105,12 +105,14 @@ class LBMPSMLattice{
     int get_ny();
     int get_nz();
     int get_envelopeWidth(){ return envelopeWidth; }
+    int get_q(){ return q; }
 
     int get_nxLocal(int iProcIndex);
     int get_nyLocal(int jProcIndex);
     int get_nzLocal(int kProcIndex);
 
     vector<double>& getVector_f(){ return f; }
+    void setVector_f(vector<double>& fcopy) { f = fcopy; }; // Function used to copy the population values read from a restart file
 
     void set_B(int index, double B_);
     double get_B(int index);

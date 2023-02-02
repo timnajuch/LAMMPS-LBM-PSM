@@ -22,6 +22,8 @@ fix_LBM_PSM::fix_LBM_PSM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
 
   tau = 0.7; // default value for BGK relaxation parameter
 
+  F_ext = vector<double>(3, 0.0);
+
   int iarg = 3;
   while (iarg < narg) {
     if (strcmp(arg[iarg],"every") == 0) {
@@ -59,6 +61,12 @@ fix_LBM_PSM::fix_LBM_PSM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
       tau = utils::numeric(FLERR,arg[iarg+1],false,lmp);
       if (tau <= 0.5) error->all(FLERR,"Illegal fix lbm-psm command");
       iarg += 2;
+    } else if (strcmp(arg[iarg],"Fext") == 0) {
+      if (iarg+4 > narg) error->all(FLERR,"Illegal fix lbm-psm command");
+      F_ext[0] = utils::numeric(FLERR,arg[iarg+1],false,lmp);
+      F_ext[1] = utils::numeric(FLERR,arg[iarg+2],false,lmp);
+      F_ext[2] = utils::numeric(FLERR,arg[iarg+3],false,lmp);
+      iarg += 4;
     } else error->all(FLERR,"Illegal fix lbm-psm command");
   }
 
@@ -110,14 +118,18 @@ void fix_LBM_PSM::init()
 
   double Ma = unitConversion->get_u_lb()/(1.0/sqrt(3.0));
   if (Ma > 0.3){
-    error->all(FLERR,"Mach number is Ma > 0.3. Aborting simulation. Choose parameters which give Ma < 0.3 for stability reasons.");
+    if (comm->me == 0)
+      { error->all(FLERR,"Mach number is Ma > 0.3. Aborting simulation. Choose parameters which give Ma < 0.3 for stability reasons."); }
   }
-  else{  
-    std::string mesg = fmt::format("Mach number is Ma = {:.2}\n", Ma);
-    utils::logmesg(lmp,mesg);
+  else{
+    if (comm->me == 0){
+      std::string mesg = fmt::format("Mach number is Ma = {:.2}\n", Ma);
+      utils::logmesg(lmp,mesg);
+      mesg = fmt::format("DEM timestep is dt = {:.6}\n", update->dt);
+      utils::logmesg(lmp,mesg);
+    }
   }
 
-  vector<double> F_lbm(3,0.0); // external forcing such as gravity. not incorporated yet.
   double SMALL = 1e-15;
   if(  pow(((double)((int)(domain->xprd/unitConversion->get_dx()+0.5)) - domain->xprd/unitConversion->get_dx()), 2.0) > SMALL
     || pow(((double)((int)(domain->yprd/unitConversion->get_dx()+0.5)) - domain->yprd/unitConversion->get_dx()), 2.0) > SMALL
@@ -144,6 +156,9 @@ void fix_LBM_PSM::init()
   if (domain->dimension == 2)
     { origin[2] = 0.0; }
 
+  vector<double> F_lbm;
+  F_lbm = unitConversion->get_volume_force_lb(F_ext);
+
   dynamics = new LBMPSMBGKDynamics(tau, nx, ny, nz, 9, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension);
 
   dynamics->initialise_domain(unitConversion->get_dx(), unitConversion->get_dx(), unitConversion->get_dx());
@@ -169,7 +184,7 @@ void fix_LBM_PSM::post_force(int vflag)
     double **t = atom->torque;
 
     int nPart = atom->nlocal;
-    for(int i=0;i<nPart;i++){
+    for(int i = 0; i < nPart; i++){
         f[i][0] += hydrodynamicInteractions[i][0];
         f[i][1] += hydrodynamicInteractions[i][1];
         f[i][2] += hydrodynamicInteractions[i][2];
@@ -187,12 +202,12 @@ void fix_LBM_PSM::post_force(int vflag)
     exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->v, atom->omega, atom->radius);
 
     if(domain->dimension == 2){
-      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
-      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic);
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic);
     }else{
-      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 0, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->xperiodic);
-      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 1, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->yperiodic);
-      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), false, 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 0, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->xperiodic);
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 1, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->yperiodic);
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
     }
 
     dynamics->macroCollideStream();
@@ -201,21 +216,22 @@ void fix_LBM_PSM::post_force(int vflag)
     double **t = atom->torque;
     v_init(vflag);
 
-    for(int i=0;i<nPart;i++){
-      vector<double> fh;
-      fh.resize(3);
+    vector<double> fh;
+    fh.resize(3);
+    vector<double> th;
+    th.resize(3);
+    vector<double> stresslet;
+    stresslet.resize(6);
+
+    for(int i = 0; i < nPart; i++){
       fh[0] = 0.0;
       fh[1] = 0.0;
       fh[2] = 0.0;
-
-      vector<double> th;
-      th.resize(3);
+      
       th[0] = 0.0;
       th[1] = 0.0;
       th[2] = 0.0;
 
-      vector<double> stresslet;
-      stresslet.resize(6);
       stresslet[0] = 0.0;
       stresslet[1] = 0.0;
       stresslet[2] = 0.0;
@@ -245,6 +261,7 @@ void fix_LBM_PSM::post_force(int vflag)
         t[i][2] = th[2];
       }
 
+      // Store forces and torque for timesteps when LBM is not called
       hydrodynamicInteractions[i][0] = fh[0];
       hydrodynamicInteractions[i][1] = fh[1];
       hydrodynamicInteractions[i][2] = fh[2];
@@ -254,8 +271,9 @@ void fix_LBM_PSM::post_force(int vflag)
 
       double stresslet_arr[6] = {stresslet[0], stresslet[1], stresslet[2], stresslet[3], stresslet[4], stresslet[5]};
       v_tally(i, stresslet_arr);
-      
     }
+
+    // Communicate (and sum) forces from ghost particle back to the original particle
     comm->reverse_comm();
     comm->reverse_comm_fix(this,0);
   }

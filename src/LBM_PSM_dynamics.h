@@ -33,6 +33,11 @@ class LBMPSMDynamics : public LBMPSMLattice {
     void streamBulk(int i_, int j_, int k_, int iq_);
     void streamBC(int i_, int j_, int k_, int iq_);
 
+    // External force according to Guo et al. (2002). When called needs to be multiplied by (1-0.5/tau)
+    double F_iq(int iq_, vector<double> u, vector<double> F);
+    double F_iq(int iq_, int ind_phys_2D_, vector<double>& u, vector<double> F);
+
 };
 
 #endif
+

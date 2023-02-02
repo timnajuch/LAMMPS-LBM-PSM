@@ -65,3 +65,19 @@ void LBMPSMDynamics::streamBC(int i_, int j_, int k_, int iq_)
       LBMPSMLattice::set_fcoll( i_ + LBMPSMLattice::e[3*iq_], j_ + LBMPSMLattice::e[3*iq_+1], k_ + LBMPSMLattice::e[3*iq_+2], iq_, LBMPSMLattice::get_f(i_, j_, k_, iq_ ) );
     }
 }
+
+
+double LBMPSMDynamics::F_iq(int iq_, vector<double> u, vector<double> F){
+  return LBMPSMLattice::w[iq_] * 
+        ( ( (LBMPSMLattice::e[3*iq_] - u[0]) * F[0] + (LBMPSMLattice::e[3*iq_+1] - u[1]) * F[1] + (LBMPSMLattice::e[3*iq_+2] - u[2]) * F[2]) / pow(LBMPSMLattice::cs, 2.0)
+          + ( (LBMPSMLattice::e[3*iq_] * u[0] + LBMPSMLattice::e[3*iq_+1] * u[1] + LBMPSMLattice::e[iq_*3+2] * u[2]) / pow(LBMPSMLattice::cs, 4.0)
+            * (LBMPSMLattice::e[3*iq_] * F[0] + LBMPSMLattice::e[3*iq_+1] * F[1] + LBMPSMLattice::e[3*iq_+2] * F[2]) ) );
+}
+
+
+double LBMPSMDynamics::F_iq(int iq_, int ind_phys_2D_, vector<double>& u, vector<double> F){
+  return LBMPSMLattice::w[iq_] * 
+        ( ( (LBMPSMLattice::e[3*iq_] - u[ind_phys_2D_+0]) * F[0] + (LBMPSMLattice::e[3*iq_+1] - u[ind_phys_2D_+1]) * F[1] + (LBMPSMLattice::e[3*iq_+2] - u[ind_phys_2D_+2]) * F[2]) / pow(LBMPSMLattice::cs, 2.0)
+          + ( (LBMPSMLattice::e[3*iq_] * u[ind_phys_2D_+0] + LBMPSMLattice::e[3*iq_+1] * u[ind_phys_2D_+1] + LBMPSMLattice::e[iq_*3+2] * u[ind_phys_2D_+2]) / pow(LBMPSMLattice::cs, 4.0)
+            * (LBMPSMLattice::e[3*iq_] * F[0] + LBMPSMLattice::e[3*iq_+1] * F[1] + LBMPSMLattice::e[3*iq_+2] * F[2]) ) );
+}

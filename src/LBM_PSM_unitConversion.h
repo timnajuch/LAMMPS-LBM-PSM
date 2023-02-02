@@ -60,14 +60,12 @@ class UnitConversion{
     // Characteristic time in physical system
     double tc;    
 
-    // Factor to transfer between physical and LBM system
-    // forceFactor is to scale dp/dx (not the force). units of dp/dx = kg/(m^2s^2) (force F = kg/m/s^2). 
-    // Hence, we need additionally "/ (pow(ly,2)*pow(dy_d,2))" to scale correctly
+    // Factor to transfer between physical and LBM system    
     double forceFactor;
     double torqueFactor;
-    // Force converted to LB system
-    //double F_lb[3];
 
+    double volumeForceFactor;
+  
     int dimension;
 
   public:
@@ -83,7 +81,8 @@ class UnitConversion{
     double get_pos_lb(double pos_phys);
     double get_forceFactor();
     double get_torqueFactor();
-    std::vector<double> get_force_lb_2D(std::vector<double> F_phys_2D_);
+    double get_volumeForceFactor();
+    std::vector<double> get_volume_force_lb(std::vector<double> F_phys);
     double get_phys_time(double time_lb);
     double get_dt_d();
 

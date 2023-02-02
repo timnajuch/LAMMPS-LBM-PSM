@@ -41,7 +41,7 @@ class LBMPSMMPI{
         MPI_Status status;
 
         template<typename T> MPI_Datatype get_type();
-        template<typename T> void sendRecvData(vector<T> &data_, bool isVector3D, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic);
+        template<typename T> void sendRecvData(vector<T> &data_, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic);
         template<typename T> void packData(vector<T> &sendBuf, vector<T> &data, int direction[3], int envelopeIterSend[3],
                                            int envlopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth);
         template<typename T> void unpackData(vector<T> &recvBuf, vector<T> &data, int direction[3], int envelopeIterRecv[3],
@@ -93,7 +93,7 @@ template<typename T> MPI_Datatype LBMPSMMPI::get_type()
 }
 
 
-template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, bool isVector3D, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic)
+template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic)
 {
   int dataSize = q;
   int commDataSize = 0;
@@ -210,12 +210,11 @@ template<typename T> void LBMPSMMPI::packData(vector<T> &sendBuf, vector<T> &dat
     for(int i = 0; i < iMax; ++i){
       for(int j = 0; j < jMax; ++j){
         for(int k = 0; k < kMax; ++k){
+          envelopeIterSend[0] = direction[0]*(envelopeStart + iEnvelope) + i;
+          envelopeIterSend[1] = direction[1]*(envelopeStart + iEnvelope) + j;
+          envelopeIterSend[2] = direction[2]*(envelopeStart + iEnvelope) + k;
           for(int iq = 0; iq < q; ++iq){
-            envelopeIterSend[0] = direction[0]*(envelopeStart + iEnvelope) + i;
-            envelopeIterSend[1] = direction[1]*(envelopeStart + iEnvelope) + j;
-            envelopeIterSend[2] = direction[2]*(envelopeStart + iEnvelope) + k;
-
-            envelopeIterSendIndex = envelopeIterSend[0] * ny * nz * q + envelopeIterSend[1] * nz * q + envelopeIterSend[2] * q + iq;
+            envelopeIterSendIndex = (envelopeIterSend[0] * ny * nz + envelopeIterSend[1] * nz + envelopeIterSend[2])*dataSize + iq;
             sendBufIndex = (k + j*kMax + i*jMax*kMax + iEnvelope*iMax*jMax*kMax)*dataSize + iq;
 
             sendBuf[sendBufIndex] = data[envelopeIterSendIndex];
@@ -241,12 +240,11 @@ template<typename T> void LBMPSMMPI::unpackData(vector<T> &recvBuf, vector<T> &d
     for(int i = 0; i < iMax; ++i){
       for(int j = 0; j < jMax; ++j){
         for(int k = 0; k < kMax; ++k){
+          envelopeIterRecv[0] = direction[0]*(envelopeStart + iEnvelope) + i;
+          envelopeIterRecv[1] = direction[1]*(envelopeStart + iEnvelope) + j;
+          envelopeIterRecv[2] = direction[2]*(envelopeStart + iEnvelope) + k;
           for(int iq = 0; iq < q; ++iq){
-            envelopeIterRecv[0] = direction[0]*(envelopeStart + iEnvelope) + i;
-            envelopeIterRecv[1] = direction[1]*(envelopeStart + iEnvelope) + j;
-            envelopeIterRecv[2] = direction[2]*(envelopeStart + iEnvelope) + k;
-
-            envelopeIterRecvIndex = envelopeIterRecv[0] * ny * nz * q + envelopeIterRecv[1] * nz * q + envelopeIterRecv[2] * q + iq;
+            envelopeIterRecvIndex = (envelopeIterRecv[0] * ny * nz + envelopeIterRecv[1] * nz + envelopeIterRecv[2])*dataSize + iq;
             recvBufIndex = (k + j*kMax + i*jMax*kMax + iEnvelope*iMax*jMax*kMax)*dataSize + iq;
 
             data[envelopeIterRecvIndex] = recvBuf[recvBufIndex];

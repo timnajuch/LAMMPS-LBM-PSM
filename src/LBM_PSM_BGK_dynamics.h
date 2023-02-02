@@ -22,6 +22,7 @@ class LBMPSMBGKDynamics : public LBMPSMDynamics {
   private:
     double tau;
     vector<double> F_lbm;
+    double F_lbm_mag_pow2;
     int dimension;
 
   public:

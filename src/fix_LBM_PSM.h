@@ -69,6 +69,7 @@ class fix_LBM_PSM : public Fix {
     double nu;          // fluid viscosity
     double Re;          // Reynolds number of system (based on characteristic velocity, characteristic length, and fluid viscosity)
     double tau;         // BGK relaxation parameter (optional, default is tau = 0.7)
+    vector<double> F_ext; // External force acting on the fluid
 
     void grow_arrays(int);
     void copy_arrays(int, int, int);

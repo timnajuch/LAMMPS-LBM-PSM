@@ -41,8 +41,9 @@ void LBMPSMBGKDynamics::compute_macro_values(){
         }
         LBMPSMLattice::rho[ind_phys_1D] = rho_tmp;
 
-  //      jx += F_lbm[0]/2.0;
-  //      jy += F_lbm[1]/2.0;
+        jx += F_lbm[0]/2.0;
+        jy += F_lbm[1]/2.0;
+        jz += F_lbm[2]/2.0;
         LBMPSMLattice::u[ind_phys_2D] = jx/rho_tmp;
         LBMPSMLattice::u[ind_phys_2D+1] = jy/rho_tmp;
         LBMPSMLattice::u[ind_phys_2D+2] = jz/rho_tmp;
@@ -71,6 +72,11 @@ void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_){
     jz += LBMPSMLattice::get_f(ind_iq) * LBMPSMLattice::e[3*iq+2];
   }
   LBMPSMLattice::rho[ind_phys_1D] = rho_tmp;
+
+  // External force according to Guo et al. (2002)
+  jx += F_lbm[0]/2.0;
+  jy += F_lbm[1]/2.0;
+  jz += F_lbm[2]/2.0;
 
   LBMPSMLattice::u[ind_phys_2D] = jx/rho_tmp;
   LBMPSMLattice::u[ind_phys_2D+1] = jy/rho_tmp;
@@ -160,8 +166,12 @@ void LBMPSMBGKDynamics::collision(int i_, int j_, int k_, int iq_){
 
   if(Btot > 1.0)
   { Btot = 1.0; }
-    
-  LBMPSMLattice::set_f(i_, j_, k_, iq_, LBMPSMLattice::get_f(ind_iq)  + ( 1.0 - Btot ) * BGKcoll  + B1 * solid_coll1 + B2 * solid_coll2 );
+ 
+  double F_lbm_iq = 0.0;
+  if (F_lbm_mag_pow2 > 0.0)
+    { F_lbm_iq = (1.0-0.5/tau) * LBMPSMDynamics::F_iq(iq_, ind_phys_2D, LBMPSMLattice::u, F_lbm); }
+
+  LBMPSMLattice::set_f(i_, j_, k_, iq_, LBMPSMLattice::get_f(ind_iq)  + ( 1.0 - Btot ) * BGKcoll  + B1 * solid_coll1 + B2 * solid_coll2 + F_lbm_iq);
 
   if(iq_ == 0)
   {
@@ -205,7 +215,7 @@ void  LBMPSMBGKDynamics::initialise_dynamics(double rho_, double ux_, double uy_
       }
     }
   }
-
+  F_lbm_mag_pow2 = F_lbm[0]*F_lbm[0] + F_lbm[1]*F_lbm[1] + F_lbm[2]*F_lbm[2];
 }
 
 
