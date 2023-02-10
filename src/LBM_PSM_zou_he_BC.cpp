@@ -35,6 +35,24 @@ void ZouHeBC::setZouHeVelBC2D_xn (int ix_, int iy0_, int iy1_, double ux_bc_) {
 }
 
 
+void ZouHeBC::setZouHeVelBC2D_xp (int ix_, int iy0_, int iy1_, double ux_bc_) {
+  for (int j = iy0_; j <= iy1_; ++j){
+    int ind_iq = ix_ * lattice->ny * lattice->q + j * lattice->q; // + iq;
+
+    double rho_tmp = 1.0/(1.0-ux_bc_)*( lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 2) + lattice->get_f(ind_iq + 4) +
+                          2.0*( lattice->get_f(ind_iq + 1) + lattice->get_f(ind_iq + 5) + lattice->get_f(ind_iq + 8) ) );
+
+    lattice->set_f(ind_iq + 7, lattice->get_f(ind_iq + 5) + 0.5*(lattice->get_f(ind_iq + 2) - lattice->get_f(ind_iq + 4))
+                          - rho_tmp*ux_bc_/6.0 );
+
+    lattice->set_f(ind_iq + 6, lattice->get_f(ind_iq + 8) + 0.5*(lattice->get_f(ind_iq + 4) - lattice->get_f(ind_iq + 2))
+                          - rho_tmp*ux_bc_/6.0 );
+
+    lattice->set_f(ind_iq + 3, lattice->get_f(ind_iq + 1) - 2.0/3.0*rho_tmp*ux_bc_ );
+  }
+}
+
+
 void ZouHeBC::setZouHeDensBC2D_xp (int ix_, int iy0_, int iy1_, double rho_bc_) {
   for (int j = iy0_; j <= iy1_; ++j){
     int ind_iq = ix_ * lattice->ny * lattice->q + j * lattice->q; // + iq;
@@ -88,6 +106,43 @@ void ZouHeBC::setZouHeVelBC2D_yp (int iy_, int ix0_, int ix1_, double ux_bc_) {
   }
 }
 
+
+void ZouHeBC::setZouHeNeumannVelBC2D_yn (int iy_, int ix0_, int ix1_) {
+  for (int i = ix0_; i <= ix1_; ++i){
+    int ind_iq = i * lattice->ny * lattice->q + iy_ * lattice->q;
+    int ind_u_neighbour_1D = i * lattice->ny + (iy_+1);
+
+    double rho_tmp =  lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 1) +
+                              2.0*( lattice->get_f(ind_iq + 8) + lattice->get_f(ind_iq + 4) + lattice->get_f(ind_iq + 7) );
+
+    lattice->set_f(ind_iq + 6, lattice->get_f(ind_iq + 8) + 0.5*(lattice->get_f(ind_iq + 1) - lattice->get_f(ind_iq + 3))
+                          - rho_tmp*lattice->get_u_at_node(ind_u_neighbour_1D, 0)/2.0 );
+
+    lattice->set_f(ind_iq + 5, lattice->get_f(ind_iq + 7) + 0.5*(lattice->get_f(ind_iq + 3) - lattice->get_f(ind_iq + 1))
+                          + rho_tmp*lattice->get_u_at_node(ind_u_neighbour_1D, 0)/2.0 );
+
+    lattice->set_f(ind_iq + 2, lattice->get_f(ind_iq + 4) );
+  }
+}
+
+
+void ZouHeBC::setZouHeNeumannVelBC2D_yp (int iy_, int ix0_, int ix1_) {
+  for (int i = ix0_; i <= ix1_; ++i){
+    int ind_iq = i * lattice->ny * lattice->q + iy_ * lattice->q;
+    int ind_u_neighbour_1D = i * lattice->ny + (iy_-1);
+
+    double rho_tmp =  lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 1) +
+                              2.0*( lattice->get_f(ind_iq + 6) + lattice->get_f(ind_iq + 2) + lattice->get_f(ind_iq + 5) );
+
+    lattice->set_f(ind_iq + 7, lattice->get_f(ind_iq + 5) + 0.5*(lattice->get_f(ind_iq + 1) - lattice->get_f(ind_iq + 3))
+                          - rho_tmp*lattice->get_u_at_node(ind_u_neighbour_1D, 0)/2.0 );
+
+    lattice->set_f(ind_iq + 8, lattice->get_f(ind_iq + 6) + 0.5*(lattice->get_f(ind_iq + 3) - lattice->get_f(ind_iq + 1))
+                          + rho_tmp*lattice->get_u_at_node(ind_u_neighbour_1D, 0)/2.0 );
+
+    lattice->set_f(ind_iq + 4, lattice->get_f(ind_iq + 2) );
+  }
+}
 
 
 void ZouHeBC::setZouHeVelBC3D_xn (int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_) {

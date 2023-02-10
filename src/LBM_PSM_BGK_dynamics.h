@@ -26,7 +26,7 @@ class LBMPSMBGKDynamics : public LBMPSMDynamics {
     int dimension;
 
   public:
-    LBMPSMBGKDynamics(double tau_, int nx_, int ny_, int nz_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_);
+    LBMPSMBGKDynamics(double tau_, int nx_, int ny_, int nz_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_);
     ~LBMPSMBGKDynamics();
 
     void compute_macro_values();

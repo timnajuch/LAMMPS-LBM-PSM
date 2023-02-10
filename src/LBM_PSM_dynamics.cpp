@@ -12,8 +12,8 @@ Tim Najuch, 2022
 
 #include "LBM_PSM_dynamics.h"
 
-LBMPSMDynamics::LBMPSMDynamics(int nx_, int ny_, int nz_, int q_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_) :
-  LBMPSMLattice(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_)
+LBMPSMDynamics::LBMPSMDynamics(int nx_, int ny_, int nz_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_) :
+  LBMPSMLattice(nx_, ny_, nz_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_)
 {
   for(int i = 0; i < LBMPSMLattice::nx; ++i){
     for(int j = 0; j < LBMPSMLattice::ny; ++j){

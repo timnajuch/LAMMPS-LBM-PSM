@@ -13,7 +13,7 @@ Tim Najuch, 2022
 #include "LBM_PSM_lattice.h"
 
 
-LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_){
+LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_){
   envelopeWidth = 1;
   dimension = dimension_;
 
@@ -108,7 +108,7 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decompositio
   x = vector<double>(nx*ny*nz,0.0);
   y = vector<double>(nx*ny*nz,0.0);
   z = vector<double>(nx*ny*nz,0.0);
-  
+
   u = vector<double>(nx*ny*nz*3,0.0);
   us = vector<double>(nx*ny*nz*3,0.0);
 
@@ -336,6 +336,10 @@ vector<double>& LBMPSMLattice::get_B_reference(){
 
  vector<double>& LBMPSMLattice::get_u_reference(){
   return u;
+}
+
+double LBMPSMLattice::get_u_at_node(int index_node_1D, int direction){
+  return u[index_node_1D*3+direction];
 }
 
 int LBMPSMLattice::get_nx(){

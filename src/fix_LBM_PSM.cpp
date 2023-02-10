@@ -21,7 +21,6 @@ fix_LBM_PSM::fix_LBM_PSM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
   comm_reverse = 6;
 
   tau = 0.7; // default value for BGK relaxation parameter
-
   F_ext = vector<double>(3, 0.0);
 
   int iarg = 3;
@@ -110,6 +109,7 @@ void fix_LBM_PSM::init()
   procNeigh[3] = comm->procneigh[1][1];
   procNeigh[4] = comm->procneigh[2][0];
   procNeigh[5] = comm->procneigh[2][1]; 
+
   lbmmpicomm = new LBMPSMMPI(world, decomposition, procNeigh, procCoordinates, domain->dimension);
 
   unitConversion = new UnitConversion(rho, nu, lc, Re, Nlc, tau, domain->dimension);
@@ -118,8 +118,7 @@ void fix_LBM_PSM::init()
 
   double Ma = unitConversion->get_u_lb()/(1.0/sqrt(3.0));
   if (Ma > 0.3){
-    if (comm->me == 0)
-      { error->all(FLERR,"Mach number is Ma > 0.3. Aborting simulation. Choose parameters which give Ma < 0.3 for stability reasons."); }
+      error->all(FLERR,"Mach number is Ma > 0.3. Aborting simulation. Choose parameters which give Ma < 0.3 for stability reasons.");
   }
   else{
     if (comm->me == 0){
@@ -136,7 +135,7 @@ void fix_LBM_PSM::init()
     || pow(((double)((int)(domain->zprd/unitConversion->get_dx()+0.5)) - domain->zprd/unitConversion->get_dx()), 2.0) > SMALL ){
       error->all(FLERR, "Illegal cell width. Division of domain length and cell width has to give an integer.");
   }
-  
+
   int nx = domain->xprd/unitConversion->get_dx()+1.5;
   if (domain->xperiodic == true)
     { nx -= 1; }
@@ -159,7 +158,7 @@ void fix_LBM_PSM::init()
   vector<double> F_lbm;
   F_lbm = unitConversion->get_volume_force_lb(F_ext);
 
-  dynamics = new LBMPSMBGKDynamics(tau, nx, ny, nz, 9, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension);
+  dynamics = new LBMPSMBGKDynamics(tau, nx, ny, nz, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension);
 
   dynamics->initialise_domain(unitConversion->get_dx(), unitConversion->get_dx(), unitConversion->get_dx());
 

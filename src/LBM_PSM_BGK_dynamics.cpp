@@ -12,8 +12,8 @@ Tim Najuch, 2022
 
 #include "LBM_PSM_BGK_dynamics.h"
 
-LBMPSMBGKDynamics::LBMPSMBGKDynamics(double tau_, int nx_, int ny_, int nz_, int q_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_) :
-  LBMPSMDynamics(nx_, ny_, nz_, q_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_), tau(tau_), F_lbm(F_lbm_) {}
+LBMPSMBGKDynamics::LBMPSMBGKDynamics(double tau_, int nx_, int ny_, int nz_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_) :
+  LBMPSMDynamics(nx_, ny_, nz_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_), tau(tau_), F_lbm(F_lbm_) { }
 
 
 LBMPSMBGKDynamics::~LBMPSMBGKDynamics(){}
@@ -41,14 +41,14 @@ void LBMPSMBGKDynamics::compute_macro_values(){
         }
         LBMPSMLattice::rho[ind_phys_1D] = rho_tmp;
 
+        // External force according to Guo et al. (2002)
         jx += F_lbm[0]/2.0;
         jy += F_lbm[1]/2.0;
         jz += F_lbm[2]/2.0;
+
         LBMPSMLattice::u[ind_phys_2D] = jx/rho_tmp;
         LBMPSMLattice::u[ind_phys_2D+1] = jy/rho_tmp;
         LBMPSMLattice::u[ind_phys_2D+2] = jz/rho_tmp;
-
-        //p[i][j] = rho_tmp*csPow2;
       }
     }
   }
@@ -162,10 +162,8 @@ void LBMPSMBGKDynamics::collision(int i_, int j_, int k_, int iq_){
   if(Btot > 1.0){
     B1 = Btmp1/Btot;
     B2 = Btmp2/Btot;
+    Btot = 1.0;
   }
-
-  if(Btot > 1.0)
-  { Btot = 1.0; }
  
   double F_lbm_iq = 0.0;
   if (F_lbm_mag_pow2 > 0.0)

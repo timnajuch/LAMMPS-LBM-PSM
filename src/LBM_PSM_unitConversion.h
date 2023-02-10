@@ -60,10 +60,9 @@ class UnitConversion{
     // Characteristic time in physical system
     double tc;    
 
-    // Factor to transfer between physical and LBM system    
+    // Factors to transfer between physical and LBM system    
     double forceFactor;
     double torqueFactor;
-
     double volumeForceFactor;
   
     int dimension;

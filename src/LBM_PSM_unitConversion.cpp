@@ -30,25 +30,11 @@ UnitConversion::UnitConversion(double rhof_, double nu_, double lc_, double Re_,
 
   tc = lc_/Uc;
 
-  if(dimension == 2){
-    // Initially assumed that in 3D could use the same conversion under the assumption that 2D would be 3D with only one cell spacing in third dimension.
-    // 2D drag coefficient simulations showed that the drag coefficient was not correct for 3D conversion factor and the conversion factor
-    // needs to be changed by reducing one length scale. This is then actually also in accordance with LBM PSM literature.
-    forceFactor = rhof_ * pow(lc_,3)/pow(tc,2) * pow(dx_d,3)/pow(dt_d,2);
-    torqueFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);
-  }else{
-    forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);
-    torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);
-  }
-
+  // In 2D, we can use the same conversion under the assumption that 2D would be 3D with only one cell spacing in third dimension.
+  forceFactor = rhof_ * pow(lc_,4)/pow(tc,2) * pow(dx_d,4)/pow(dt_d,2);
+  torqueFactor = rhof_ * pow(lc_,5)/pow(tc,2) * pow(dx_d,5)/pow(dt_d,2);
   // volumeForceFactor is to scale dp/dx or Force/Volume (not the force). Units of dp/dx = Force/Volume = kg/(m^2s^2) (force F = kg*m/s^2). 
-  // Hence, we need additionally "/ (pow(lc,2)*pow(dx_d,2))" to scale correctly
-  if(dimension == 2){
-    // Todo check 2D units
-    volumeForceFactor = rhof_ / pow(tc,2) / pow(dt_d,2);
-  }else{
-    volumeForceFactor = rhof_ * lc_/pow(tc,2) * dx_d/pow(dt_d,2);
-  }
+  volumeForceFactor = rhof_ * lc_/pow(tc,2) * dx_d/pow(dt_d,2);
 }
 
 UnitConversion::~UnitConversion(){};

@@ -24,7 +24,7 @@ using namespace std;
 class LBMPSMDynamics : public LBMPSMLattice {
   
   public:
-    LBMPSMDynamics(int nx_, int ny_, int nz_, int q_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_);
+    LBMPSMDynamics(int nx_, int ny_, int nz_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_);
     ~LBMPSMDynamics();
 
     double feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, vector<double> &rho_, vector<double> &u_);

@@ -30,9 +30,12 @@ fix_LBM_PSM_BC::fix_LBM_PSM_BC(LAMMPS *lmp, int narg, char **arg) :
   } else if (strcmp(arg[iarg],"channel") == 0) {
     if (iarg+1 > narg) error->all(FLERR,"Illegal fix lbm-psm-bc command");
     typeBC = 3;
-  } else if (strcmp(arg[iarg],"closedBox") == 0) {
+  } else if (strcmp(arg[iarg],"channel-velIn-pressOut") == 0) {
     if (iarg+1 > narg) error->all(FLERR,"Illegal fix lbm-psm-bc command");
     typeBC = 4;
+  } else if (strcmp(arg[iarg],"closedBox") == 0) {
+    if (iarg+1 > narg) error->all(FLERR,"Illegal fix lbm-psm-bc command");
+    typeBC = 5;
   } else error->all(FLERR,"Illegal fix lbm-psm-bc command");
 
 
@@ -238,15 +241,41 @@ void fix_LBM_PSM_BC::post_force(int)
         { zouHe->setZouHeVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
       if (comm->myloc[1] == comm->procgrid[1]-1)
         { zouHe->setZouHeVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth, u_infty ); }
+      //if (comm->myloc[1] == 0)
+      //  { zouHe->setZouHeNeumannVelBC2D_yn( 0+envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth ); }
+      //if (comm->myloc[1] == comm->procgrid[1]-1)
+      //  { zouHe->setZouHeNeumannVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 1+envelopeWidth, fixLBMPSM->dynamics->get_nx()-2-envelopeWidth ); }
     }
-    if (typeBC == 3)
-    { // Two parallel plates in y-direction which are not moving. Can be used for channel flow.
+    else if (typeBC == 3)
+    { // Two parallel plates in y-direction which are not moving. Can be used for channel flow driven by external force/pressure gradient.
       if (comm->myloc[1] == 0)
         { zouHe->setZouHeVelBC2D_yn( 0+envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, 0.0 ); }
       if (comm->myloc[1] == comm->procgrid[1]-1)
         { zouHe->setZouHeVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, 0.0 ); }
     }
-  }else{
+    else if (typeBC == 4)
+    { // Enclosed channel with velocity inlet, pressure outlet, and surrounding no-slip walls (can be used for fluidised bed simulation)
+      if (comm->myloc[0] == 0)
+        { zouHe->setZouHeVelBC2D_xn( envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, u_infty ); }
+      if (comm->myloc[0] == comm->procgrid[0]-1)
+        { zouHe->setZouHeDensBC2D_xp( fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, rho_outlet ); }
+      if (comm->myloc[1] == 0)
+        { zouHe->setZouHeVelBC2D_yn( 0+envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, 0.0 ); }
+      if (comm->myloc[1] == comm->procgrid[1]-1)
+        { zouHe->setZouHeVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, 0.0 ); }
+    }
+    else if (typeBC == 5)
+    { // Closed box with no-slip boundary conditions all around
+      if (comm->myloc[0] == 0)
+        { zouHe->setZouHeVelBC2D_xn( envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 0.0 ); }
+      if (comm->myloc[0] == comm->procgrid[0]-1)
+        { zouHe->setZouHeVelBC2D_xp( fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, 0.0 ); }
+      if (comm->myloc[1] == 0)
+        { zouHe->setZouHeVelBC2D_yn( 0+envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, 0.0 ); }
+      if (comm->myloc[1] == comm->procgrid[1]-1)
+        { zouHe->setZouHeVelBC2D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth, envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth, 0.0 ); }
+    }
+  }else{ // 3D
     if (typeBC == 1)
     { // Shear with shear gradient in y-direction. Other boundaries are periodic.
       if (comm->myloc[1] == 0)
@@ -260,8 +289,43 @@ void fix_LBM_PSM_BC::post_force(int)
                                        envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
                                        u_infty, 0.0, 0.0 ); }
     }
+    else if (typeBC == 2)
+    { // Fluid flow in positive x-direction by setting velocity on inlet boundary (boundary at smaller domain coordinate in x-direction)
+      // and constant density on outlet boundary (boundary at larger domain coordinate in x-direction).
+      // Lateral boundaries (in y- and z-direction) have the imposed inlet velocity in x-direction.
+      if (comm->myloc[0] == 0)
+        { zouHe->setZouHeVelBC3D_xn( 0+envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
+                                       u_infty, 0.0, 0.0); }
+      if (comm->myloc[0] == comm->procgrid[0]-1)
+        { zouHe->setZouHeDensBC3D_xp( fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
+                                       rho_outlet, 0.0, 0.0 ); }
+      if (comm->myloc[1] == 0)
+        { zouHe->setZouHeVelBC3D_yn( 0+envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
+                                       u_infty, 0.0, 0.0); }
+      if (comm->myloc[1] == comm->procgrid[1]-1)
+        { zouHe->setZouHeVelBC3D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
+                                       u_infty, 0.0, 0.0 ); }
+      if (comm->myloc[2] == 0)
+        { zouHe->setZouHeVelBC3D_zn( 0+envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,
+                                       u_infty, 0.0, 0.0); }
+      if (comm->myloc[2] == comm->procgrid[2]-1)
+        { zouHe->setZouHeVelBC3D_zp( fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,
+                                       u_infty, 0.0, 0.0 ); }
+    }
     else if (typeBC == 3)
-    { // Two parallel plates in y-direction which are not moving. Can be used for channel flow.
+    { // Two parallel plates in y-direction which are not moving. Can be used for channel flow driven by external force/pressure gradient.
       if (comm->myloc[1] == 0)
         { zouHe->setZouHeVelBC3D_yn( 0+envelopeWidth,
                                        envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
@@ -274,6 +338,39 @@ void fix_LBM_PSM_BC::post_force(int)
                                        0.0, 0.0, 0.0 ); }
     }
     else if (typeBC == 4)
+    { // Enclosed channel with velocity inlet, pressure outlet, and surrounding no-slip walls (can be used for fluidised bed simulation)
+      if (comm->myloc[0] == 0)
+        { zouHe->setZouHeVelBC3D_xn( 0+envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
+                                       u_infty, 0.0, 0.0); }
+      if (comm->myloc[0] == comm->procgrid[0]-1)
+        { zouHe->setZouHeDensBC3D_xp( fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
+                                       rho_outlet, 0.0, 0.0 ); }
+      if (comm->myloc[1] == 0)
+        { zouHe->setZouHeVelBC3D_yn( 0+envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
+                                       0.0, 0.0, 0.0); }
+      if (comm->myloc[1] == comm->procgrid[1]-1)
+        { zouHe->setZouHeVelBC3D_yp( fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
+                                       0.0, 0.0, 0.0 ); }
+      if (comm->myloc[2] == 0)
+        { zouHe->setZouHeVelBC3D_zn( 0+envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,
+                                       0.0, 0.0, 0.0); }
+      if (comm->myloc[2] == comm->procgrid[2]-1)
+        { zouHe->setZouHeVelBC3D_zp( fixLBMPSM->dynamics->get_nz()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_nx()-1-envelopeWidth,
+                                       envelopeWidth, fixLBMPSM->dynamics->get_ny()-1-envelopeWidth,
+                                       0.0, 0.0, 0.0 ); }
+    }
+    else if (typeBC == 5)
     { // Closed box with no-slip boundary conditions all around
       if (comm->myloc[0] == 0)
         { zouHe->setZouHeVelBC3D_xn( 0+envelopeWidth,

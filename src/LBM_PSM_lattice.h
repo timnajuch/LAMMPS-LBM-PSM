@@ -80,7 +80,7 @@ class LBMPSMLattice{
     int procCoordinates[3];
 
   public:
-    LBMPSMLattice(int nx_, int ny_, int nz_, int q_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_);
+    LBMPSMLattice(int nx_, int ny_, int nz_, int decomposition[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_);
     ~LBMPSMLattice();
 
     void initialise_domain(double dx_, double dy_, double dz_);
@@ -98,6 +98,8 @@ class LBMPSMLattice{
     vector<double>& get_y_reference();
     vector<double>& get_z_reference();
     vector<double>& get_u_reference();
+
+    double get_u_at_node(int index_node_1D, int direction);
 
     int* getProcCoordinates(){ return procCoordinates; }
 
