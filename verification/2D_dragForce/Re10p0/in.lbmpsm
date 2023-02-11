@@ -1,0 +1,42 @@
+# Read in 
+
+units			si
+atom_style		sphere
+atom_modify		map array
+atom_modify 	sort 0 0.003
+
+dimension       2 
+
+comm_modify	    cutoff 0.001 vel yes
+
+boundary		p p p
+newton			off
+
+processors      9 3 1 map cart
+region			box block 0.0 0.07 -0.0125 0.0125 -0.00025 0.00025 units box
+create_box		1 box
+
+create_atoms 	1 single 0.02 0.0 0.0
+set 			group all diameter 0.0005 density 1000
+
+neighbor		0.001 bin
+neigh_modify	delay 0 every 1 check yes
+
+pair_style		none
+
+fix             lbDYN all lbm-psm every 1 Nlc 11 lc 0.0005 rho 1000.0 nu 0.0001 Re 10.0 tau 0.7 
+fix             lbBC all lbm-psm-bc xFlow
+fix             lbVTK all lbm-psm-vtk every 2000
+
+dump           	iddump all custom 100 s.p id type diameter mass x y z vx vy vz fx fy fz tqx tqy tqz omegax omegay omegaz
+
+compute			1 all erotate/sphere
+thermo_style	custom step atoms ke
+thermo			1000
+thermo_modify	lost ignore norm no flush yes
+compute_modify	thermo_temp dynamic yes
+
+compute         compTemp all temp
+compute         pressureFix all pressure NULL virial
+
+run 1000000

@@ -1,0 +1,16 @@
+set term png font arial 20 size 1500,750 enhanced
+set output "Re-dragCoefficients.png"
+
+set style line 1 lt 0 lc 1 pt 4 ps 3.0 lw 5.0
+set style line 2 lt 0 lc 3 pt 6 ps 3.0 lw 3.0
+
+set logscale xy
+
+set key right top reverse box lt 8 lw 1
+
+show xtics
+
+set xlabel 'Reynolds number Re'
+set ylabel 'Drag coefficient {C}_{D}*'
+
+plot 'dragCoefficients_experiment_korzani-etal-2017.dat' u 1:2 ls 2, 'dragCoefficients.dat' u 1:2 ls 1

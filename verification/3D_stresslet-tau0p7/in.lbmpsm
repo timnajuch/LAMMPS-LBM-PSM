@@ -1,0 +1,44 @@
+units			si
+atom_style		sphere
+atom_modify		map array
+atom_modify 	sort 0 0.003
+
+comm_modify	    cutoff 0.001 vel yes
+
+boundary		p f p
+newton			off
+
+processors      3 3 3 map cart
+region			box block 0. 0.005 0. 0.005 0. 0.005 units box
+create_box		1 box
+
+create_atoms 	1 single 0.0025 0.0025 0.0025
+set 			group all diameter 0.0005 density 1000
+
+neighbor		0.001 bin
+neigh_modify	delay 0 every 1 check yes
+
+pair_style		none
+
+fix             lbDYN all lbm-psm every 1 Nlc 11 lc 0.0005 rho 1000.0 nu 0.0001 Re 0.1 tau 0.7 
+fix             lbBC all lbm-psm-bc shear
+fix             lbVTK all lbm-psm-vtk every 10000
+
+fix             freeze all setforce 0.0 0.0 0.0
+
+fix             integrate all nve/sphere
+dump           	iddump all custom 100 s.p id type diameter mass x y z vx vy vz fx fy fz tqx tqy tqz omegax omegay omegaz
+
+compute			1 all erotate/sphere
+thermo_style	custom step atoms ke
+thermo			1000
+thermo_modify	lost ignore norm no flush yes
+compute_modify	thermo_temp dynamic yes
+
+compute         compTemp all temp
+compute         pressureFix all pressure NULL virial
+
+fix             pStressesFix all print 100 "$(step) $((c_pressureFix[1]+c_pressureFix[2]+c_pressureFix[3])/3) $(c_pressureFix[1]) $(c_pressureFix[2]) $(c_pressureFix[3]) $(c_pressureFix[4]) $(c_pressureFix[5]) $(c_pressureFix[6])" append stressOutputFIX screen no
+
+
+run 100000
