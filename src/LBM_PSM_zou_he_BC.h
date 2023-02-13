@@ -28,22 +28,22 @@ class ZouHeBC {
     ZouHeBC(LBMPSMLattice *lattice_);
     ~ZouHeBC();
 
-    void setZouHeVelBC2D_xn(int ix_, int iy0_, int iy1_, double ux_bc_);
-    void setZouHeVelBC2D_xp(int ix_, int iy0_, int iy1_, double ux_bc_);
-    void setZouHeDensBC2D_xp(int ix_, int iy0_, int iy1_, double rho_bc_);
-    void setZouHeVelBC2D_yn(int iy_, int ix0_, int ix1_, double ux_bc_);
-    void setZouHeVelBC2D_yp(int iy_, int ix0_, int ix1_, double ux_bc_);
-    void setZouHeNeumannVelBC2D_yn (int iy_, int ix0_, int ix1_);
-    void setZouHeNeumannVelBC2D_yp (int iy_, int ix0_, int ix1_);
+    void setZouHeVelBC2D_xn(int ix_, int iy0_, int iy1_, double ux_bc_, int currentStep);
+    void setZouHeVelBC2D_xp(int ix_, int iy0_, int iy1_, double ux_bc_, int currentStep);
+    void setZouHeDensBC2D_xp(int ix_, int iy0_, int iy1_, double rho_bc_, int currentStep);
+    void setZouHeVelBC2D_yn(int iy_, int ix0_, int ix1_, double ux_bc_, int currentStep);
+    void setZouHeVelBC2D_yp(int iy_, int ix0_, int ix1_, double ux_bc_, int currentStep);
+    void setZouHeNeumannVelBC2D_yn (int iy_, int ix0_, int ix1_, int currentStep);
+    void setZouHeNeumannVelBC2D_yp (int iy_, int ix0_, int ix1_, int currentStep);
 
 
-    void setZouHeVelBC3D_xn(int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_);
-    void setZouHeVelBC3D_xp(int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_);
-    void setZouHeDensBC3D_xp(int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double rho_bc_, double uy_bc_, double uz_bc_);
-    void setZouHeVelBC3D_yn(int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_);
-    void setZouHeVelBC3D_yp(int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_);
-    void setZouHeVelBC3D_zn(int iz_, int ix0_, int ix1_, int iy0_, int iy1_, double ux_bc_, double uy_bc_, double uz_bc_);
-    void setZouHeVelBC3D_zp(int iz_, int ix0_, int ix1_, int iy0_, int iy1_, double ux_bc_, double uy_bc_, double uz_bc_);
+    void setZouHeVelBC3D_xn(int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep);
+    void setZouHeVelBC3D_xp(int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep);
+    void setZouHeDensBC3D_xp(int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double rho_bc_, double uy_bc_, double uz_bc_, int currentStep);
+    void setZouHeVelBC3D_yn(int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep);
+    void setZouHeVelBC3D_yp(int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep);
+    void setZouHeVelBC3D_zn(int iz_, int ix0_, int ix1_, int iy0_, int iy1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep);
+    void setZouHeVelBC3D_zp(int iz_, int ix0_, int ix1_, int iy0_, int iy1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep);
 
 };
 

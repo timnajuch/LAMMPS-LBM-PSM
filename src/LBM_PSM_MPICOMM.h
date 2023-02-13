@@ -41,11 +41,11 @@ class LBMPSMMPI{
         MPI_Status status;
 
         template<typename T> MPI_Datatype get_type();
-        template<typename T> void sendRecvData(vector<T> &data_, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic);
+        template<typename T> void sendRecvData(vector<T> &data_, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic, int currentStep);
         template<typename T> void packData(vector<T> &sendBuf, vector<T> &data, int direction[3], int envelopeIterSend[3],
-                                           int envlopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth);
+                                           int envlopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth, int currentStep);
         template<typename T> void unpackData(vector<T> &recvBuf, vector<T> &data, int direction[3], int envelopeIterRecv[3],
-                                           int envelopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth);
+                                           int envelopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth, int currentStep);
 
 };
 
@@ -93,7 +93,7 @@ template<typename T> MPI_Datatype LBMPSMMPI::get_type()
 }
 
 
-template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic)
+template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic, int currentStep)
 {
   int dataSize = q;
   int commDataSize = 0;
@@ -148,7 +148,7 @@ template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, int commDire
                   direction[1]*envelopeIterSend[1] +
                   direction[2]*envelopeIterSend[2];
 
-  packData(sendBuf1, data_, direction, envelopeIterSend, envelopeStart, dataSize, nx, ny, nz, envelopeWidth);
+  packData(sendBuf1, data_, direction, envelopeIterSend, envelopeStart, dataSize, nx, ny, nz, envelopeWidth, currentStep);
 
   MPI_Sendrecv(&sendBuf1[0], commDataSize, commDataType, recvRank[commDirection][0], 0,
                &recvBuf1[0], commDataSize, commDataType, sendRank[commDirection][0], 0,
@@ -160,7 +160,7 @@ template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, int commDire
                     direction[1]*envelopeIterRecv[1] +
                     direction[2]*envelopeIterRecv[2];
 
-    unpackData(recvBuf1, data_, direction, envelopeIterRecv, envelopeStart, dataSize, nx, ny, nz, envelopeWidth);
+    unpackData(recvBuf1, data_, direction, envelopeIterRecv, envelopeStart, dataSize, nx, ny, nz, envelopeWidth, currentStep);
   }
 
   envelopeIterSend[0] = direction[0]*envelopeWidth;
@@ -179,7 +179,7 @@ template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, int commDire
                   direction[1]*envelopeIterSend[1] +
                   direction[2]*envelopeIterSend[2];
 
-  packData(sendBuf2, data_, direction, envelopeIterSend, envelopeStart, dataSize, nx, ny, nz, envelopeWidth);
+  packData(sendBuf2, data_, direction, envelopeIterSend, envelopeStart, dataSize, nx, ny, nz, envelopeWidth, currentStep);
 
   MPI_Sendrecv(&sendBuf2[0], commDataSize, commDataType, recvRank[commDirection][1], 0,
                &recvBuf2[0], commDataSize, commDataType, sendRank[commDirection][1], 0,
@@ -191,13 +191,13 @@ template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, int commDire
                     direction[1]*envelopeIterRecv[1] +
                     direction[2]*envelopeIterRecv[2];
 
-    unpackData(recvBuf2, data_, direction, envelopeIterRecv, envelopeStart, dataSize, nx, ny, nz, envelopeWidth); 
+    unpackData(recvBuf2, data_, direction, envelopeIterRecv, envelopeStart, dataSize, nx, ny, nz, envelopeWidth, currentStep); 
   }
 
 }
 
 
-template<typename T> void LBMPSMMPI::packData(vector<T> &sendBuf, vector<T> &data, int direction[3], int envelopeIterSend[3], int envelopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth)
+template<typename T> void LBMPSMMPI::packData(vector<T> &sendBuf, vector<T> &data, int direction[3], int envelopeIterSend[3], int envelopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth, int currentStep)
 {
   int iMax = nx*(1-direction[0])+direction[0];
   int jMax = ny*(1-direction[1])+direction[1];
@@ -213,8 +213,8 @@ template<typename T> void LBMPSMMPI::packData(vector<T> &sendBuf, vector<T> &dat
           envelopeIterSend[0] = direction[0]*(envelopeStart + iEnvelope) + i;
           envelopeIterSend[1] = direction[1]*(envelopeStart + iEnvelope) + j;
           envelopeIterSend[2] = direction[2]*(envelopeStart + iEnvelope) + k;
-          for(int iq = 0; iq < q; ++iq){
-            envelopeIterSendIndex = (envelopeIterSend[0] * ny * nz + envelopeIterSend[1] * nz + envelopeIterSend[2])*dataSize + iq;
+          for(int iq = 0; iq < dataSize; ++iq){
+            envelopeIterSendIndex = nx*ny*nz*dataSize*currentStep + (envelopeIterSend[0] * ny * nz + envelopeIterSend[1] * nz + envelopeIterSend[2])*dataSize + iq;
             sendBufIndex = (k + j*kMax + i*jMax*kMax + iEnvelope*iMax*jMax*kMax)*dataSize + iq;
 
             sendBuf[sendBufIndex] = data[envelopeIterSendIndex];
@@ -227,7 +227,7 @@ template<typename T> void LBMPSMMPI::packData(vector<T> &sendBuf, vector<T> &dat
 }
 
 
-template<typename T> void LBMPSMMPI::unpackData(vector<T> &recvBuf, vector<T> &data, int direction[3], int envelopeIterRecv[3], int envelopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth)
+template<typename T> void LBMPSMMPI::unpackData(vector<T> &recvBuf, vector<T> &data, int direction[3], int envelopeIterRecv[3], int envelopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth, int currentStep)
 {
   int iMax = nx*(1-direction[0])+direction[0];
   int jMax = ny*(1-direction[1])+direction[1];
@@ -243,8 +243,8 @@ template<typename T> void LBMPSMMPI::unpackData(vector<T> &recvBuf, vector<T> &d
           envelopeIterRecv[0] = direction[0]*(envelopeStart + iEnvelope) + i;
           envelopeIterRecv[1] = direction[1]*(envelopeStart + iEnvelope) + j;
           envelopeIterRecv[2] = direction[2]*(envelopeStart + iEnvelope) + k;
-          for(int iq = 0; iq < q; ++iq){
-            envelopeIterRecvIndex = (envelopeIterRecv[0] * ny * nz + envelopeIterRecv[1] * nz + envelopeIterRecv[2])*dataSize + iq;
+          for(int iq = 0; iq < dataSize; ++iq){
+            envelopeIterRecvIndex = nx*ny*nz*dataSize*currentStep + (envelopeIterRecv[0] * ny * nz + envelopeIterRecv[1] * nz + envelopeIterRecv[2])*dataSize + iq;
             recvBufIndex = (k + j*kMax + i*jMax*kMax + iEnvelope*iMax*jMax*kMax)*dataSize + iq;
 
             data[envelopeIterRecvIndex] = recvBuf[recvBufIndex];

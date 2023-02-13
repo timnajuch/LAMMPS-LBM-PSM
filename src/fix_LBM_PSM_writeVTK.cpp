@@ -280,8 +280,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
       }
     }
 
-    ovel << "\nSCALARS Velocity-x FLOAT" << "\n";
-    ovel << "LOOKUP_TABLE default" << "\n";
+    ovel << "\nVECTORS Velocity FLOAT" << "\n";
     for(int kproc = 0; kproc<decomposition[2]; kproc++){
       if(domain->dimension == 3){
         nzLoopStart = envelopeWidth;
@@ -294,52 +293,10 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
               for(int i=envelopeWidth; i<(fixLBMPSM->dynamics->get_nxLocal(iproc)-envelopeWidth); i++){
                 int procIndex = iproc*decomposition[1]*decomposition[2] + jproc*decomposition[2] + kproc;
                 int index = (i*fixLBMPSM->dynamics->get_nyLocal(jproc)*fixLBMPSM->dynamics->get_nzLocal(kproc) + j*fixLBMPSM->dynamics->get_nzLocal(kproc) + k)*3 + MPIGathervDispls3D[procIndex];
-                ovel << u_vtk[index] <<"\n";
-              }
-            }
-          }
-        }
-      }
-    }
-
-    ovel << "\nSCALARS Velocity-y FLOAT" << "\n";
-    ovel << "LOOKUP_TABLE default" << "\n";
-    for(int kproc = 0; kproc<decomposition[2]; kproc++){
-      if(domain->dimension == 3){
-        nzLoopStart = envelopeWidth;
-        nzLoopEnd = fixLBMPSM->dynamics->get_nzLocal(kproc)-envelopeWidth;
-      }
-      for(int k=nzLoopStart; k<nzLoopEnd; k++){
-        for(int jproc = 0; jproc<decomposition[1]; jproc++){
-          for(int j=envelopeWidth; j<(fixLBMPSM->dynamics->get_nyLocal(jproc)-envelopeWidth); j++){
-            for(int iproc = 0; iproc<decomposition[0]; iproc++){
-              for(int i=envelopeWidth; i<(fixLBMPSM->dynamics->get_nxLocal(iproc)-envelopeWidth); i++){
-                int procIndex = iproc*decomposition[1]*decomposition[2] + jproc*decomposition[2] + kproc;
-                int index = (i*fixLBMPSM->dynamics->get_nyLocal(jproc)*fixLBMPSM->dynamics->get_nzLocal(kproc) + j*fixLBMPSM->dynamics->get_nzLocal(kproc) + k)*3 + 1 + MPIGathervDispls3D[procIndex];
-                ovel << u_vtk[index] <<"\n";
-              }
-            }
-          }
-        }
-      }
-    }
-
-    if(domain->dimension == 3){
-      ovel << "\nSCALARS Velocity-z FLOAT" << "\n";
-      ovel << "LOOKUP_TABLE default" << "\n";
-    for(int kproc = 0; kproc<decomposition[2]; kproc++){
-      if(domain->dimension == 3){
-        nzLoopStart = envelopeWidth;
-        nzLoopEnd = fixLBMPSM->dynamics->get_nzLocal(kproc)-envelopeWidth;
-      }
-      for(int k=nzLoopStart; k<nzLoopEnd; k++){
-        for(int jproc = 0; jproc<decomposition[1]; jproc++){
-          for(int j=envelopeWidth; j<(fixLBMPSM->dynamics->get_nyLocal(jproc)-envelopeWidth); j++){
-            for(int iproc = 0; iproc<decomposition[0]; iproc++){
-              for(int i=envelopeWidth; i<(fixLBMPSM->dynamics->get_nxLocal(iproc)-envelopeWidth); i++){
-                  int procIndex = iproc*decomposition[1]*decomposition[2] + jproc*decomposition[2] + kproc;
-                  int index = (i*fixLBMPSM->dynamics->get_nyLocal(jproc)*fixLBMPSM->dynamics->get_nzLocal(kproc) + j*fixLBMPSM->dynamics->get_nzLocal(kproc) + k)*3 + 2 + MPIGathervDispls3D[procIndex];
-                  ovel << u_vtk[index] <<"\n";
+                if(domain->dimension == 2){
+                  ovel << u_vtk[index] << " " << u_vtk[index+1] << " 0\n";
+                }else{
+                  ovel << u_vtk[index] << " " << u_vtk[index+1] << " " << u_vtk[index+2] << "\n";
                 }
               }
             }

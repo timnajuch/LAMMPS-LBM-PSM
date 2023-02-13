@@ -201,12 +201,12 @@ void fix_LBM_PSM::post_force(int vflag)
     exchangeParticleData->setParticlesOnLattice(dynamics, unitConversion, nPart, atom->tag, atom->x, atom->v, atom->omega, atom->radius);
 
     if(domain->dimension == 2){
-      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic);
-      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic);
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 0, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->xperiodic, dynamics->get_currentStep());
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 1, dynamics->get_nx(), dynamics->get_ny(), 1, dynamics->get_envelopeWidth(), domain->yperiodic, dynamics->get_currentStep());
     }else{
-      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 0, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->xperiodic);
-      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 1, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->yperiodic);
-      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic);
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 0, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->xperiodic, dynamics->get_currentStep());
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 1, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->yperiodic, dynamics->get_currentStep());
+      lbmmpicomm->sendRecvData<double>(dynamics->getVector_f(), 2, dynamics->get_nx(), dynamics->get_ny(), dynamics->get_nz(), dynamics->get_envelopeWidth(), domain->zperiodic, dynamics->get_currentStep());
     }
 
     dynamics->macroCollideStream();

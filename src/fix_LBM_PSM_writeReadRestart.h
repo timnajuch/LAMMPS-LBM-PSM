@@ -50,7 +50,7 @@ class LBMPSMWriteReadRestart : public Fix{
     void init();
     void pre_force(int);
 
-  void write_restart(string name_, vector<double> &f_);
+  void write_restart(string name_, vector<double> &f_, int currentStep);
   void read_restart(string name_, vector<double> &f_);
 
   class fix_LBM_PSM *fixLBMPSM;

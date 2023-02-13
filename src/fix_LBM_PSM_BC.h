@@ -56,7 +56,7 @@ class fix_LBM_PSM_BC : public Fix {
 
     class fix_LBM_PSM *fixLBMPSM;
 
-    int typeBC; // 0: periodic set-up, 1: shear set-up, 2: imposed flow in x-direction set-up
+    int typeBC;
 
 /* TODO Use when genreral BC are implemented
     int lowerBC[3];  // 0: periodic, 1: velocity, 2: density
