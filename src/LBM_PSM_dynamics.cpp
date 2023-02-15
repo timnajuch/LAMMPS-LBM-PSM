@@ -36,17 +36,19 @@ LBMPSMDynamics::~LBMPSMDynamics(){};
 
 
 double LBMPSMDynamics::feq(int iq_, int ind_phys_1D_, int ind_phys_2D_){
-  return rho[ind_phys_1D_] * w[iq_] * 
-        (1.0 + ( e[3*iq_] * u[ind_phys_2D_] + e[3*iq_+1] * u[ind_phys_2D_+1] + e[3*iq_+2] * u[ind_phys_2D_+2]) * invCsPow2
-        + pow( e[3*iq_] * u[ind_phys_2D_] + e[3*iq_+1] * u[ind_phys_2D_+1] + e[3*iq_+2] * u[ind_phys_2D_+2] , 2.0) * 0.5 * invCsPow4
+  double eiq_dot_u = e[3*iq_] * u[ind_phys_2D_] + e[3*iq_+1] * u[ind_phys_2D_+1] + e[3*iq_+2] * u[ind_phys_2D_+2];
+  return rho[ind_phys_1D_] * w[iq_] *
+        (1.0 + eiq_dot_u * invCsPow2
+        + eiq_dot_u*eiq_dot_u * 0.5 * invCsPow4
         - 0.5 * ( u[ind_phys_2D_] * u[ind_phys_2D_] + u[ind_phys_2D_+1] * u[ind_phys_2D_+1] + u[ind_phys_2D_+2] * u[ind_phys_2D_+2]) * invCsPow2 );
 }
 
 
 double LBMPSMDynamics::feq(int iq_, double rho_, vector<double> u_){
+  double eiq_dot_u = e[3*iq_] * u_[0] + e[3*iq_+1] * u_[1] + e[3*iq_+2] * u_[2];
   return rho_ * w[iq_] * 
-        (1.0 + ( e[3*iq_] * u_[0] + e[3*iq_+1] * u_[1] + e[3*iq_+2] * u_[2]) * invCsPow2
-        + pow( e[3*iq_] * u_[0] + e[3*iq_+1] * u_[1] + e[iq_*3+2] * u_[2], 2.0) * 0.5 * invCsPow4
+        (1.0 + eiq_dot_u * invCsPow2
+        + eiq_dot_u*eiq_dot_u * 0.5 * invCsPow4
         - 0.5 * ( u_[0] * u_[0] + u_[1] * u_[1] + u_[2] * u_[2]) * invCsPow2 );
 }
 
