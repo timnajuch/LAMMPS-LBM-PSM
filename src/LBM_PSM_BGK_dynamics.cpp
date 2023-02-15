@@ -13,7 +13,7 @@ Tim Najuch, 2022
 #include "LBM_PSM_BGK_dynamics.h"
 
 LBMPSMBGKDynamics::LBMPSMBGKDynamics(double tau_, int nx_, int ny_, int nz_, vector<double> F_lbm_, int decomposition_[3], int procCoordinates_[3], vector<double> origin_, vector<double> boxLength_, int dimension_) :
-  LBMPSMDynamics(nx_, ny_, nz_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_), tau(tau_), F_lbm(F_lbm_) { }
+  LBMPSMDynamics(nx_, ny_, nz_, decomposition_, procCoordinates_, origin_, boxLength_, dimension_), tau(tau_), omega(1.0/tau_), F_lbm(F_lbm_) { }
 
 
 LBMPSMBGKDynamics::~LBMPSMBGKDynamics(){}
@@ -63,9 +63,9 @@ void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_, int current
   rho[ind_phys_1D] = rho_tmp;
 
   // External force according to Guo et al. (2002)
-  jx += F_lbm[0]/2.0;
-  jy += F_lbm[1]/2.0;
-  jz += F_lbm[2]/2.0;
+  jx += F_lbm[0]*0.5;
+  jy += F_lbm[1]*0.5;
+  jz += F_lbm[2]*0.5;
 
   u[ind_phys_2D] = jx/rho_tmp;
   u[ind_phys_2D+1] = jy/rho_tmp;
@@ -80,58 +80,65 @@ void LBMPSMBGKDynamics::collisionAndStream(int i_, int j_, int k_, int iq_, int 
   int ind_phys_1D = index_1D(i_, j_, k_);
   int ind_phys_2D = index_2D(i_, j_, k_, 0);
 
+  // Equilibrium function
   set_f0(i_, j_, k_, iq_, feq(iq_, ind_phys_1D, ind_phys_2D) );
 
+  // Solid phase / particle data
   LAMMPS_NS::tagint pID1 = getParticleDataOnLatticeNode(ind_phys_1D).particleID[0];
   LAMMPS_NS::tagint pID2 = getParticleDataOnLatticeNode(ind_phys_1D).particleID[1];
-  double Btmp1 = 0.0;
-  double Btmp2 = 0.0;
+  double B1 = 0.0;
+  double B2 = 0.0;
   vector<double> uSolid1{0.0, 0.0, 0.0};
   vector<double> uSolid2{0.0, 0.0, 0.0};
+  double f0_solid1 = 0.0;
+  double f0_solid2 = 0.0;
+  double solid_coll1 = 0.0;
+  double solid_coll2 = 0.0;
 
+  // Solid phase collision terms
   if (pID1 > 0){
-    Btmp1 = getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[0];
+    B1 = getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[0];
     uSolid1[0] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[0];
     uSolid1[1] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[1];
     uSolid1[2] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[2];
+    f0_solid1 = feq(iq_, get_rho(ind_phys_1D), uSolid1);
+    solid_coll1 = f0_solid1 - get_f(ind_iq) + ( 1.0 - omega) * (get_f(ind_iq) - get_f0(ind_iq0) );
   }
   if (pID2 > 0){
-    Btmp2 = getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[1];
+    B2 = getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[1];
     uSolid2[0] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[3];
     uSolid2[1] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[4];
     uSolid2[2] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[5];
+    f0_solid2 = feq(iq_, get_rho(ind_phys_1D), uSolid2);
+    solid_coll2 = f0_solid2 - get_f(ind_iq) + ( 1.0 - omega) * (get_f(ind_iq) - get_f0(ind_iq0) );
   }
 
-  double f0_solid1 = feq(iq_, get_rho(ind_phys_1D), uSolid1);
-  double f0_solid2 = feq(iq_, get_rho(ind_phys_1D), uSolid2);
-
-  double BGKcoll = ( get_f0(ind_iq0) - get_f(ind_iq) ) / tau;
-
-  double solid_coll1 = f0_solid1 - get_f(ind_iq) + ( 1.0 - 1.0/tau) * (get_f(ind_iq) - get_f0(ind_iq0) );
-  double solid_coll2 = f0_solid2 - get_f(ind_iq) + ( 1.0 - 1.0/tau) * (get_f(ind_iq) - get_f0(ind_iq0) );
-
-  double Btot = Btmp1 + Btmp2;
-  
-  double B1 = Btmp1;
-  double B2 = Btmp2;
+  double Btot = B1 + B2;
   if(Btot > 1.0){
-    B1 = Btmp1/Btot;
-    B2 = Btmp2/Btot;
+    B1 = B1/Btot;
+    B2 = B2/Btot;
     Btot = 1.0;
   }
- 
+
+  // External forcing according to Guo et al. (2002)
   double F_lbm_iq = 0.0;
   if (F_lbm_mag_pow2 > 0.0)
-    { F_lbm_iq = (1.0-0.5/tau) * F_iq(iq_, ind_phys_2D, F_lbm); }
+    { F_lbm_iq = (1.0-0.5*omega) * F_iq(iq_, ind_phys_2D, F_lbm); }
 
-  set_f(iShift_, jShift_, kShift_, iq_, nextStep_, get_f(ind_iq)  + ( 1.0 - Btot ) * BGKcoll  + B1 * solid_coll1 + B2 * solid_coll2 + F_lbm_iq);
+  // Collision and streaming
+  set_f(iShift_, jShift_, kShift_, iq_, nextStep_, get_f(ind_iq)  + ( 1.0 - Btot ) * ( get_f0(ind_iq0) - get_f(ind_iq) ) * omega  + B1 * solid_coll1 + B2 * solid_coll2 + F_lbm_iq);
 
-  add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * e[3*iq_], 0);
-  add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * e[3*iq_+1], 1);
-  add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * e[3*iq_+2], 2);
-  add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * e[3*iq_], 0);
-  add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * e[3*iq_+1], 1);
-  add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * e[3*iq_+2], 2);
+  // Add hydrodynamic interaction force
+  if (pID1 > 0){
+    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * e[3*iq_], 0);
+    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * e[3*iq_+1], 1);
+    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * e[3*iq_+2], 2);
+  }
+  if (pID2 > 0){
+    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * e[3*iq_], 0);
+    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * e[3*iq_+1], 1);
+    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * e[3*iq_+2], 2);
+  }
 }
 
 

@@ -28,13 +28,11 @@ class LBMPSMDynamics : public LBMPSMLattice {
     ~LBMPSMDynamics();
 
     double feq(int iq_, int ind_phys_1D_, int ind_phys_2D_); // Accesses the density and velocities stored in the Lattice class
-    double feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, vector<double> &rho_, vector<double> &u_);
-    double feq(int iq_, double rho, vector<double> u);
+    double feq(int iq_, double rho_, vector<double> u_);
 
     // External force according to Guo et al. (2002). When called needs to be multiplied by (1-0.5/tau)
-    double F_iq(int iq_, vector<double> u, vector<double> F);
-    double F_iq(int iq_, int ind_phys_2D_, vector<double>& u, vector<double> F);
-    double F_iq(int iq_, int ind_phys_2D_, vector<double> F); // Accesses the velocities stored in the Lattice class
+    double F_iq(int iq_, vector<double> u_, vector<double> F_);
+    double F_iq(int iq_, int ind_phys_2D_, vector<double> F_); // Accesses the velocities stored in the Lattice class
 
 };
 

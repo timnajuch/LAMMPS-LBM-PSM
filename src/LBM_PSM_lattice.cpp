@@ -27,6 +27,10 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int decomposition[3], in
 
   cs = 1.0/sqrt(3.0);
   csPow2 = 1.0/3.0;
+  csPow4 = csPow2*csPow2;
+  invCsPow2 = 1.0/csPow2;
+  invCsPow4 = 1.0/csPow4;
+
   currentStep = 0;
   nextStep = 1;
   
@@ -311,7 +315,7 @@ double LBMPSMLattice::get_u_at_node(int index_node_1D, int direction){ return u[
 
 vector<double>& LBMPSMLattice::getVector_f(){ return f; }
 
-void LBMPSMLattice::setVector_f(vector<double>& fcopy){ f = fcopy; };
+void LBMPSMLattice::setVector_f(vector<double>& fcopy){ f = fcopy; }
 
 
 ParticleDataOnLattice LBMPSMLattice::getParticleDataOnLatticeNode(int index){ return pData[index]; }

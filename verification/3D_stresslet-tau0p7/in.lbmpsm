@@ -24,8 +24,6 @@ fix             lbDYN all lbm-psm every 1 Nlc 11 lc 0.0005 rho 1000.0 nu 0.0001 
 fix             lbBC all lbm-psm-bc shear
 fix             lbVTK all lbm-psm-vtk every 10000
 
-fix             freeze all setforce 0.0 0.0 0.0
-
 fix             integrate all nve/sphere
 dump           	iddump all custom 100 s.p id type diameter mass x y z vx vy vz fx fy fz tqx tqy tqz omegax omegay omegaz
 

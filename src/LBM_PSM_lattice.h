@@ -43,7 +43,8 @@ class LBMPSMLattice{
     vector<double> w;                 // Weighting factor in LB equilibrium function
     vector<double> e;                 // LB velocity sets
 
-    double cs , csPow2;               // Speed of sound in LBM etc
+    double cs, csPow2, csPow4;        // Speed of sound in LBM and to power of 2/4
+    double invCsPow2, invCsPow4;      // Inverse of speed of sound to power of 2/4
 
     double dx, dy, dz;                // Lattice discretisation in 3D
   

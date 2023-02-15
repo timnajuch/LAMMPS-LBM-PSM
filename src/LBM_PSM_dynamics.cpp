@@ -37,47 +37,31 @@ LBMPSMDynamics::~LBMPSMDynamics(){};
 
 double LBMPSMDynamics::feq(int iq_, int ind_phys_1D_, int ind_phys_2D_){
   return rho[ind_phys_1D_] * w[iq_] * 
-        (1.0 + ( e[3*iq_] * u[ind_phys_2D_] + e[3*iq_+1] * u[ind_phys_2D_+1] + e[3*iq_+2] * u[ind_phys_2D_+2]) / (pow(cs, 2.0))
-        + pow( e[3*iq_] * u[ind_phys_2D_] + e[3*iq_+1] * u[ind_phys_2D_+1] + e[3*iq_+2] * u[ind_phys_2D_+2] , 2.0) / (2.0*pow(cs, 4.0))
-        - 1.0/2.0 * ( u[ind_phys_2D_] * u[ind_phys_2D_] + u[ind_phys_2D_+1] * u[ind_phys_2D_+1] + u[ind_phys_2D_+2] * u[ind_phys_2D_+2]) / (pow(cs,2.0) ) );
+        (1.0 + ( e[3*iq_] * u[ind_phys_2D_] + e[3*iq_+1] * u[ind_phys_2D_+1] + e[3*iq_+2] * u[ind_phys_2D_+2]) * invCsPow2
+        + pow( e[3*iq_] * u[ind_phys_2D_] + e[3*iq_+1] * u[ind_phys_2D_+1] + e[3*iq_+2] * u[ind_phys_2D_+2] , 2.0) * 0.5 * invCsPow4
+        - 0.5 * ( u[ind_phys_2D_] * u[ind_phys_2D_] + u[ind_phys_2D_+1] * u[ind_phys_2D_+1] + u[ind_phys_2D_+2] * u[ind_phys_2D_+2]) * invCsPow2 );
 }
 
 
-double LBMPSMDynamics::feq(int iq_, int ind_phys_1D_, int ind_phys_2D_, vector<double> &rho_, vector<double> &u_){
-  return rho_[ind_phys_1D_] * w[iq_] * 
-        (1.0 + ( e[3*iq_] * u_[ind_phys_2D_] + e[3*iq_+1] * u_[ind_phys_2D_+1] + e[3*iq_+2] * u_[ind_phys_2D_+2]) / (pow(cs, 2.0))
-        + pow( e[3*iq_] * u_[ind_phys_2D_] + e[3*iq_+1] * u_[ind_phys_2D_+1] + e[3*iq_+2] * u_[ind_phys_2D_+2] , 2.0) / (2.0*pow(cs, 4.0))
-        - 1.0/2.0 * ( u_[ind_phys_2D_] * u_[ind_phys_2D_] + u_[ind_phys_2D_+1] * u_[ind_phys_2D_+1] + u_[ind_phys_2D_+2] * u_[ind_phys_2D_+2]) / (pow(cs,2.0) ) );
+double LBMPSMDynamics::feq(int iq_, double rho_, vector<double> u_){
+  return rho_ * w[iq_] * 
+        (1.0 + ( e[3*iq_] * u_[0] + e[3*iq_+1] * u_[1] + e[3*iq_+2] * u_[2]) * invCsPow2
+        + pow( e[3*iq_] * u_[0] + e[3*iq_+1] * u_[1] + e[iq_*3+2] * u_[2], 2.0) * 0.5 * invCsPow4
+        - 0.5 * ( u_[0] * u_[0] + u_[1] * u_[1] + u_[2] * u_[2]) * invCsPow2 );
 }
 
 
-double LBMPSMDynamics::feq(int iq_, double rho, vector<double> u){
-  return rho * w[iq_] * 
-        (1.0 + ( e[3*iq_] * u[0] + e[3*iq_+1] * u[1] + e[3*iq_+2] * u[2]) / (pow(cs, 2.0))
-        + pow( e[3*iq_] * u[0] + e[3*iq_+1] * u[1] + e[iq_*3+2] * u[2], 2.0) / (2.0*pow(cs, 4.0))
-        - 1.0/2.0 * ( u[0] * u[0] + u[1] * u[1] + u[2] * u[2]) / (pow(cs,2.0) ) );
-}
-
-
-double LBMPSMDynamics::F_iq(int iq_, vector<double> u, vector<double> F){
+double LBMPSMDynamics::F_iq(int iq_, vector<double> u_, vector<double> F_){
   return w[iq_] * 
-        ( ( (e[3*iq_] - u[0]) * F[0] + (e[3*iq_+1] - u[1]) * F[1] + (e[3*iq_+2] - u[2]) * F[2]) / pow(cs, 2.0)
-          + ( (e[3*iq_] * u[0] + e[3*iq_+1] * u[1] + e[iq_*3+2] * u[2]) / pow(cs, 4.0)
-            * (e[3*iq_] * F[0] + e[3*iq_+1] * F[1] + e[3*iq_+2] * F[2]) ) );
+        ( ( (e[3*iq_] - u_[0]) * F_[0] + (e[3*iq_+1] - u_[1]) * F_[1] + (e[3*iq_+2] - u_[2]) * F_[2]) * invCsPow2
+          + ( (e[3*iq_] * u_[0] + e[3*iq_+1] * u_[1] + e[iq_*3+2] * u_[2]) * invCsPow4
+            * (e[3*iq_] * F_[0] + e[3*iq_+1] * F_[1] + e[3*iq_+2] * F_[2]) ) );
 }
 
 
-double LBMPSMDynamics::F_iq(int iq_, int ind_phys_2D_, vector<double>& u, vector<double> F){
+double LBMPSMDynamics::F_iq(int iq_, int ind_phys_2D_, vector<double> F_){
   return w[iq_] * 
-        ( ( (e[3*iq_] - u[ind_phys_2D_+0]) * F[0] + (e[3*iq_+1] - u[ind_phys_2D_+1]) * F[1] + (e[3*iq_+2] - u[ind_phys_2D_+2]) * F[2]) / pow(cs, 2.0)
-          + ( (e[3*iq_] * u[ind_phys_2D_+0] + e[3*iq_+1] * u[ind_phys_2D_+1] + e[iq_*3+2] * u[ind_phys_2D_+2]) / pow(cs, 4.0)
-            * (e[3*iq_] * F[0] + e[3*iq_+1] * F[1] + e[3*iq_+2] * F[2]) ) );
-}
-
-
-double LBMPSMDynamics::F_iq(int iq_, int ind_phys_2D_, vector<double> F){
-  return w[iq_] * 
-        ( ( (e[3*iq_] - u[ind_phys_2D_+0]) * F[0] + (e[3*iq_+1] - u[ind_phys_2D_+1]) * F[1] + (e[3*iq_+2] - u[ind_phys_2D_+2]) * F[2]) / pow(cs, 2.0)
-          + ( (e[3*iq_] * u[ind_phys_2D_+0] + e[3*iq_+1] * u[ind_phys_2D_+1] + e[iq_*3+2] * u[ind_phys_2D_+2]) / pow(cs, 4.0)
-            * (e[3*iq_] * F[0] + e[3*iq_+1] * F[1] + e[3*iq_+2] * F[2]) ) );
+        ( ( (e[3*iq_] - u[ind_phys_2D_+0]) * F_[0] + (e[3*iq_+1] - u[ind_phys_2D_+1]) * F_[1] + (e[3*iq_+2] - u[ind_phys_2D_+2]) * F_[2]) * invCsPow2
+          + ( (e[3*iq_] * u[ind_phys_2D_+0] + e[3*iq_+1] * u[ind_phys_2D_+1] + e[iq_*3+2] * u[ind_phys_2D_+2]) * invCsPow4
+            * (e[3*iq_] * F_[0] + e[3*iq_+1] * F_[1] + e[3*iq_+2] * F_[2]) ) );
 }

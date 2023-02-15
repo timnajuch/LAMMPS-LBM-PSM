@@ -20,7 +20,7 @@ Tim Najuch, 2022
 class LBMPSMBGKDynamics : public LBMPSMDynamics {
   
   private:
-    double tau;
+    double tau, omega;      // Single relaxation parameter tau and its inverse omega
     vector<double> F_lbm;
     double F_lbm_mag_pow2;
 
