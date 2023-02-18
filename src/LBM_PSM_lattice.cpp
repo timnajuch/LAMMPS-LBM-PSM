@@ -118,7 +118,7 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int decomposition[3], in
 
   pData.resize(nx*ny*nz);
 
-  if(q == 9){ // D2Q9 lattice
+  if(q == 9){ // D2Q9 lattice // Every 3 elements (listed in one line) give one velocity vector
     e = { 0.0 ,  0.0,  0.0,
           1.0 ,  0.0,  0.0,
           0.0 ,  1.0,  0.0,
@@ -142,7 +142,7 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int decomposition[3], in
         };
     }
 
-  if(q == 19){ // D3Q19 lattice
+  if(q == 19){ // D3Q19 lattice // Every 3 elements (listed in one line) give one velocity vector
     e = { 0.0,  0.0,  0.0,
           1.0,  0.0,  0.0,
          -1.0,  0.0,  0.0,
@@ -257,7 +257,9 @@ double LBMPSMLattice::get_f(int i_, int j_, int k_, int iq_, int step_){ return 
 
 double LBMPSMLattice::get_f(int ind_iq_){ return f[ind_iq_]; }
 
- void LBMPSMLattice::set_f0(int i_, int j_, int k_, int iq_, double value_){ f0[index_fi(i_, j_, k_, iq_, 0)] = value_; }
+void LBMPSMLattice::set_f0(int i_, int j_, int k_, int iq_, double value_){ f0[index_fi(i_, j_, k_, iq_, 0)] = value_; }
+
+void LBMPSMLattice::set_f0(int ind_iq_, double value_){ f0[ind_iq_] = value_; }
 
 double LBMPSMLattice::get_f0(int i_, int j_, int k_, int iq_){ return f0[index_fi(i_, j_, k_, iq_, 0)]; }
 
@@ -424,12 +426,6 @@ void LBMPSMLattice::add_Fhyd(int index, LAMMPS_NS::tagint pID, double Fhyd, int 
     pData[index].hydrodynamicForce[3*0+dir] += Fhyd;
   }
   else if(pData[index].particleID[1] == pID){
-    pData[index].hydrodynamicForce[3*1+dir] += Fhyd;
-  }
-  else if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[0] == 0){
-    pData[index].hydrodynamicForce[3*0+dir] += Fhyd;
-  }
-  else if(pID != pData[index].particleID[0] && pID != pData[index].particleID[1] && pData[index].particleID[1] == 0){
     pData[index].hydrodynamicForce[3*1+dir] += Fhyd;
   }
 }

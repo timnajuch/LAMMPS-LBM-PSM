@@ -69,6 +69,7 @@ class LBMPSMLattice{
     double get_f(int ind_iq_);
 
     void set_f0(int i_, int j_, int k_, int iq_, double value_);
+    void set_f0(int ind_iq_, double value_);
     double get_f0(int i_, int j_, int k_, int iq_);
     double get_f0(int ind_iq_);
 

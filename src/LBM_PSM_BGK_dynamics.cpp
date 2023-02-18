@@ -55,10 +55,10 @@ void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_, int current
   int ind_iq = 0;
   for(int iq = 0; iq < q; ++iq){
     ind_iq = index_fi(i_, j_, k_, iq, currentStep_);
-    rho_tmp += get_f(ind_iq);
-    jx += get_f(ind_iq) * e[3*iq];
-    jy += get_f(ind_iq) * e[3*iq+1];
-    jz += get_f(ind_iq) * e[3*iq+2];
+    rho_tmp += f[ind_iq];
+    jx += f[ind_iq] * e[3*iq];
+    jy += f[ind_iq] * e[3*iq+1];
+    jz += f[ind_iq] * e[3*iq+2];
   }
   rho[ind_phys_1D] = rho_tmp;
 
@@ -81,7 +81,7 @@ void LBMPSMBGKDynamics::collisionAndStream(int i_, int j_, int k_, int iq_, int 
   int ind_phys_2D = index_2D(i_, j_, k_, 0);
 
   // Equilibrium function
-  set_f0(i_, j_, k_, iq_, feq(iq_, ind_phys_1D, ind_phys_2D) );
+  f0[ind_iq0] = feq(iq_, ind_phys_1D, ind_phys_2D);
 
   // Solid phase / particle data
   LAMMPS_NS::tagint pID1 = getParticleDataOnLatticeNode(ind_phys_1D).particleID[0];
@@ -102,7 +102,7 @@ void LBMPSMBGKDynamics::collisionAndStream(int i_, int j_, int k_, int iq_, int 
     uSolid1[1] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[1];
     uSolid1[2] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[2];
     f0_solid1 = feq(iq_, get_rho(ind_phys_1D), uSolid1);
-    solid_coll1 = f0_solid1 - get_f(ind_iq) + ( 1.0 - omega) * (get_f(ind_iq) - get_f0(ind_iq0) );
+    solid_coll1 = f0_solid1 - f[ind_iq] + ( 1.0 - omega) * (f[ind_iq] - f0[ind_iq0]);
   }
   if (pID2 > 0){
     B2 = getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[1];
@@ -110,7 +110,7 @@ void LBMPSMBGKDynamics::collisionAndStream(int i_, int j_, int k_, int iq_, int 
     uSolid2[1] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[4];
     uSolid2[2] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[5];
     f0_solid2 = feq(iq_, get_rho(ind_phys_1D), uSolid2);
-    solid_coll2 = f0_solid2 - get_f(ind_iq) + ( 1.0 - omega) * (get_f(ind_iq) - get_f0(ind_iq0) );
+    solid_coll2 = f0_solid2 - f[ind_iq] + ( 1.0 - omega) * (f[ind_iq] - f0[ind_iq0]);
   }
 
   double Btot = B1 + B2;
@@ -126,7 +126,7 @@ void LBMPSMBGKDynamics::collisionAndStream(int i_, int j_, int k_, int iq_, int 
     { F_lbm_iq = (1.0-0.5*omega) * F_iq(iq_, ind_phys_2D, F_lbm); }
 
   // Collision and streaming
-  set_f(iShift_, jShift_, kShift_, iq_, nextStep_, get_f(ind_iq)  + ( 1.0 - Btot ) * ( get_f0(ind_iq0) - get_f(ind_iq) ) * omega  + B1 * solid_coll1 + B2 * solid_coll2 + F_lbm_iq);
+  set_f(iShift_, jShift_, kShift_, iq_, nextStep_, f[ind_iq]  + (1.0 - Btot)*(f0[ind_iq0] - f[ind_iq])*omega  + B1*solid_coll1 + B2*solid_coll2 + F_lbm_iq);
 
   // Add hydrodynamic interaction force
   if (pID1 > 0){
