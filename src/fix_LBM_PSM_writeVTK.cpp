@@ -307,6 +307,11 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
 
     ovel.close();
   }
+
+  delete MPIGathervCounts;
+  delete MPIGathervDispls;
+  delete MPIGathervCounts3D;
+  delete MPIGathervDispls3D;
 };
 
 

@@ -130,8 +130,7 @@ fix_LBM_PSM_BC::fix_LBM_PSM_BC(LAMMPS *lmp, int narg, char **arg) :
 
 fix_LBM_PSM_BC::~fix_LBM_PSM_BC()
 {
-//  delete zouHe;
-//  delete fixLBMPSM;
+  delete zouHe;
 }
 
 

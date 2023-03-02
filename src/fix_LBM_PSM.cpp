@@ -86,6 +86,9 @@ fix_LBM_PSM::fix_LBM_PSM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
 fix_LBM_PSM::~fix_LBM_PSM()
 {
   delete dynamics;
+  delete unitConversion;
+  delete exchangeParticleData;
+  delete lbmmpicomm;
   memory->destroy(hydrodynamicInteractions);
 }
 
