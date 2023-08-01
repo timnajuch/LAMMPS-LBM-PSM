@@ -38,6 +38,7 @@ FixStyle(lbm-psm,fix_LBM_PSM)
 #include "update.h"
 
 #include "LBM_PSM_BGK_dynamics.h"
+#include "LBM_PSM_TRT_dynamics.h"
 #include "LBM_PSM_MPICOMM.h"
 #include "LBM_PSM_exchangeParticleData.h"
 #include "LBM_PSM_unitConversion.h"
@@ -56,7 +57,9 @@ class fix_LBM_PSM : public Fix {
 
     double get_rho();
 
-    LBMPSMBGKDynamics *dynamics;
+    //LBMPSMBGKDynamics *dynamics;
+    LBMPSMDynamics *dynamics;
+
 
     UnitConversion *unitConversion;
     ExchangeParticleData *exchangeParticleData;
@@ -69,7 +72,11 @@ class fix_LBM_PSM : public Fix {
     double nu;          // fluid viscosity
     double Re;          // Reynolds number of system (based on characteristic velocity, characteristic length, and fluid viscosity)
     double tau;         // BGK relaxation parameter (optional, default is tau = 0.7)
+    int dynamicsScheme; // 1: BGK dynamics, 2: TRT dynamics
+    double tau_m;       // TRT minus relaxation parameter which can be freely chosen to minimise error
     vector<double> F_ext; // External force acting on the fluid
+
+
 
     void grow_arrays(int);
     void copy_arrays(int, int, int);

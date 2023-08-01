@@ -114,7 +114,6 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int decomposition[3], in
   z = vector<double>(nx*ny*nz,0.0);
 
   u = vector<double>(nx*ny*nz*3,0.0);
-  us = vector<double>(nx*ny*nz*3,0.0);
 
   pData.resize(nx*ny*nz);
 

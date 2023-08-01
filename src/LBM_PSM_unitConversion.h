@@ -64,7 +64,7 @@ class UnitConversion{
     double forceFactor;
     double torqueFactor;
     double volumeForceFactor;
-  
+
     int dimension;
 
   public:

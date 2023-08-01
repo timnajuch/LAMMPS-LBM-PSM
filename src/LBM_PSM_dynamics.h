@@ -34,7 +34,11 @@ class LBMPSMDynamics : public LBMPSMLattice {
     double F_iq(int iq_, vector<double> u_, vector<double> F_);
     double F_iq(int iq_, int ind_phys_2D_, vector<double> F_); // Accesses the velocities stored in the Lattice class
 
+    virtual void initialise_dynamics(double rho_, double ux_, double uy_, double uz_){};
+    virtual void compute_macro_values(int i_, int j_, int k_, int currentStep_){};
+    virtual void collisionAndStream(int i_, int j_, int k_, int iq_, int iShift_, int jShift_, int kShift_, int currentStep_, int nextStep_){};
+    virtual void macroCollideStream(){};
+
 };
 
 #endif
-

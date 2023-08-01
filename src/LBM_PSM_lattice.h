@@ -59,7 +59,6 @@ class LBMPSMLattice{
     vector<double> B;                 // Weighting factor which is based on the solid fraction
     
     vector<double> u;                 // Fluid velocity
-    vector<double> us;                // Solid velocity
 
     vector<ParticleDataOnLattice> pData;  // Particle data stored on lattice node
 

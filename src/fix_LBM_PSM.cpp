@@ -22,6 +22,8 @@ fix_LBM_PSM::fix_LBM_PSM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
 
   tau = 0.7; // default value for BGK relaxation parameter
   F_ext = vector<double>(3, 0.0);
+  dynamicsScheme = 1;
+  tau_m = 0.7;
 
   int iarg = 3;
   while (iarg < narg) {
@@ -59,6 +61,16 @@ fix_LBM_PSM::fix_LBM_PSM(LAMMPS *lmp, int narg, char **arg) : Fix(lmp, narg, arg
       if (iarg+2 > narg) error->all(FLERR,"Illegal fix lbm-psm command");
       tau = utils::numeric(FLERR,arg[iarg+1],false,lmp);
       if (tau <= 0.5) error->all(FLERR,"Illegal fix lbm-psm command");
+      iarg += 2;
+    } else if (strcmp(arg[iarg],"dynamicsScheme") == 0) {
+      if (iarg+2 > narg) error->all(FLERR,"Illegal fix lbm-psm command");
+      dynamicsScheme = atoi(arg[iarg+1]);
+      if (dynamicsScheme < 1 || dynamicsScheme > 2) error->all(FLERR,"Illegal fix lbm-psm command");
+      iarg += 2;
+    } else if (strcmp(arg[iarg],"tau_m") == 0) {
+      if (iarg+2 > narg) error->all(FLERR,"Illegal fix lbm-psm-trt command");
+      tau_m = utils::numeric(FLERR,arg[iarg+1],false,lmp);
+      if (tau_m <= 0.5) error->all(FLERR,"Illegal fix lbm-psm-trt command");
       iarg += 2;
     } else if (strcmp(arg[iarg],"Fext") == 0) {
       if (iarg+4 > narg) error->all(FLERR,"Illegal fix lbm-psm command");
@@ -161,7 +173,11 @@ void fix_LBM_PSM::init()
   vector<double> F_lbm;
   F_lbm = unitConversion->get_volume_force_lb(F_ext);
 
-  dynamics = new LBMPSMBGKDynamics(tau, nx, ny, nz, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension);
+  if (dynamicsScheme == 1){
+    dynamics = new LBMPSMBGKDynamics(tau, nx, ny, nz, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension);
+  }else if (dynamicsScheme == 2){
+    dynamics = new LBMPSMTRTDynamics(tau, tau_m, nx, ny, nz, F_lbm, decomposition, procCoordinates, origin, boxLength, domain->dimension);
+  }
 
   dynamics->initialise_domain(unitConversion->get_dx(), unitConversion->get_dx(), unitConversion->get_dx());
 
