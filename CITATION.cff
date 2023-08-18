@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: ' LAMMPS-LBM-PSM'
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Tim
+    family-names: Najuch
+    orcid: 'https://orcid.org/0000-0002-2046-9696'
+repository-code: 'https://github.com/timnajuch/LAMMPS-LBM-PSM'
+license: GPL-3.0
