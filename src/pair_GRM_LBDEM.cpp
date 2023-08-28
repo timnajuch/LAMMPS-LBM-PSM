@@ -192,41 +192,41 @@ void PairLubricateGRMLBDEM::compute(int eflag, int vflag)
 	    
         h_sepN = h_sepN/radijmean;
 
-/* ----------------------------------------------------------------------
-		Grand resistance matrix notation. 
-		1) Jeffrey and Onishi (1984) 
-		"Resistance functions for two spheres in low-Reynolds-number flow"
-		2) Kim & Karilla "Microhydrodynamics" (chapter 7 and 11)
+/* -------------------------------------------------------------------------
+        Grand resistance matrix notation. 
+        1) Jeffrey and Onishi (1984) 
+        "Resistance functions for two spheres in low-Reynolds-number flow"
+        2) Kim & Karilla "Microhydrodynamics" (chapter 7 and 11)
 
-                                                   / U_1 - U(x_1) \
-		/ F_1 \   / A_11 A_12 Bt_11 Bt_12 Gt_11 Gt_12\ | U_2 - U(x_2) |
-		| F_2 |   | A_21 A_22 Bt_21 Bt_22 Gt_21 Gt_22| | w_1 - w(x_1) |
-		| L_1 | = | B_11 B_12 C_11  C_12  Ht_11 Ht_12| | w_2 - w(x_2) |
-		\ L_2 /   \ B_21 B_22 C_21  C_22  Ht_21 Ht_22/ |    E_infty   |
-                                                   \    E_infty   /
+                                                        / U_1 - U(x_1) \
+        / F_1 \   / A_11 A_12 Bt_11 Bt_12 Gt_11 Gt_12\ | U_2 - U(x_2) |
+        | F_2 |   | A_21 A_22 Bt_21 Bt_22 Gt_21 Gt_22| | w_1 - w(x_1) |
+        | L_1 | = | B_11 B_12 C_11  C_12  Ht_11 Ht_12| | w_2 - w(x_2) |
+        \ L_2 /   \ B_21 B_22 C_21  C_22  Ht_21 Ht_22/ |    E_infty   |
+                                                        \    E_infty   /
 
-		where
+        where
 
-		A_(ij)^(ab) = X_(ab)^A*e_i*e_j + Y_(ab)^A (d_(ij) - e_i*e_j)
-		B_(ij)^(ab) = Bt_(ji)^(ba) = ...
-                Y_(ab)^B*e_(ijk)*e_k
-		C_(ij)^(ab) = X_(ab)^C*e_i*e_j + Y_(ab)^C*(d_(ij) - e_i*e_j)
-    G_(ijk)^(ab) = Gt_(kij)_^(ba) = ...
-            X_(ab)^G*(e_i*e_j - 1/3*d_(ij))e_k ...
-          + Y_(ab)^G*(e_i*d_(jk) + e_j*d_(ik) - 2*e_i*e_j*e_k)
-    H_(ijk)^(ab) = Ht_(kij)^(ab) = ...
-            Y_(ab)^H*(e_(ikl)*e_l*e_j + e_(ijkl)*e_l*e_i)
+        A_(ij)^(ab) = X_(ab)^A*e_i*e_j + Y_(ab)^A (d_(ij) - e_i*e_j)
+        B_(ij)^(ab) = Bt_(ji)^(ba) = ...
+                    Y_(ab)^B*e_(ijk)*e_k
+        C_(ij)^(ab) = X_(ab)^C*e_i*e_j + Y_(ab)^C*(d_(ij) - e_i*e_j)
+        G_(ijk)^(ab) = Gt_(kij)_^(ba) = ...
+                X_(ab)^G*(e_i*e_j - 1/3*d_(ij))e_k ...
+              + Y_(ab)^G*(e_i*d_(jk) + e_j*d_(ik) - 2*e_i*e_j*e_k)
+        H_(ijk)^(ab) = Ht_(kij)^(ab) = ...
+                Y_(ab)^H*(e_(ikl)*e_l*e_j + e_(ijkl)*e_l*e_i)
 
-    e_i: Unit vector along center to center axis
-    d_(ij): Dirac symbol
-    e_(ijk): Levi-Cita symbol
+        e_i: Unit vector along center to center axis
+        d_(ij): Dirac symbol
+        e_(ijk): Levi-Cita symbol
 
-		// Twisting terms X_C are not implemented because:
-		// a) Rieman zeta function would have to be evaluated 
-		//      during run-time
-		// b) Supposedly neglectable contribution
+        // Twisting terms X_C are not implemented because:
+        // a) Rieman zeta function would have to be evaluated 
+        //      during run-time
+        // b) Supposedly neglectable contribution
 
----------------------------------------------------------------------- */
+------------------------------------------------------------------------- */
         X_A_11 = 0.0; X_A_12 = 0.0;
         Y_A_11 = 0.0; Y_A_12 = 0.0;
         Y_B_11 = 0.0; Y_B_12 = 0.0; Y_B_21 = 0.0;
