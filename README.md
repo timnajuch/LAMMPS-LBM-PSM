@@ -131,7 +131,7 @@ Paper describing the lubrication force and torque correction. Could be cited if 
 I (Tim Najuch) used during my Ph.D. an open-source Palabos-LIGGGHTS coupling (https://github.com/ParticulateFlow/LBDEMcoupling-public) with my own modifications and developments (never pushed my modifications to GitHub, but perhaps will do).
 Some code parts are based & inspired by the coupling and from my development efforts during my Ph.D.
 Some of my main motivations of developing the coupling for LAMMPS were:
-+ Try to reproduce my main Ph.D. findings with a somewhat different code (I could!) due to the complexity of the previous code by coupling two massive software packages and the therefore inherent confidence lack in the coupled code
++ Try to reproduce my main Ph.D. findings with a somewhat different code which I wrote from scratch (I could reproduce my finding with the code hosted in this repo!) due to the complexity of the previous code, which coupled two massive software packages, and the therefore inherent confidence lack in the correctness of the coupled code
 + Use this new code in this repository to work on the underlying methodology
 + Provide an easy and straightforward use of a coupled LBM-DEM method for the wider scientific community in a framework of a popular open-source software (LAMMPS)
 
