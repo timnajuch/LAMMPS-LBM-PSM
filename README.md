@@ -18,8 +18,8 @@ The verification cases are found in a folder of the same name (verification).
 The simulations can be postprocessed with Python scripts in the corresponding folders and figures can be created with the accompanying gnuplot scripts.
 
 The coupling can be used for different particle-laden fluid flows. For example fluidised beds (here in 2D):
-![2D Fluidised Bed Simulation](graphics/fluidisedBedExample-LAMMPS-LBM-PSM.png)
 
+<img src="graphics/fluidsedBedExample-LAMMPS-LBM-PSM.png" height="400"/>
 
 Author: Tim Najuch, 2023
 
