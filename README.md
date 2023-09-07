@@ -1,7 +1,27 @@
 # LAMMPS-LBM-PSM
 
 ## About
+This repository hosts a coupling between a Lattice Boltzmann Method (LBM) and a Discrete Element Method (DEM) to simulate fluid-particles flows.
+The coupling is very suitable to simulate (dense) suspensions and to study the rheology of suspensions.
+The coupled methodology is based on the Partially partially-saturated-cell scheme and more details can be found in the references listed below.
 
+The coupling is extending the widely used open-source molecular dynamics software LAMMPS (https://www.lammps.org).
+LAMMPS is used for the DEM and is extended by a LBM solver and coupling.
+The advantage is that the use is straightforward by calling new LAMMPS fix styles. LAMMPS users should have no problem using the coupling. 
+If unfamiliar with LAMMPS, it is recommended to have a look at the documentation (https://docs.lammps.org/Manual.html).
+More details on the new fix styles can be found below.
+
+Additional, a new LAMMPS pair style is added which allows to impose a lubrication force/torque correction for particle-particle gap distances which are unresolved due to possible limitations in the LBM lattice resolution (i.e. the lattice is at some point too fine which would result in extremely expensive simulations or simulations which are not feasible). Use of the pair style is also described below.
+
+The code has been verified by varied cases where the numerical results are compared to analytical or empirical solutions.
+The verification cases are found in a folder of the same name (verification). 
+The simulations can be postprocessed with Python scripts in the corresponding folders and figures can be created with the accompanying gnuplot scripts.
+
+The coupling can be used for different particle-laden fluid flows. For example fluidised beds (here in 2D):
+![2D Fluidised Bed Simulation](graphics/fluidisedBedExample-LAMMPS-LBM-PSM.png)
+
+
+Author: Tim Najuch, 2023
 
 ## Adding this feature to LAMMPS
 The current version has been tested and used with "lammps-stable_29Sep2021_update3".
@@ -9,6 +29,7 @@ Simply copy all files from the src folder into your LAMMPS src folder and compil
 
 ## How to use the coupled LBM-DEM feature
 The LBM-DEM coupling can be used by employing some simple LAMMPS commands (fix and pair_style) in your LAMMPS input script.
+The verification cases demonstrate also the usage of the new fix styles.
 
 ### fix lbm-psm
 This fix employs the LBM method which updates the LBM distribution functions on each lattice node, computes the velocity field, and the hydrodynamic forces and torques acting on the particles as well as the stresslet for each particle.
