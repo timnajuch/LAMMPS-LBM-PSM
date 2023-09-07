@@ -114,6 +114,14 @@ pair_style lubricate/GRM/LBDEM mu ci co componet calibrationFactor
 Example: pair_style lubricate/GRM/LBDEM 0.1 5.0e-11 3.3333333333333335e-05 1 0.75
 
 
+## Other remarks
+I (Tim Najuch) used during my Ph.D. an open-source Palabos-LIGGGHTS coupling (https://github.com/ParticulateFlow/LBDEMcoupling-public) with my own modifications and developments (never pushed my modifications to GitHub, but perhaps will do).
+Some code parts are based & inspired by the coupling and from my development efforts during my Ph.D.
+Some of my main motivations of developing the coupling for LAMMPS were:
++ Try to reproduce my main Ph.D. findings with a somewhat different code which I wrote from scratch (I could reproduce my finding with the code hosted in this repo!) due to the complexity of the previous code, which coupled two massive software packages, and the therefore inherent confidence lack in the correctness of the coupled code
++ Use this new code in this repository to work on the underlying methodology
++ Provide an easy and straightforward use of a coupled LBM-DEM method for the wider scientific community in a framework of a popular open-source software (LAMMPS)
+
 ## References to cite if using this package
 If you use this LAMMPS extension, then please cite one of the following papers and possibly this repository (which has a .cff file):
 
@@ -125,15 +133,6 @@ Url: https://www.sciencedirect.com/science/article/abs/pii/S0045793019301458
 Paper describing the lubrication force and torque correction. Could be cited if you use the lubrication corrections:
 
 + Tim Najuch and Jin Sun, "Lubrication force correction and calibration for a partially-saturated-cell lattice Boltzmann method", Computers & Fluids (Submitted 2023)
-
-
-## Other remarks
-I (Tim Najuch) used during my Ph.D. an open-source Palabos-LIGGGHTS coupling (https://github.com/ParticulateFlow/LBDEMcoupling-public) with my own modifications and developments (never pushed my modifications to GitHub, but perhaps will do).
-Some code parts are based & inspired by the coupling and from my development efforts during my Ph.D.
-Some of my main motivations of developing the coupling for LAMMPS were:
-+ Try to reproduce my main Ph.D. findings with a somewhat different code which I wrote from scratch (I could reproduce my finding with the code hosted in this repo!) due to the complexity of the previous code, which coupled two massive software packages, and the therefore inherent confidence lack in the correctness of the coupled code
-+ Use this new code in this repository to work on the underlying methodology
-+ Provide an easy and straightforward use of a coupled LBM-DEM method for the wider scientific community in a framework of a popular open-source software (LAMMPS)
 
 
 ## License
