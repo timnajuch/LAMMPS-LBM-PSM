@@ -122,7 +122,7 @@ Some of my main motivations of developing the coupling for LAMMPS were:
 + Use this new code in this repository to work on the underlying methodology
 + Provide an easy and straightforward use of a coupled LBM-DEM method for the wider scientific community in a framework of a popular open-source software (LAMMPS)
 
-## References to cite if using this package
+## References to cite when using this package
 If you use this LAMMPS extension, then please cite one of the following papers and possibly this repository (which has a .cff file):
 
 Paper analysing the underlying methodology. Could be cited in the methodology section of your paper:
