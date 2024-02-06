@@ -17,9 +17,17 @@ The code has been verified by varied cases where the numerical results are compa
 The verification cases are found in a folder of the same name (verification). 
 The simulations can be postprocessed with Python scripts in the corresponding folders and figures can be created with the accompanying gnuplot scripts.
 
-The coupling can be used for different particle-laden fluid flows. For example fluidised beds (here in 2D):
+The coupling can be used for different particle-laden fluid flows. For example fluidised beds in 2D:
 
 <img src="graphics/fluidsedBedExample-LAMMPS-LBM-PSM.png" height="400"/>
+
+Or 3D:
+
+
+https://github.com/timnajuch/LAMMPS-LBM-PSM/assets/14159338/3f8336c5-b4cf-4411-8a9a-5de07b52ba48
+
+
+
 
 
 ## Adding this feature to LAMMPS
@@ -123,16 +131,14 @@ Some of my main motivations of developing the coupling for LAMMPS were:
 + Provide an easy and straightforward use of a coupled LBM-DEM method for the wider scientific community in a framework of a popular open-source software (LAMMPS)
 
 ## References to cite when using this package
-If you use this LAMMPS extension, then please cite one of the following papers and possibly this repository (which has a .cff file):
+If you use this LAMMPS extension, then please cite the following paper and possibly this repository (which has a .cff file):
 
-Paper analysing the underlying methodology. Could be cited in the methodology section of your paper:
+My paper in which the underlying methodology is analysed. It cou be cited in the methodology section of your paper:
 
 + Tim Najuch and Jin Sun, "Analysis of two partially-saturated-cell methods for lattice Boltzmann simulation of granular suspension rheology", Computers & Fluids, Volume 189, 15 July 2019, Pages 1-12, 
 Url: https://www.sciencedirect.com/science/article/abs/pii/S0045793019301458
 
-Paper describing the lubrication force and torque correction. Could be cited if you use the lubrication corrections:
-
-+ Tim Najuch and Jin Sun, "Lubrication force correction and calibration for a partially-saturated-cell lattice Boltzmann method", Computers & Fluids (Submitted 2023)
+A written document on the lubrication force and torque correction will follow.
 
 
 ## License
