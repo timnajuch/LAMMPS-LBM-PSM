@@ -192,7 +192,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
       ovel << "DIMENSIONS " << nxTotal-2*envelopeWidth*decomposition[0] << " " << nyTotal-2*envelopeWidth*decomposition[1] << " " << nzTotal-2*envelopeWidth*decomposition[2] << "\n";
     }
 
-    ovel << "X_COORDINATES " << nxTotal-2*envelopeWidth*decomposition[0] << " float" << endl;
+    ovel << "X_COORDINATES " << nxTotal-2*envelopeWidth*decomposition[0] << " float\n";
     for(int iproc = 0; iproc < decomposition[0]; iproc++){
       for(int i = envelopeWidth; i < fixLBMPSM->dynamics->get_nxLocal(iproc)-envelopeWidth; i++){
         int j = 0; int jproc = 0;
@@ -203,7 +203,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
       }
     }
 
-    ovel << "Y_COORDINATES " << nyTotal-2*envelopeWidth*decomposition[1] << " float" << endl;
+    ovel << "Y_COORDINATES " << nyTotal-2*envelopeWidth*decomposition[1] << " float\n";
     for(int jproc = 0; jproc < decomposition[1]; jproc++){
       for(int j = envelopeWidth; j < fixLBMPSM->dynamics->get_nyLocal(jproc)-envelopeWidth; j++){
         int i = 0; int iproc = 0;
@@ -215,10 +215,10 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
     }
 
     if(domain->dimension == 2){
-      ovel << "Z_COORDINATES " << 1 << " float" << endl;
+      ovel << "Z_COORDINATES " << 1 << " float\n";
       ovel << "0.0\n";
     }else{
-      ovel << "Z_COORDINATES " << nzTotal-2*envelopeWidth*decomposition[2] << " float" << endl;
+      ovel << "Z_COORDINATES " << nzTotal-2*envelopeWidth*decomposition[2] << " float\n";
       for(int kproc = 0; kproc < decomposition[2]; kproc++){
         for(int k = envelopeWidth; k < fixLBMPSM->dynamics->get_nzLocal(kproc)-envelopeWidth; k++){
           int i = 0; int iproc = 0;
@@ -236,8 +236,8 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
     }else{
       ovel << "\nPOINT_DATA " << (nxTotal-envelopeWidth*2*decomposition[0])*(nyTotal-envelopeWidth*2*decomposition[1])*(nzTotal-envelopeWidth*2*decomposition[2]) << "\n";
     }
-    ovel << "SCALARS SolidFraction FLOAT" << "\n";
-    ovel << "LOOKUP_TABLE default" << "\n";
+    ovel << "SCALARS SolidFraction FLOAT\n";
+    ovel << "LOOKUP_TABLE default\n";
     for(int kproc = 0; kproc<decomposition[2]; kproc++){
       if(domain->dimension == 3){
         nzLoopStart = envelopeWidth;
@@ -258,8 +258,8 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
       }
     }
 
-    ovel << "\nSCALARS Density FLOAT" << "\n";
-    ovel << "LOOKUP_TABLE default" << "\n";
+    ovel << "\nSCALARS Density FLOAT\n";
+    ovel << "LOOKUP_TABLE default\n";
     for(int kproc = 0; kproc<decomposition[2]; kproc++){
       if(domain->dimension == 3){
         nzLoopStart = envelopeWidth;
@@ -280,7 +280,7 @@ void WriteVTK::write_vtk(string name_, vector<double> &x_, double x0_, vector<do
       }
     }
 
-    ovel << "\nVECTORS Velocity FLOAT" << "\n";
+    ovel << "\nVECTORS Velocity FLOAT\n";
     for(int kproc = 0; kproc<decomposition[2]; kproc++){
       if(domain->dimension == 3){
         nzLoopStart = envelopeWidth;

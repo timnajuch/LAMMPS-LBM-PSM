@@ -23,6 +23,9 @@ using namespace std;
 class ZouHeBC {
   private:
     LBMPSMLattice *lattice;
+    double oneOverThree;
+    double twoOverThree;
+    double oneOverSix;
     
   public:
     ZouHeBC(LBMPSMLattice *lattice_);

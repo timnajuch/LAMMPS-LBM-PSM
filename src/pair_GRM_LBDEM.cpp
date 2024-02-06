@@ -193,8 +193,8 @@ void PairLubricateGRMLBDEM::compute(int eflag, int vflag)
         h_sepN = h_sepN/radijmean;
 
 /* -------------------------------------------------------------------------
-        Grand resistance matrix notation. 
-        1) Jeffrey and Onishi (1984) 
+        Grand resistance matrix notation.
+        1) Jeffrey and Onishi (1984)
         "Resistance functions for two spheres in low-Reynolds-number flow"
         2) Kim & Karilla "Microhydrodynamics" (chapter 7 and 11)
 
@@ -222,7 +222,7 @@ void PairLubricateGRMLBDEM::compute(int eflag, int vflag)
         e_(ijk): Levi-Cita symbol
 
         // Twisting terms X_C are not implemented because:
-        // a) Rieman zeta function would have to be evaluated 
+        // a) Rieman zeta function would have to be evaluated
         //      during run-time
         // b) Supposedly neglectable contribution
 
@@ -284,7 +284,7 @@ void PairLubricateGRMLBDEM::compute(int eflag, int vflag)
           Y_A_12_N = -Y_A_11_N;
         }
 
-            // Shearing terms Y_B
+        // Shearing terms Y_B
         if(flagGRM == 3){
           Y_B_11 = -beta0*(4.0 + beta0)/(5.0*b1p2)*log1oh;
           Y_B_11 *= 4.0*MY_PI*radip2;
@@ -297,7 +297,7 @@ void PairLubricateGRMLBDEM::compute(int eflag, int vflag)
           Y_B_12_N = -Y_B_11_N;
         }
 
-            // Terms Y_B for forces from rotations
+        // Terms Y_B for forces from rotations
         if(flagGRM == 4){
           Y_B_11 = -beta0*(4.0 + beta0)/(5.0*b1p2)*log1oh;
           Y_B_11 *= 4.0*MY_PI*radip2;
@@ -409,7 +409,7 @@ void PairLubricateGRMLBDEM::compute(int eflag, int vflag)
           ei3Xwj = ei1*wj[1] - ei2*wj[0];
         }
             
-            // Force calculations
+        // Force calculations
 
         fx = 0.0; fy = 0.0; fz = 0.0;
         tx = 0.0; ty = 0.0; tz = 0.0;
