@@ -1,0 +1,58 @@
+##### Create initial particle configuration ####
+
+units			si
+atom_style		sphere
+atom_modify		map array
+
+comm_modify 	vel yes
+
+boundary		p p p
+newton			off
+
+processors      2 2 2
+
+##### Simulation domain #####
+region			box block -${bdim} ${bdim} -${bdim} ${bdim} -${bdim} ${bdim} units box
+create_box		1 box
+change_box		all triclinic
+
+#### Particle definitions ####
+create_atoms    1 random ${NP} ${random} NULL
+set         	type 1 diameter ${d}
+set         	type 1 density ${rho}
+
+#### Simulation settings ####
+neighbor		${skin} bin
+neigh_modify	delay 0 one 2300
+
+
+#### Definition of contact model and parameters ####
+pair_style      gran/hooke/history ${kn} ${kt} ${gamman} ${gammat} ${xmur} 0
+pair_coeff      * *
+
+timestep        ${dt_create}
+
+#### Time integration ####
+fix				1 all nve/sphere
+
+#### Compute commands etc ####
+compute			1 all erotate/sphere
+compute			3 all temp
+compute			4 all pressure 3
+
+thermo_style    custom step atoms c_3 c_4[4]
+thermo      	100
+
+fix				dx all deform 1 x final -${edim} ${edim} y final -${edim} ${edim} z final -${edim} ${edim} remap v
+	
+run 			${N_timesteps_creation}
+
+unfix           dx
+
+velocity        all set 0.0 0.0 0.0
+fix             visc all viscous 0.9 
+
+velocity        all set 0.0 0.0 0.0
+run             ${N_timesteps_relaxation}
+
+write_data		initial.${caseCreate}

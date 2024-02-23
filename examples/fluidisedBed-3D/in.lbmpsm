@@ -1,0 +1,53 @@
+
+units			si
+atom_style		sphere
+atom_modify		map array
+atom_modify 	sort 0 0.003
+
+dimension       3
+
+comm_modify	    cutoff 0.015 vel yes
+
+boundary		f f f
+newton			off
+
+processors      9 3 3 map cart
+
+read_restart    particleSetup.start
+
+group           g1 type 1
+
+neighbor		0.015 bin
+neigh_modify	delay 0 every 1 check yes
+
+pair_style      gran/hooke/history 10000.0 NULL 100.0 NULL 0.5 1 limit_damping
+pair_coeff      * *
+
+fix             wallxn all wall/gran hooke 10000.0 NULL 100.0 NULL 0.5 0 xplane 0.0 1.0
+fix             wallyn all wall/gran hooke 10000.0 NULL 100.0 NULL 0.5 0 yplane -0.15 0.15
+fix             wallzn all wall/gran hooke 10000.0 NULL 100.0 NULL 0.5 0 zplane -0.15 0.15
+
+variable        gravForce1 equal -(1000.0-100)*4.0/3.0*PI*0.00625*0.00625*0.00625*9.81
+fix             gravity g1 addforce v_gravForce1 0.0 0.0
+
+fix             lbDYN all lbm-psm every 5 Nlc 6 lc 0.0125 rho 100 nu 0.005 Re 0.1 tau 0.65 Fext -981.0 0.0 0.0
+fix             lbBC all lbm-psm-bc channel-velIn-pressOut
+fix             lbVTK all lbm-psm-vtk every 5000
+
+fix             integrate all nve/sphere
+
+dump           	iddumpxyz all xyz 5000 xyzoutput.xyz
+
+restart         5000 particles.restart
+fix             lbRestart all lbm-psm-restart every 5000 write 1 read 0
+
+compute			1 all erotate/sphere
+thermo_style	custom step atoms ke
+thermo			10000
+thermo_modify	lost ignore norm no flush yes
+compute_modify	thermo_temp dynamic yes
+
+compute         compTemp all temp
+compute         pressureFix all pressure NULL virial
+
+run 30000000

@@ -1,0 +1,3 @@
+1) Run a LAMMPS simulation using the input script "createInitialParticleConfiguration.lammps" to create an initial particle configuration.
+2) Run LAMMPS with the LBM feature by using the script "in.lammps". It will write out restart files in case there is a time limit on your machine/HPC system.
+3) Continue the LBM-DEM simulation by using the script "in2.lammps". You will have to change the restart file name and the output file name for the .xyz output file (unless you want to overwrite it).

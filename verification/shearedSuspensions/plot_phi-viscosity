@@ -1,0 +1,9 @@
+set terminal png
+set output 'phi-visc.png'
+
+f(x) = 1.0 + 2.5*x
+g(x) = 1.0 + 2.5*x + 7.6*x*x
+
+set xrange [0:0.27]
+
+plot 'phi-viscosity.dat'u 1:2, f(x) title 'Einstein', g(x) title 'Batchelor and Green'

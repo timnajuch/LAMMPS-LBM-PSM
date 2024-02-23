@@ -1,0 +1,8 @@
+Creates initial particle configurations at different volume fractions which are then sheared to measure the viscosity of suspension.
+
+1) Run "create_configurations.py", which executes the LAMMPS input script "create.lammps", creating the initial particle configurations.
+2) Run "shear_configurations.py", which executes the LAMMPS input script "shear.lammps", creating the initial particle configurations.
+
+Please, make necessary changes in the above mentioned ".py" files to link to the correct path of your LAMMPS executable and to set up the correct job submission script for your cluster (or remove it and run it on a local workstation).
+
+The simulations can be postprocessed using "analyseViscosity.py" and plotted using the gnuplot script "plot_phi-viscosity".

@@ -1,0 +1,70 @@
+##### File to shear particle configurations ####
+
+units			si
+atom_style		sphere
+atom_modify		map array
+
+comm_modify 	vel yes #cutoff 0.002
+
+boundary		p f p
+newton			off
+
+processors      3 3 3
+
+##### Read in initial particle configuration #####
+read_data		initial.${caseCreate}
+
+change_box		all x final -${edim_half} ${edim_half} y final -${edim_half} ${edim_half} z final -${edim_half} ${edim_half} boundary p f p units box
+
+#### Simulation settings ####
+neighbor		${skin} bin
+neigh_modify	delay 0 one 2300
+
+#### Definition of contact model and parameters ####
+pair_style      gran/hooke/history ${kn} ${kt} ${gamman} ${gammat} ${xmur} 0
+pair_coeff      * *
+
+timestep        ${dt}
+
+fix             lbDYN all lbm-psm every 10 Nlc 11 lc 0.0005 rho 500.0 nu ${nu} Re ${Re} tau 0.7 
+fix             lbBC all lbm-psm-bc shear
+fix             lbVTK all lbm-psm-vtk every 10000
+fix             lbRestart all lbm-psm-restart every 10000 write 1 read 0
+
+#### Time integration ####
+fix				1 all nve/sphere 
+
+variable        shearVelocity equal ${Re}*${nu}/0.0005
+fix             upperWall all wall/gran hooke/history  ${kn} ${kt} ${gamman} ${gammat} ${xmur} 0 yplane -${edim_half} ${edim_half} shear x ${shearVelocity}
+
+
+
+
+#### Compute commands etc ####
+compute			1 all erotate/sphere
+compute			Temp all temp
+compute			Pressure all pressure Temp 
+compute         PressureKE all pressure Temp ke
+compute         PressurePAIR all pressure Temp pair
+compute         Etrans all ke
+compute         Erot all erotate/sphere
+
+thermo_style    custom step atoms c_Temp c_Pressure c_Pressure[4]
+thermo      	100
+	
+#dump            id all custom ${N_particleDump} d_*.particles id type diameter mass xs ys zs vx vy vz fx fy fz omegax omegay omegaz tqx tqy tqz
+dump            id all custom 1000 d_*.particles id type diameter mass xs ys zs vx vy vz fx fy fz omegax omegay omegaz tqx tqy tqz
+dump           	iddumpxyz all xyz 1000 xyzoutput.xyz
+
+
+fix             pStresses all print 100 "$(step) $(c_Pressure) $(c_Pressure[4]) $(c_PressureKE[4])" append ${caseCreate}.stresses screen no
+
+#fix             pStressesKE all print 100 "$(step) $(v_strain) $(c_PressureKE[1]) $(c_PressureKE[2]) $(c_PressureKE[3]) $(c_PressureKE[4]) $(c_PressureKE[5]) $(c_PressureKE[6])" append ${caseShearRate}stressOutputKE screen no
+
+compute         pressureFix all pressure NULL virial
+fix             pStressesFix all print 100 "$(step) $((c_pressureFix[1]+c_pressureFix[2]+c_pressureFix[3])/3) $(c_pressureFix[1]) $(c_pressureFix[2]) $(c_pressureFix[3]) $(c_pressureFix[4]) $(c_pressureFix[5]) $(c_pressureFix[6])" append stressOutputFIX screen no
+
+restart         10000 particles.restart
+
+run 			${N_timesteps_shearing}
+
