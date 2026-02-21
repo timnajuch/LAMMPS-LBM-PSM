@@ -34,6 +34,8 @@ https://github.com/timnajuch/LAMMPS-LBM-PSM/assets/14159338/3f8336c5-b4cf-4411-8
 The current version has been tested and used with "lammps-stable_29Sep2021_update3".
 Simply copy all files from the src folder into your LAMMPS src folder and compile your LAMMPS executable.
 
+Last update caught up with the main LAMMPS repo so that the code compiles. Verification cases have not been re-run though.
+
 ## How to use the coupled LBM-DEM feature
 The LBM-DEM coupling can be used by employing some simple LAMMPS commands (fix and pair_style) in your LAMMPS input script.
 The verification cases demonstrate also the usage of the new fix styles.
