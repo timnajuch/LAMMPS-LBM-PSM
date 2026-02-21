@@ -47,10 +47,6 @@ using namespace MathConst;
 
 enum{NO_REMAP,X_REMAP,V_REMAP};
 
-// same as fix_wall.cpp
-
-enum{NONE=0,EDGE,CONSTANT,VARIABLE};
-
 /* ---------------------------------------------------------------------- */
 
 PairLubricateGRMLBDEM::PairLubricateGRMLBDEM(LAMMPS *lmp) : Pair(lmp)
@@ -571,8 +567,11 @@ void PairLubricateGRMLBDEM::init_style()
   if (comm->ghost_velocity == 0)
     error->all(FLERR,
                "Pair lubricate/GRM/LBDEM requires ghost atoms store velocity");
-  if (!atom->sphere_flag)
-    error->all(FLERR,"Pair lubricate/GRM/LBDEM requires atom style sphere");
+  if (!atom->omega_flag)
+    error->all(FLERR,"Pair lubricate/GRM/LBDEM requires atom attribute omega");
+  if (!atom->radius_flag)
+    error->all(FLERR,"Pair lubricate/GRM/LBEM requires atom attribute radius");
+
 
   // ensure all particles are finite-size
   // for pair hybrid, should limit test to types using the pair style
@@ -585,9 +584,7 @@ void PairLubricateGRMLBDEM::init_style()
     if (radius[i] == 0.0)
       error->one(FLERR,"Pair lubricate/GRM/LBDEM requires extended particles");
 
-  int irequest = neighbor->request(this);
-  neighbor->requests[irequest]->half = 0;
-  neighbor->requests[irequest]->full = 1;
+  neighbor->add_request(this, NeighConst::REQ_FULL);
 
   // check for fix deform, if exists it must use "remap v"
   // If box will change volume, set appropriate flag so that volume
@@ -599,30 +596,23 @@ void PairLubricateGRMLBDEM::init_style()
   // are re-calculated at every step.
 
   shearing = flagdeform = flagwall = 0;
-  for (int i = 0; i < modify->nfix; i++){
-    if (strcmp(modify->fix[i]->style,"deform") == 0) {
-      shearing = flagdeform = 1;
-      if (((FixDeform *) modify->fix[i])->remapflag != Domain::V_REMAP)
-        error->all(FLERR,"Using pair lubricate with inconsistent "
-                   "fix deform remap option");
-    }
-    if (strstr(modify->fix[i]->style,"wall") != nullptr) {
-      if (flagwall)
-        error->all(FLERR,
-                   "Cannot use multiple fix wall commands with "
-                   "pair lubricate/GRM/LBDEM");
-      flagwall = 1; // Walls exist
-      wallfix = (FixWall *) modify->fix[i];
-      if (wallfix->xflag) flagwall = 2; // Moving walls exist
-    }
 
-    if (strstr(modify->fix[i]->style,"wall") != NULL){
-      flagwall = 1; // Walls exist
-      if (((FixWall *) modify->fix[i])->xflag ) {
-        flagwall = 2; // Moving walls exist
-        wallfix = (FixWall *) modify->fix[i];
-      }
-    }
+  auto fixes = modify->get_fix_by_style("^deform");
+  if (fixes.size() > 0) {
+    shearing = flagdeform = 1;
+    auto *myfix = dynamic_cast<FixDeform *>(fixes[0]);
+    if (myfix && (myfix->remapflag != Domain::V_REMAP))
+      error->all(FLERR,"Using pair lubricate/GRM/LBDEM with inconsistent fix deform remap option");
+  }
+  fixes = modify->get_fix_by_style("^wall");
+  if (fixes.size() > 1)
+    error->all(FLERR, "Cannot use multiple fix wall commands with pair lubricate/GRM/LBDEM");
+  else if (fixes.size() == 1) {
+    wallfix = dynamic_cast<FixWall *>(fixes[0]);
+    if (!wallfix)
+      error->all(FLERR, "Fix {} is not compatible with pair lubricate/GRM/LBDEM", fixes[0]->style);
+    flagwall = 1;
+    if (wallfix->xflag) flagwall = 2; // Moving walls exist
   }
 
   // check for fix deform, if exists it must use "remap v"
@@ -631,7 +621,8 @@ void PairLubricateGRMLBDEM::init_style()
   for (int i = 0; i < modify->nfix; i++)
     if (strcmp(modify->fix[i]->style,"deform") == 0) {
       shearing = 1;
-      if (((FixDeform *) modify->fix[i])->remapflag != Domain::V_REMAP)
+      if ((dynamic_cast<FixDeform *>(modify->fix[i]))->remapflag != Domain::V_REMAP)
+
         error->all(FLERR,"Using pair lubricate/GRM/LBDEM with inconsistent "
                    "fix deform remap option");
     }
