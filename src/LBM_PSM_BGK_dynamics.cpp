@@ -51,14 +51,17 @@ void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_, int current
   double jx = 0.0;
   double jy = 0.0;
   double jz = 0.0;
+
+  double fi = 0.0;
   
   int ind_iq = 0;
   for(int iq = 0; iq < q; ++iq){
     ind_iq = index_fi(i_, j_, k_, iq, currentStep_);
-    rho_tmp += f[ind_iq];
-    jx += f[ind_iq] * e[3*iq];
-    jy += f[ind_iq] * e[3*iq+1];
-    jz += f[ind_iq] * e[3*iq+2];
+    fi = f[ind_iq];
+    rho_tmp += fi;
+    jx += fi * e[3*iq];
+    jy += fi * e[3*iq+1];
+    jz += fi * e[3*iq+2];
   }
   rho[ind_phys_1D] = rho_tmp;
 
@@ -70,75 +73,6 @@ void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_, int current
   u[ind_phys_2D] = jx/rho_tmp;
   u[ind_phys_2D+1] = jy/rho_tmp;
   u[ind_phys_2D+2] = jz/rho_tmp;
-}
-
-
-
-void LBMPSMBGKDynamics::collisionAndStream(int i_, int j_, int k_, int iq_, int iShift_, int jShift_, int kShift_, int currentStep_, int nextStep_){
-  int ind_iq = index_fi(i_, j_, k_, iq_, currentStep_); // Index for populations
-  int ind_iq0 = index_fi(i_, j_, k_, iq_, 0);           // Index for equilibrium populations
-  int ind_phys_1D = index_1D(i_, j_, k_);
-  int ind_phys_2D = index_2D(i_, j_, k_, 0);
-
-  // Equilibrium function
-  f0[ind_iq0] = feq(iq_, ind_phys_1D, ind_phys_2D);
-
-  // Solid phase / particle data
-  LAMMPS_NS::tagint pID1 = getParticleDataOnLatticeNode(ind_phys_1D).particleID[0];
-  LAMMPS_NS::tagint pID2 = getParticleDataOnLatticeNode(ind_phys_1D).particleID[1];
-  double B1 = 0.0;
-  double B2 = 0.0;
-  vector<double> uSolid1{0.0, 0.0, 0.0};
-  vector<double> uSolid2{0.0, 0.0, 0.0};
-  double f0_solid1 = 0.0;
-  double f0_solid2 = 0.0;
-  double solid_coll1 = 0.0;
-  double solid_coll2 = 0.0;
-
-  // Solid phase collision terms
-  if (pID1 > 0){
-    B1 = getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[0];
-    uSolid1[0] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[0];
-    uSolid1[1] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[1];
-    uSolid1[2] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[2];
-    f0_solid1 = feq(iq_, get_rho(ind_phys_1D), uSolid1);
-    solid_coll1 = f0_solid1 - f[ind_iq] + ( 1.0 - omega) * (f[ind_iq] - f0[ind_iq0]);
-  }
-  if (pID2 > 0){
-    B2 = getParticleDataOnLatticeNode(ind_phys_1D).solidFraction[1];
-    uSolid2[0] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[3];
-    uSolid2[1] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[4];
-    uSolid2[2] = getParticleDataOnLatticeNode(ind_phys_1D).particleVelocity[5];
-    f0_solid2 = feq(iq_, get_rho(ind_phys_1D), uSolid2);
-    solid_coll2 = f0_solid2 - f[ind_iq] + ( 1.0 - omega) * (f[ind_iq] - f0[ind_iq0]);
-  }
-
-  double Btot = B1 + B2;
-  if(Btot > 1.0){
-    B1 = B1/Btot;
-    B2 = B2/Btot;
-    Btot = 1.0;
-  }
-
-  // External forcing according to Guo et al. (2002)
-  double F_lbm_iq = 0.0;
-  if (F_lbm_mag_pow2 > 0.0)
-    { F_lbm_iq = (1.0-0.5*omega) * F_iq(iq_, ind_phys_2D, F_lbm); }
-
-  // Collision and streaming
-  set_f(iShift_, jShift_, kShift_, iq_, nextStep_, f[ind_iq]  + (1.0 - Btot)*(f0[ind_iq0] - f[ind_iq])*omega  + B1*solid_coll1 + B2*solid_coll2 + F_lbm_iq);
-
-  // Add hydrodynamic interaction force
-  if (pID1 > 0){
-    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * e[3*iq_], 0);
-    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * e[3*iq_+1], 1);
-    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * e[3*iq_+2], 2);
-  }
-  if (pID2 > 0){
-    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * e[3*iq_], 0);
-    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * e[3*iq_+1], 1);
-    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * e[3*iq_+2], 2);
-  }
 }
 
 

@@ -13,8 +13,7 @@ Tim Najuch, 2022
 #ifndef LBMPSM_PARTDATALATTICE_H
 #define LBMPSM_PARTDATALATTICE_H
 
-#include <iostream>
-#include <vector>
+#include <array>
 
 #include "lmptype.h"
 
@@ -25,10 +24,11 @@ class ParticleDataOnLattice{
     ParticleDataOnLattice();
     ~ParticleDataOnLattice();
 
-    vector<LAMMPS_NS::tagint> particleID;
-    vector<double> solidFraction;
-    vector<double> particleVelocity;
-    vector<double> hydrodynamicForce;
+    array<LAMMPS_NS::tagint, 2> particleID{};
+    array<double, 2> solidFraction{};
+    array<double, 6> particleVelocity{};
+    array<double, 6> hydrodynamicForce{};
+
 };
 
 #endif

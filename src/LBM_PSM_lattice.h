@@ -124,16 +124,24 @@ class LBMPSMLattice{
     void setVector_f(vector<double>& fcopy); // Function used to copy the population values which are read from a restart file
 
     ParticleDataOnLattice getParticleDataOnLatticeNode(int index);
+    inline ParticleDataOnLattice& getReferenceParticleDataOnLatticeNode(int index);
+    inline const ParticleDataOnLattice& getReferenceParticleDataOnLatticeNode(int index) const;
     void setParticleOnLattice(int index, LAMMPS_NS::tagint pID, double uP[3], double eps);
     void setToZero(int index, LAMMPS_NS::tagint pID);
     double getSolidFractionOnLattice(int index, int pID);
-    vector<double> getSolidVelocityOnLattice(int index);
-    vector<double> getSolidVelocityOnLattice(int index, int pID);
+    //vector<double> getSolidVelocityOnLattice(int index);
+    //vector<double> getSolidVelocityOnLattice(int index, int pID);
     void add_Fhyd(int index, LAMMPS_NS::tagint pID, double Fhyd, int dir);
 
     vector<int> get_procCoordinates();
 
     friend class ZouHeBC;
 };
+
+
+inline ParticleDataOnLattice& LBMPSMLattice::getReferenceParticleDataOnLatticeNode(int index){ return pData[index]; }
+
+inline const ParticleDataOnLattice& LBMPSMLattice::getReferenceParticleDataOnLatticeNode(int index) const { return pData[index]; }
+
 
 #endif

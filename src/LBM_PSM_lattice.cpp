@@ -393,7 +393,7 @@ void LBMPSMLattice::setToZero(int index, LAMMPS_NS::tagint pID)
 
 
 double LBMPSMLattice::getSolidFractionOnLattice(int index, int pID){ return pData[index].solidFraction[pID]; }
-
+/*
 vector<double> LBMPSMLattice::getSolidVelocityOnLattice(int index){ return pData[index].particleVelocity; }
 
 vector<double> LBMPSMLattice::getSolidVelocityOnLattice(int index, int pID)
@@ -418,7 +418,7 @@ vector<double> LBMPSMLattice::getSolidVelocityOnLattice(int index, int pID)
   }
   return returnVelVector;
 }
-
+*/
 
 void LBMPSMLattice::add_Fhyd(int index, LAMMPS_NS::tagint pID, double Fhyd, int dir)
 {
