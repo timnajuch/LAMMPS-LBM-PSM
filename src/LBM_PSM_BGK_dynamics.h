@@ -98,18 +98,18 @@ inline void LBMPSMBGKDynamics::collisionAndStream(int i_, int j_, int k_, int iq
   set_f(iShift_, jShift_, kShift_, iq_, nextStep_, fi  + (1.0 - Btot)*(fi_eq - fi)*omega  + B1*solid_coll1 + B2*solid_coll2 + F_lbm_iq);
 
   // Add hydrodynamic interaction force
-  double ex = e[3*iq_];
-  double ey = e[3*iq_+1];
-  double ez = e[3*iq_+2];
+  const double ex_i = ex[iq_];
+  const double ey_i = ey[iq_];
+  const double ez_i = ez[iq_];
   if (pID1 > 0){
-    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * ex, 0);
-    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * ey, 1);
-    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * ez, 2);
+    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * ex_i, 0);
+    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * ey_i, 1);
+    add_Fhyd(ind_phys_1D, pID1, -B1 * solid_coll1 * ez_i, 2);
   }
   if (pID2 > 0){
-    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * ex, 0);
-    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * ey, 1);
-    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * ez, 2);
+    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * ex_i, 0);
+    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * ey_i, 1);
+    add_Fhyd(ind_phys_1D, pID2, -B2 * solid_coll2 * ez_i, 2);
   }
 }
 

@@ -40,8 +40,11 @@ class LBMPSMLattice{
     int dimension;                    // 2D or 3D system
 
     int q;                            // Defines the number of velocities in LB (e.g. D2Q9 (q = 9) or D3Q19 (q = 19))
-    vector<double> w;                 // Weighting factor in LB equilibrium function
-    vector<double> e;                 // LB velocity sets
+    double* w;                        // Weighting factor in LB equilibrium function
+    int* ex;                          // LB velocity set in x-direction
+    int* ey;                          // LB velocity set in y-direction
+    int* ez;                          // LB velocity set in z-direction
+    
 
     double cs, csPow2, csPow4;        // Speed of sound in LBM and to power of 2/4
     double invCsPow2, invCsPow4;      // Inverse of speed of sound to power of 2/4
@@ -62,6 +65,9 @@ class LBMPSMLattice{
     vector<double> us;                // Solid velocity
 
     vector<ParticleDataOnLattice> pData;  // Particle data stored on lattice node
+
+    void setLattice2D();
+    void setLattice3D();
 
     void set_f(int i_, int j_, int k_, int iq_, int step_, double value_);
     void set_f(int ind_iq_, double value_);
@@ -136,6 +142,76 @@ class LBMPSMLattice{
     vector<int> get_procCoordinates();
 
     friend class ZouHeBC;
+};
+
+/*
+// Perhaps use in future. But need to refactor LBMPSMLattice class as template class (incl. children) and check other classes (e.g. boundaries) calling lattice class
+struct D2Q9 {
+    static constexpr int q = 9;
+
+    static constexpr int ex[q] = {0,1,0,-1,0,1,-1,-1,1};
+    static constexpr int ey[q] = {0,0,1,0,-1,1,1,-1,-1};
+    static constexpr int ez[q] = {0,0,0,0,0,0,0,0,0};
+
+    static constexpr double w[q] = {
+        4.0/9.0,
+        1.0/9.0,1.0/9.0,1.0/9.0,1.0/9.0,
+        1.0/36.0,1.0/36.0,1.0/36.0,1.0/36.0
+    };
+};
+
+
+struct D3Q19 {
+    static constexpr int q = 19;
+
+    static constexpr int ex[q] = {
+         0, 1,-1, 0, 0, 0, 0,
+         1,-1, 1,-1, 0, 0, 1,-1, 1,-1, 0, 0
+    };
+
+    static constexpr int ey[q] = {
+         0, 0, 0, 1,-1, 0, 0,
+         1,-1, 0, 0, 1,-1,-1, 1, 0, 0, 1,-1
+    };
+
+    static constexpr int ez[q] = {
+         0, 0, 0, 0, 0, 1,-1,
+         0, 0, 1,-1, 1,-1, 0, 0,-1, 1,-1, 1
+    };
+
+    static constexpr double w[q] = {
+         1.0/3.0,
+         1.0/18.0, 1.0/18.0, 1.0/18.0, 1.0/18.0, 1.0/18.0, 1.0/18.0,
+         1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0,
+         1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0,
+         1.0/36.0, 1.0/36.0, 1.0/36.0, 1.0/36.0
+    };
+};
+*/
+
+struct LatticeD2Q9 {
+    int q = 9; // non-constant, runtime visible if needed
+    int ex[9] = {0, 1, 0, -1, 0, 1, -1, -1, 1};
+    int ey[9] = {0, 0, 1, 0, -1, 1, 1, -1, -1};
+    int ez[9] = {0, 0, 0, 0, 0, 0, 0, 0, 0}; // can be ignored for 2D
+    double w[9] = {
+        4.0/9.0,
+        1.0/9.0,1.0/9.0,1.0/9.0,1.0/9.0,
+        1.0/36.0,1.0/36.0,1.0/36.0,1.0/36.0
+    };
+};
+
+struct LatticeD3Q19 {
+    int q = 19;
+    int ex[19] = {0,1,-1,0,0,0,0,1,-1,1,-1,0,0,1,-1,1,-1,0,0};
+    int ey[19] = {0,0,0,1,-1,0,0,1,-1,0,0,1,-1,-1,1,0,0,1,-1};
+    int ez[19] = {0,0,0,0,0,1,-1,0,0,1,-1,1,-1,0,0,-1,1,-1,1};
+    double w[19] = {
+        1.0/3.0,
+        1.0/18.0,1.0/18.0,1.0/18.0,1.0/18.0,1.0/18.0,1.0/18.0,
+        1.0/36.0,1.0/36.0,1.0/36.0,1.0/36.0,1.0/36.0,1.0/36.0,
+        1.0/36.0,1.0/36.0,1.0/36.0,1.0/36.0,1.0/36.0,1.0/36.0
+    };
 };
 
 

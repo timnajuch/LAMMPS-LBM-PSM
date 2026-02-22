@@ -59,9 +59,9 @@ void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_, int current
     ind_iq = index_fi(i_, j_, k_, iq, currentStep_);
     fi = f[ind_iq];
     rho_tmp += fi;
-    jx += fi * e[3*iq];
-    jy += fi * e[3*iq+1];
-    jz += fi * e[3*iq+2];
+    jx += fi * ex[iq];
+    jy += fi * ey[iq];
+    jz += fi * ez[iq];
   }
   rho[ind_phys_1D] = rho_tmp;
 
@@ -90,11 +90,11 @@ void LBMPSMBGKDynamics::macroCollideStream(){
 
         for(int iq = 0; iq < q; ++iq){
 
-          iShift = i + e[3*iq];
+          iShift = i + ex[iq];
           if (iShift < 0 || iShift > nx-1) { continue; }
-          jShift = j + e[3*iq+1];
+          jShift = j + ey[iq];
           if (jShift < 0 || jShift > ny-1) { continue; }
-          kShift = k + e[3*iq+2];
+          kShift = k + ez[iq];
           if (kShift < 0 || kShift > nz-1) { continue; }
 
           collisionAndStream(i, j, k, iq, iShift, jShift, kShift, currentStep, nextStep);

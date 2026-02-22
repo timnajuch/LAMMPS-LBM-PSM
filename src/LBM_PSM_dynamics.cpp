@@ -33,19 +33,3 @@ LBMPSMDynamics::LBMPSMDynamics(int nx_, int ny_, int nz_, int decomposition_[3],
 
 
 LBMPSMDynamics::~LBMPSMDynamics(){};
-
-
-double LBMPSMDynamics::F_iq(int iq_, vector<double> u_, vector<double> F_){
-  return w[iq_] * 
-        ( ( (e[3*iq_] - u_[0]) * F_[0] + (e[3*iq_+1] - u_[1]) * F_[1] + (e[3*iq_+2] - u_[2]) * F_[2]) * invCsPow2
-          + ( (e[3*iq_] * u_[0] + e[3*iq_+1] * u_[1] + e[iq_*3+2] * u_[2]) * invCsPow4
-            * (e[3*iq_] * F_[0] + e[3*iq_+1] * F_[1] + e[3*iq_+2] * F_[2]) ) );
-}
-
-
-double LBMPSMDynamics::F_iq(int iq_, int ind_phys_2D_, vector<double> F_){
-  return w[iq_] * 
-        ( ( (e[3*iq_] - u[ind_phys_2D_+0]) * F_[0] + (e[3*iq_+1] - u[ind_phys_2D_+1]) * F_[1] + (e[3*iq_+2] - u[ind_phys_2D_+2]) * F_[2]) * invCsPow2
-          + ( (e[3*iq_] * u[ind_phys_2D_+0] + e[3*iq_+1] * u[ind_phys_2D_+1] + e[iq_*3+2] * u[ind_phys_2D_+2]) * invCsPow4
-            * (e[3*iq_] * F_[0] + e[3*iq_+1] * F_[1] + e[3*iq_+2] * F_[2]) ) );
-}

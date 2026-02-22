@@ -55,7 +55,6 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int decomposition[3], in
   }
 
   nz = 1;
-  q = 9;
   if (dimension == 3)
   {
     if ( nz_ % decomposition[2] == 0){
@@ -67,9 +66,10 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int decomposition[3], in
         nz = ((int)(nz_/decomposition[2])) + nz_ - ((int)(nz_/decomposition[2]))*decomposition[2] + envelopeWidth*2;
       }
     }
-
-    q = 19;
   }
+
+  if (dimension == 2){ setLattice2D(); }
+  else if(dimension == 3){ setLattice3D(); }
 
   MPI_Allgather(&nx, 1, MPI_INT, &(nxLocal[0]), 1, MPI_INT, MPI_COMM_WORLD);
   MPI_Allgather(&ny, 1, MPI_INT, &(nyLocal[0]), 1, MPI_INT, MPI_COMM_WORLD);
@@ -117,80 +117,29 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int decomposition[3], in
   us = vector<double>(nx*ny*nz*3,0.0);
 
   pData.resize(nx*ny*nz);
-
-  if(q == 9){ // D2Q9 lattice // Every 3 elements (listed in one line) give one velocity vector
-    e = { 0.0 ,  0.0,  0.0,
-          1.0 ,  0.0,  0.0,
-          0.0 ,  1.0,  0.0,
-          -1.0,  0.0,  0.0,
-          0.0 , -1.0,  0.0,
-          1.0 ,  1.0,  0.0,
-          -1.0,  1.0,  0.0,
-          -1.0, -1.0,  0.0,
-          1.0 ,  -1.0, 0.0
-        };
-
-    w = { 4.0/9.0,
-          1.0/9.0,
-          1.0/9.0,
-          1.0/9.0,
-          1.0/9.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0
-        };
-    }
-
-  if(q == 19){ // D3Q19 lattice // Every 3 elements (listed in one line) give one velocity vector
-    e = { 0.0,  0.0,  0.0,
-          1.0,  0.0,  0.0,
-         -1.0,  0.0,  0.0,
-          0.0,  1.0,  0.0,
-          0.0, -1.0,  0.0,
-          0.0,  0.0,  1.0,
-          0.0,  0.0, -1.0,
-          1.0,  1.0,  0.0,
-         -1.0, -1.0,  0.0,
-          1.0,  0.0,  1.0, 
-         -1.0,  0.0, -1.0,
-          0.0,  1.0,  1.0,
-          0.0, -1.0, -1.0,
-          1.0, -1.0,  0.0,
-         -1.0,  1.0,  0.0,
-          1.0,  0.0, -1.0,
-         -1.0,  0.0,  1.0,
-          0.0,  1.0, -1.0,
-          0.0, -1.0,  1.0      
-        };
-
-    w = { 1.0/3.0,
-          1.0/18.0,
-          1.0/18.0,
-          1.0/18.0,
-          1.0/18.0,
-          1.0/18.0,
-          1.0/18.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0,
-          1.0/36.0
-        };
-  }
-
 }
 
 
 LBMPSMLattice::~LBMPSMLattice(){}
 
+
+void LBMPSMLattice::setLattice2D() {
+  static LatticeD2Q9 lat;
+  q = lat.q;
+  ex = lat.ex;
+  ey = lat.ey;
+  ez = lat.ez;
+  w = lat.w;
+}
+
+void LBMPSMLattice::setLattice3D() {
+  static LatticeD3Q19 lat;
+  q = lat.q;
+  ex = lat.ex;
+  ey = lat.ey;
+  ez = lat.ez;
+  w = lat.w;
+}
 
 void LBMPSMLattice::initialise_domain(double dx_, double dy_, double dz_){
   dx = dx_;
