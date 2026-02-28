@@ -31,9 +31,6 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int decomposition[3], in
   invCsPow2 = 1.0/csPow2;
   invCsPow4 = 1.0/csPow4;
 
-  currentStep = 0;
-  nextStep = 1;
-  
   if ( nx_ % decomposition[0] == 0){
     nx = nx_/decomposition[0] + envelopeWidth*2;
   }else{
@@ -100,7 +97,8 @@ LBMPSMLattice::LBMPSMLattice(int nx_, int ny_, int nz_, int decomposition[3], in
     nzLocalGrid[kproc] = nzLocal[procIndex];
   }
 
-  f = vector<double>(nx*ny*nz*q*2,0.0); // Store populations at two different timesteps (even and odd to avoid using a temporary variable and copying)
+  f_curr = vector<double>(nx*ny*nz*q,0.0);
+  f_next = vector<double>(nx*ny*nz*q,0.0);
   f0 = vector<double>(nx*ny*nz*q,0.0);
 
   origin_global.push_back(origin_[0]);
@@ -187,23 +185,15 @@ void LBMPSMLattice::initialise_domain(double dx_, double dy_, double dz_){
 
 }
 
-int LBMPSMLattice::get_currentStep(){ return currentStep; }
+void LBMPSMLattice::set_f(int ind_iq_, double value_){ f_curr[ind_iq_] = value_; }
 
-void LBMPSMLattice::set_currentStep(int currentStep_){ currentStep = currentStep_; nextStep = 1 - currentStep_; }
+double LBMPSMLattice::get_f(int ind_iq_){ return f_curr[ind_iq_]; }
 
-void LBMPSMLattice::set_f(int i_, int j_, int k_, int iq_, int step_, double value_){ f[index_fi(i_, j_, k_, iq_, step_)] = value_; }
-
-void LBMPSMLattice::set_f(int ind_iq_, double value_){ f[ind_iq_] = value_; }
-
-double LBMPSMLattice::get_f(int i_, int j_, int k_, int iq_, int step_){ return f[index_fi(i_, j_, k_, iq_, step_)]; }
-
-double LBMPSMLattice::get_f(int ind_iq_){ return f[ind_iq_]; }
-
-void LBMPSMLattice::set_f0(int i_, int j_, int k_, int iq_, double value_){ f0[index_fi(i_, j_, k_, iq_, 0)] = value_; }
+void LBMPSMLattice::set_f0(int i_, int j_, int k_, int iq_, double value_){ f0[index_fi(i_, j_, k_, iq_)] = value_; }
 
 void LBMPSMLattice::set_f0(int ind_iq_, double value_){ f0[ind_iq_] = value_; }
 
-double LBMPSMLattice::get_f0(int i_, int j_, int k_, int iq_){ return f0[index_fi(i_, j_, k_, iq_, 0)]; }
+double LBMPSMLattice::get_f0(int i_, int j_, int k_, int iq_){ return f0[index_fi(i_, j_, k_, iq_)]; }
 
 double LBMPSMLattice::get_f0(int ind_iq_){ return f0[ind_iq_]; }
 
@@ -257,9 +247,9 @@ double LBMPSMLattice::get_u(int index){ return u[index]; }
 
 double LBMPSMLattice::get_u_at_node(int index_node_1D, int direction){ return u[index_node_1D*3+direction]; }
 
-vector<double>& LBMPSMLattice::getVector_f(){ return f; }
+vector<double>& LBMPSMLattice::getVector_f_curr(){ return f_curr; }
 
-void LBMPSMLattice::setVector_f(vector<double>& fcopy){ f = fcopy; }
+void LBMPSMLattice::setVector_f_curr(vector<double>& fcopy){ f_curr = fcopy; }
 
 
 ParticleDataOnLattice LBMPSMLattice::getParticleDataOnLatticeNode(int index){ return pData[index]; }

@@ -51,9 +51,8 @@ class LBMPSMLattice{
 
     double dx, dy, dz;                // Lattice discretisation in 3D
   
-    int currentStep, nextStep;        // Populations of two different time steps are stored in same std::vector at different places in memory. Need this variables to keep track
-
-    vector<double> f;                 // Populations 
+    vector<double> f_curr;            // Populations at current time step
+    vector<double> f_next;            // Populations at next time step (ping-pong buffer)
     vector<double> f0;                // Equilibrium populations
 
     vector<double> origin_global;     // Global origin of lattice 
@@ -69,9 +68,7 @@ class LBMPSMLattice{
     void setLattice2D();
     void setLattice3D();
 
-    void set_f(int i_, int j_, int k_, int iq_, int step_, double value_);
     void set_f(int ind_iq_, double value_);
-    double get_f(int i_, int j_, int k_, int iq_, int step_);
     double get_f(int ind_iq_);
 
     void set_f0(int i_, int j_, int k_, int iq_, double value_);
@@ -90,10 +87,7 @@ class LBMPSMLattice{
 
     inline int index_1D(int i, int j, int k){ return i*ny*nz + j*nz + k; }
     inline int index_2D(int i, int j, int k, int direction){ return (i*ny*nz + j*nz + k)*3 + direction; }
-    inline int index_fi(int i, int j, int k, int iq, int step){ return nx*ny*nz*q*step + (i*ny*nz + j*nz + k)*q + iq; }
-
-    int get_currentStep();
-    void set_currentStep(int currentStep);
+    inline int index_fi(int i, int j, int k, int iq){ return (i*ny*nz + j*nz + k)*q + iq; }
 
     vector<double> get_B();
     vector<double> get_rho();
@@ -126,8 +120,8 @@ class LBMPSMLattice{
     double get_u(int index);
     double get_u_at_node(int index_node_1D, int direction);
 
-    vector<double>& getVector_f();
-    void setVector_f(vector<double>& fcopy); // Function used to copy the population values which are read from a restart file
+    vector<double>& getVector_f_curr();
+    void setVector_f_curr(vector<double>& fcopy); // Function used to copy the population values which are read from a restart file
 
     ParticleDataOnLattice getParticleDataOnLatticeNode(int index);
     inline ParticleDataOnLattice& getReferenceParticleDataOnLatticeNode(int index);

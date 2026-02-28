@@ -29,22 +29,22 @@ class LBMPSMBGKDynamics : public LBMPSMDynamics {
     ~LBMPSMBGKDynamics();
 
     void initialise_dynamics(double rho_, double ux_, double uy_, double uz_);
-    void compute_macro_values(int i_, int j_, int k_, int currentStep_);
-    inline void collisionAndStream(int i_, int j_, int k_, int iq_, int iShift_, int jShift_, int kShift_, int currentStep_, int nextStep_);
+    void compute_macro_values(int i_, int j_, int k_);
+    inline void collisionAndStream(int i_, int j_, int k_, int iq_, int iShift_, int jShift_, int kShift_);
     void macroCollideStream();
     
 };
 
 
 
-inline void LBMPSMBGKDynamics::collisionAndStream(int i_, int j_, int k_, int iq_, int iShift_, int jShift_, int kShift_, int currentStep_, int nextStep_){
-  int ind_iq = index_fi(i_, j_, k_, iq_, currentStep_); // Index for populations
-  int ind_iq0 = index_fi(i_, j_, k_, iq_, 0);           // Index for equilibrium populations
+inline void LBMPSMBGKDynamics::collisionAndStream(int i_, int j_, int k_, int iq_, int iShift_, int jShift_, int kShift_){
+  int ind_iq = index_fi(i_, j_, k_, iq_); // Index for populations
+  int ind_iq0 = ind_iq;                    // f0 has same layout as f_curr
   int ind_phys_1D = index_1D(i_, j_, k_);
   int ind_phys_2D = index_2D(i_, j_, k_, 0);
 
   double rho = get_rho(ind_phys_1D);
-  double fi = f[ind_iq];
+  double fi = f_curr[ind_iq];
   double fi_eq = feq(iq_, ind_phys_1D, ind_phys_2D);;
   f0[ind_iq0] = fi_eq;
 
@@ -61,8 +61,8 @@ inline void LBMPSMBGKDynamics::collisionAndStream(int i_, int j_, int k_, int iq
 
 
   // Collision and streaming for pure fluid node
-  if (pID1 <= 0 && pID2 <= 0){    
-    set_f(iShift_, jShift_, kShift_, iq_, nextStep_, fi  + (fi_eq - fi)*omega  + F_lbm_iq);
+  if (pID1 <= 0 && pID2 <= 0){
+    f_next[index_fi(iShift_, jShift_, kShift_, iq_)] = fi + (fi_eq - fi)*omega + F_lbm_iq;
     return;
   }
 
@@ -95,7 +95,7 @@ inline void LBMPSMBGKDynamics::collisionAndStream(int i_, int j_, int k_, int iq
   }
 
   // Collision and streaming
-  set_f(iShift_, jShift_, kShift_, iq_, nextStep_, fi  + (1.0 - Btot)*(fi_eq - fi)*omega  + B1*solid_coll1 + B2*solid_coll2 + F_lbm_iq);
+  f_next[index_fi(iShift_, jShift_, kShift_, iq_)] = fi + (1.0 - Btot)*(fi_eq - fi)*omega + B1*solid_coll1 + B2*solid_coll2 + F_lbm_iq;
 
   // Add hydrodynamic interaction force
   const double ex_i = ex[iq_];

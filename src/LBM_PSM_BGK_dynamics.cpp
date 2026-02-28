@@ -31,9 +31,11 @@ void  LBMPSMBGKDynamics::initialise_dynamics(double rho_, double ux_, double uy_
         u[ind_phys_2D+2] = uz_;
 
         for(int iq = 0; iq < q; ++iq){
-            set_f0(i, j, k, iq, feq(iq, ind_phys_1D, ind_phys_2D) );
-            set_f(i, j, k, iq, 0, feq(iq, ind_phys_1D, ind_phys_2D) );
-            set_f(i, j, k, iq, 1, feq(iq, ind_phys_1D, ind_phys_2D) );
+            double feq_val = feq(iq, ind_phys_1D, ind_phys_2D);
+            int ind_iq = index_fi(i, j, k, iq);
+            f0[ind_iq] = feq_val;
+            f_curr[ind_iq] = feq_val;
+            f_next[ind_iq] = feq_val;
         }
       }
     }
@@ -43,7 +45,7 @@ void  LBMPSMBGKDynamics::initialise_dynamics(double rho_, double ux_, double uy_
 
 
 
-void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_, int currentStep_){
+void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_){
   int ind_phys_1D = index_1D(i_, j_, k_);
   int ind_phys_2D = index_2D(i_, j_, k_, 0);
 
@@ -53,11 +55,10 @@ void LBMPSMBGKDynamics::compute_macro_values(int i_, int j_, int k_, int current
   double jz = 0.0;
 
   double fi = 0.0;
-  
-  int ind_iq = 0;
+
+  int ind_iq = index_fi(i_, j_, k_, 0);
   for(int iq = 0; iq < q; ++iq){
-    ind_iq = index_fi(i_, j_, k_, iq, currentStep_);
-    fi = f[ind_iq];
+    fi = f_curr[ind_iq + iq];
     rho_tmp += fi;
     jx += fi * ex[iq];
     jy += fi * ey[iq];
@@ -86,7 +87,7 @@ void LBMPSMBGKDynamics::macroCollideStream(){
     for(int j = 0; j < ny; ++j){
       for(int k = 0; k < nz; ++k){
 
-        compute_macro_values(i, j, k, currentStep);
+        compute_macro_values(i, j, k);
 
         for(int iq = 0; iq < q; ++iq){
 
@@ -97,13 +98,12 @@ void LBMPSMBGKDynamics::macroCollideStream(){
           kShift = k + ez[iq];
           if (kShift < 0 || kShift > nz-1) { continue; }
 
-          collisionAndStream(i, j, k, iq, iShift, jShift, kShift, currentStep, nextStep);
+          collisionAndStream(i, j, k, iq, iShift, jShift, kShift);
         }
 
       }
     }
   }
 
-  currentStep = nextStep;
-  nextStep = 1 - currentStep;
+  std::swap(f_curr, f_next);
 }

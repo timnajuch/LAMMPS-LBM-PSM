@@ -55,11 +55,11 @@ class LBMPSMMPI{
 
         void setupBuffers(int nx, int ny, int nz, int envelopeWidth, int q);
 
-        template<typename T> void sendRecvData(vector<T> &data_, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic, int currentStep);
+        template<typename T> void sendRecvData(vector<T> &data_, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic);
         template<typename T> void packData(T* sendBuf, const T* data, const int direction[3],
-                                           int envelopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth, int currentStep);
+                                           int envelopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth);
         template<typename T> void unpackData(const T* recvBuf, T* data, const int direction[3],
-                                           int envelopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth, int currentStep);
+                                           int envelopeStart, int dataSize, int nx, int ny, int nz, int envelopeWidth);
 
 };
 
@@ -76,7 +76,7 @@ inline void LBMPSMMPI::setupBuffers(int nx, int ny, int nz, int envelopeWidth, i
 }
 
 
-template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic, int currentStep)
+template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, int commDirection, int nx, int ny, int nz, int envelopeWidth, bool isPeriodic)
 {
   const int dataSize = q;
   int commDataSize = 0;
@@ -120,18 +120,18 @@ template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, int commDire
                     + direction[1]*(ny - envelopeWidth*2)
                     + direction[2]*(nz - envelopeWidth*2);
 
-  packData(sBuf1, data_.data(), direction, envelopeStart, dataSize, nx, ny, nz, envelopeWidth, currentStep);
+  packData(sBuf1, data_.data(), direction, envelopeStart, dataSize, nx, ny, nz, envelopeWidth);
 
   MPI_Sendrecv(sBuf1, commDataSize, commDataType, recvRank[commDirection][0], 0,
                rBuf1, commDataSize, commDataType, sendRank[commDirection][0], 0,
                world, &status);
 
   if(procCoordinates[commDirection] != 0 || isPeriodic)
-    unpackData(rBuf1, data_.data(), direction, 0, dataSize, nx, ny, nz, envelopeWidth, currentStep);
+    unpackData(rBuf1, data_.data(), direction, 0, dataSize, nx, ny, nz, envelopeWidth);
 
   // Second exchange: inner real cells → positive neighbour, ghost layer from negative neighbour
   // envelopeStart = direction[d]*envelopeWidth; since exactly one direction[d]==1 this equals envelopeWidth.
-  packData(sBuf2, data_.data(), direction, envelopeWidth, dataSize, nx, ny, nz, envelopeWidth, currentStep);
+  packData(sBuf2, data_.data(), direction, envelopeWidth, dataSize, nx, ny, nz, envelopeWidth);
 
   MPI_Sendrecv(sBuf2, commDataSize, commDataType, recvRank[commDirection][1], 0,
                rBuf2, commDataSize, commDataType, sendRank[commDirection][1], 0,
@@ -142,14 +142,14 @@ template<typename T> void LBMPSMMPI::sendRecvData(vector<T> &data_, int commDire
     envelopeStart = direction[0]*(nx - envelopeWidth)
                   + direction[1]*(ny - envelopeWidth)
                   + direction[2]*(nz - envelopeWidth);
-    unpackData(rBuf2, data_.data(), direction, envelopeStart, dataSize, nx, ny, nz, envelopeWidth, currentStep);
+    unpackData(rBuf2, data_.data(), direction, envelopeStart, dataSize, nx, ny, nz, envelopeWidth);
   }
 }
 
 
 template<typename T> void LBMPSMMPI::packData(T* sendBuf, const T* data, const int direction[3],
                                                int envelopeStart, int dataSize,
-                                               int nx, int ny, int nz, int envelopeWidth, int currentStep)
+                                               int nx, int ny, int nz, int envelopeWidth)
 {
   const int iMax = nx*(1-direction[0]) + direction[0];
   const int jMax = ny*(1-direction[1]) + direction[1];
@@ -157,7 +157,6 @@ template<typename T> void LBMPSMMPI::packData(T* sendBuf, const T* data, const i
   const int jMaxkMax     = jMax * kMax;
   const int iMaxjMaxkMax = iMax * jMaxkMax;
   const int nynz         = ny * nz;
-  const int stepOffset   = nx * nynz * dataSize * currentStep;
 
   // Per-direction strides into the lattice data array (in units of T elements).
   // Exactly one direction[d] == 1; the others are 0, so these collapse cleanly.
@@ -167,7 +166,7 @@ template<typename T> void LBMPSMMPI::packData(T* sendBuf, const T* data, const i
   const int kDataStride   = (1-direction[2])         * dataSize;
 
   for (int iEnvelope = 0; iEnvelope < envelopeWidth; ++iEnvelope) {
-    const int dataEnvBase = stepOffset + (envelopeStart + iEnvelope) * envDataStride;
+    const int dataEnvBase = (envelopeStart + iEnvelope) * envDataStride;
     const int bufEnvBase  = iEnvelope * iMaxjMaxkMax * dataSize;
     for (int i = 0; i < iMax; ++i) {
       const int dataIBase = dataEnvBase + i * iDataStride;
@@ -188,7 +187,7 @@ template<typename T> void LBMPSMMPI::packData(T* sendBuf, const T* data, const i
 
 template<typename T> void LBMPSMMPI::unpackData(const T* recvBuf, T* data, const int direction[3],
                                                  int envelopeStart, int dataSize,
-                                                 int nx, int ny, int nz, int envelopeWidth, int currentStep)
+                                                 int nx, int ny, int nz, int envelopeWidth)
 {
   const int iMax = nx*(1-direction[0]) + direction[0];
   const int jMax = ny*(1-direction[1]) + direction[1];
@@ -196,7 +195,6 @@ template<typename T> void LBMPSMMPI::unpackData(const T* recvBuf, T* data, const
   const int jMaxkMax     = jMax * kMax;
   const int iMaxjMaxkMax = iMax * jMaxkMax;
   const int nynz         = ny * nz;
-  const int stepOffset   = nx * nynz * dataSize * currentStep;
 
   const int envDataStride = (direction[0]*nynz + direction[1]*nz + direction[2]) * dataSize;
   const int iDataStride   = (1-direction[0]) * nynz * dataSize;
@@ -204,7 +202,7 @@ template<typename T> void LBMPSMMPI::unpackData(const T* recvBuf, T* data, const
   const int kDataStride   = (1-direction[2])         * dataSize;
 
   for (int iEnvelope = 0; iEnvelope < envelopeWidth; ++iEnvelope) {
-    const int dataEnvBase = stepOffset + (envelopeStart + iEnvelope) * envDataStride;
+    const int dataEnvBase = (envelopeStart + iEnvelope) * envDataStride;
     const int bufEnvBase  = iEnvelope * iMaxjMaxkMax * dataSize;
     for (int i = 0; i < iMax; ++i) {
       const int dataIBase = dataEnvBase + i * iDataStride;

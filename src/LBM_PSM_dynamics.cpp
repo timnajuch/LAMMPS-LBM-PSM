@@ -22,9 +22,11 @@ LBMPSMDynamics::LBMPSMDynamics(int nx_, int ny_, int nz_, int decomposition_[3],
           int ind_phys_1D = index_1D(i, j, k);
           int ind_phys_2D = index_2D(i, j, k, 0);
 
-          set_f0(i, j, k, iq, feq(iq, ind_phys_1D, ind_phys_2D) );
-          set_f(i, j, k, iq, 0, feq(iq, ind_phys_1D, ind_phys_2D) );
-          set_f(i, j, k, iq, 1, feq(iq, ind_phys_1D, ind_phys_2D) );
+          double feq_val = feq(iq, ind_phys_1D, ind_phys_2D);
+          int ind_iq = index_fi(i, j, k, iq);
+          f0[ind_iq]     = feq_val;
+          f_curr[ind_iq] = feq_val;
+          f_next[ind_iq] = feq_val;
         }
       }
     }

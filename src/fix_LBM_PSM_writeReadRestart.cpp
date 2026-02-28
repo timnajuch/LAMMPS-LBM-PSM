@@ -59,7 +59,7 @@ void LBMPSMWriteReadRestart::init()
     ostringstream restartFileStringTmp;
     restartFileStringTmp << "LBM-PSM-restartFile-processor-" << comm->me << ".bin";
     string timeString(restartFileStringTmp.str());
-    read_restart(timeString, fixLBMPSM->dynamics->getVector_f());
+    read_restart(timeString, fixLBMPSM->dynamics->getVector_f_curr());
   }
 }
 
@@ -72,16 +72,14 @@ void LBMPSMWriteReadRestart::pre_force(int)
     restartFileStringTmp << "LBM-PSM-restartFile-processor-" << comm->me << ".bin";
     string timeString(restartFileStringTmp.str());
 
-    write_restart(timeString, fixLBMPSM->dynamics->getVector_f(), fixLBMPSM->dynamics->get_currentStep());
+    write_restart(timeString, fixLBMPSM->dynamics->getVector_f_curr());
   }
 }
 
 
-void LBMPSMWriteReadRestart::write_restart(string name_, vector<double> &f_, int currentStep){
+void LBMPSMWriteReadRestart::write_restart(string name_, vector<double> &f_){
   ofstream out;
   out.open(name_, ios::binary | ios::out);
-
-  out.write ( reinterpret_cast<char *>(&currentStep), sizeof(currentStep) );
 
   unsigned int f_size = f_.size();
   out.write ( reinterpret_cast<char *>(&f_size), sizeof(unsigned) );
@@ -94,9 +92,6 @@ void LBMPSMWriteReadRestart::write_restart(string name_, vector<double> &f_, int
 void LBMPSMWriteReadRestart::read_restart(string name_, vector<double> &f_){
   ifstream in(name_, ios_base::binary | ios::in);
 
-  int currentStep = 0;
-  in.read( reinterpret_cast<char *>(&currentStep), sizeof(int) );
-
   unsigned vsize;
   in.read( reinterpret_cast<char *>(&vsize), sizeof(unsigned) );
   vector<double> f_in(vsize);
@@ -104,6 +99,5 @@ void LBMPSMWriteReadRestart::read_restart(string name_, vector<double> &f_){
 
   in.close();
 
-  fixLBMPSM->dynamics->set_currentStep(currentStep);
   f_ = f_in;
 }

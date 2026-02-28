@@ -22,9 +22,9 @@ ZouHeBC::ZouHeBC (LBMPSMLattice *lattice_) : lattice(lattice_)
 ZouHeBC::~ZouHeBC () {}
 
 
-void ZouHeBC::setZouHeVelBC2D_xn (int ix_, int iy0_, int iy1_, double ux_bc_, int currentStep) {
+void ZouHeBC::setZouHeVelBC2D_xn (int ix_, int iy0_, int iy1_, double ux_bc_) {
   for (int j = iy0_; j <= iy1_; ++j){
-    int ind_iq = lattice->index_fi(ix_, j, 0, 0, currentStep);
+    int ind_iq = lattice->index_fi(ix_, j, 0, 0);
 
     double rho_tmp = 1.0/(1.0-ux_bc_)*( lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 2) + lattice->get_f(ind_iq + 4) +
                           2.0*( lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 6) + lattice->get_f(ind_iq + 7) ) );
@@ -40,9 +40,9 @@ void ZouHeBC::setZouHeVelBC2D_xn (int ix_, int iy0_, int iy1_, double ux_bc_, in
 }
 
 
-void ZouHeBC::setZouHeVelBC2D_xp (int ix_, int iy0_, int iy1_, double ux_bc_, int currentStep) {
+void ZouHeBC::setZouHeVelBC2D_xp (int ix_, int iy0_, int iy1_, double ux_bc_) {
   for (int j = iy0_; j <= iy1_; ++j){
-    int ind_iq = lattice->index_fi(ix_, j, 0, 0, currentStep);
+    int ind_iq = lattice->index_fi(ix_, j, 0, 0);
 
     double rho_tmp = 1.0/(1.0-ux_bc_)*( lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 2) + lattice->get_f(ind_iq + 4) +
                           2.0*( lattice->get_f(ind_iq + 1) + lattice->get_f(ind_iq + 5) + lattice->get_f(ind_iq + 8) ) );
@@ -58,9 +58,9 @@ void ZouHeBC::setZouHeVelBC2D_xp (int ix_, int iy0_, int iy1_, double ux_bc_, in
 }
 
 
-void ZouHeBC::setZouHeDensBC2D_xp (int ix_, int iy0_, int iy1_, double rho_bc_, int currentStep) {
+void ZouHeBC::setZouHeDensBC2D_xp (int ix_, int iy0_, int iy1_, double rho_bc_) {
   for (int j = iy0_; j <= iy1_; ++j){
-    int ind_iq = lattice->index_fi(ix_, j, 0, 0, currentStep);
+    int ind_iq = lattice->index_fi(ix_, j, 0, 0);
 
     double ux_tmp = -1.0 + 1.0/rho_bc_*(lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 2) + lattice->get_f(ind_iq + 4) 
                       + 2.0*(lattice->get_f(ind_iq + 1) + lattice->get_f(ind_iq + 5) + lattice->get_f(ind_iq + 8)) );
@@ -76,9 +76,9 @@ void ZouHeBC::setZouHeDensBC2D_xp (int ix_, int iy0_, int iy1_, double rho_bc_, 
 }
 
 
-void ZouHeBC::setZouHeVelBC2D_yn (int iy_, int ix0_, int ix1_, double ux_bc_, int currentStep) {
+void ZouHeBC::setZouHeVelBC2D_yn (int iy_, int ix0_, int ix1_, double ux_bc_) {
   for (int i = ix0_; i <= ix1_; ++i){
-    int ind_iq = lattice->index_fi(i, iy_, 0, 0, currentStep);
+    int ind_iq = lattice->index_fi(i, iy_, 0, 0);
 
     double rho_tmp =  lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 1) +
                               2.0*( lattice->get_f(ind_iq + 8) + lattice->get_f(ind_iq + 4) + lattice->get_f(ind_iq + 7) );
@@ -94,9 +94,9 @@ void ZouHeBC::setZouHeVelBC2D_yn (int iy_, int ix0_, int ix1_, double ux_bc_, in
 }
 
 
-void ZouHeBC::setZouHeVelBC2D_yp (int iy_, int ix0_, int ix1_, double ux_bc_, int currentStep) {
+void ZouHeBC::setZouHeVelBC2D_yp (int iy_, int ix0_, int ix1_, double ux_bc_) {
   for (int i = ix0_; i <= ix1_; ++i){
-    int ind_iq = lattice->index_fi(i, iy_, 0, 0, currentStep);
+    int ind_iq = lattice->index_fi(i, iy_, 0, 0);
 
     double rho_tmp =  lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 1) +
                               2.0*( lattice->get_f(ind_iq + 6) + lattice->get_f(ind_iq + 2) + lattice->get_f(ind_iq + 5) );
@@ -112,9 +112,9 @@ void ZouHeBC::setZouHeVelBC2D_yp (int iy_, int ix0_, int ix1_, double ux_bc_, in
 }
 
 
-void ZouHeBC::setZouHeNeumannVelBC2D_yn (int iy_, int ix0_, int ix1_, int currentStep) {
+void ZouHeBC::setZouHeNeumannVelBC2D_yn (int iy_, int ix0_, int ix1_) {
   for (int i = ix0_; i <= ix1_; ++i){
-    int ind_iq = lattice->index_fi(i, iy_, 0, 0, currentStep);
+    int ind_iq = lattice->index_fi(i, iy_, 0, 0);
     int ind_u_neighbour_1D = lattice->index_1D(i, iy_+1, 0);
 
     double rho_tmp =  lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 1) +
@@ -131,9 +131,9 @@ void ZouHeBC::setZouHeNeumannVelBC2D_yn (int iy_, int ix0_, int ix1_, int curren
 }
 
 
-void ZouHeBC::setZouHeNeumannVelBC2D_yp (int iy_, int ix0_, int ix1_, int currentStep) {
+void ZouHeBC::setZouHeNeumannVelBC2D_yp (int iy_, int ix0_, int ix1_) {
   for (int i = ix0_; i <= ix1_; ++i){
-    int ind_iq = lattice->index_fi(i, iy_, 0, 0, currentStep);
+    int ind_iq = lattice->index_fi(i, iy_, 0, 0);
     int ind_u_neighbour_1D = lattice->index_1D(i, iy_-1, 0);
 
     double rho_tmp =  lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 1) +
@@ -150,10 +150,10 @@ void ZouHeBC::setZouHeNeumannVelBC2D_yp (int iy_, int ix0_, int ix1_, int curren
 }
 
 
-void ZouHeBC::setZouHeVelBC3D_xn (int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep) {
+void ZouHeBC::setZouHeVelBC3D_xn (int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_) {
   for (int j = iy0_; j <= iy1_; ++j){
     for (int k = iz0_; k <= iz1_; ++k){
-      int ind_iq = lattice->index_fi(ix_, j, k, 0, currentStep);
+      int ind_iq = lattice->index_fi(ix_, j, k, 0);
 
       double rho_tmp =  1.0/(1.0-ux_bc_)*(lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 4) +
                                           lattice->get_f(ind_iq + 5) + lattice->get_f(ind_iq + 6) + lattice->get_f(ind_iq + 11) +
@@ -186,10 +186,10 @@ void ZouHeBC::setZouHeVelBC3D_xn (int ix_, int iy0_, int iy1_, int iz0_, int iz1
 
 
 
-void ZouHeBC::setZouHeVelBC3D_xp (int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep) {
+void ZouHeBC::setZouHeVelBC3D_xp (int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_) {
   for (int j = iy0_; j <= iy1_; ++j){
     for (int k = iz0_; k <= iz1_; ++k){
-      int ind_iq = lattice->index_fi(ix_, j, k, 0, currentStep);
+      int ind_iq = lattice->index_fi(ix_, j, k, 0);
 
       double rho_tmp =  1.0/(1.0+ux_bc_)*(lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 4) +
                                           lattice->get_f(ind_iq + 5) + lattice->get_f(ind_iq + 6) + lattice->get_f(ind_iq + 11) +
@@ -222,10 +222,10 @@ void ZouHeBC::setZouHeVelBC3D_xp (int ix_, int iy0_, int iy1_, int iz0_, int iz1
 
 
 
-void ZouHeBC::setZouHeDensBC3D_xp (int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double rho_bc_, double uy_bc_, double uz_bc_, int currentStep) {
+void ZouHeBC::setZouHeDensBC3D_xp (int ix_, int iy0_, int iy1_, int iz0_, int iz1_, double rho_bc_, double uy_bc_, double uz_bc_) {
   for (int j = iy0_; j <= iy1_; ++j){
     for (int k = iz0_; k <= iz1_; ++k){
-      int ind_iq = lattice->index_fi(ix_, j, k, 0, currentStep);
+      int ind_iq = lattice->index_fi(ix_, j, k, 0);
 
       double ux_bc_ =  -1.0 + 1.0/rho_bc_*(lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 4) +
                                           lattice->get_f(ind_iq + 5) + lattice->get_f(ind_iq + 6) + lattice->get_f(ind_iq + 11) +
@@ -258,10 +258,10 @@ void ZouHeBC::setZouHeDensBC3D_xp (int ix_, int iy0_, int iy1_, int iz0_, int iz
 
 
 
-void ZouHeBC::setZouHeVelBC3D_yn (int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep) {
+void ZouHeBC::setZouHeVelBC3D_yn (int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_) {
   for (int i = ix0_; i <= ix1_; ++i){
     for (int k = iz0_; k <= iz1_; ++k){
-      int ind_iq = lattice->index_fi(i, iy_, k, 0, currentStep);
+      int ind_iq = lattice->index_fi(i, iy_, k, 0);
 
       double rho_tmp =  1.0/(1.0-uy_bc_)*(lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 1) + lattice->get_f(ind_iq + 2) +
                                           lattice->get_f(ind_iq + 5) + lattice->get_f(ind_iq + 6) + lattice->get_f(ind_iq + 9) +
@@ -293,10 +293,10 @@ void ZouHeBC::setZouHeVelBC3D_yn (int iy_, int ix0_, int ix1_, int iz0_, int iz1
 }
 
 
-void ZouHeBC::setZouHeVelBC3D_yp (int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep) {
+void ZouHeBC::setZouHeVelBC3D_yp (int iy_, int ix0_, int ix1_, int iz0_, int iz1_, double ux_bc_, double uy_bc_, double uz_bc_) {
   for (int i = ix0_; i <= ix1_; ++i){
     for (int k = iz0_; k <= iz1_; ++k){
-      int ind_iq = lattice->index_fi(i, iy_, k, 0, currentStep);
+      int ind_iq = lattice->index_fi(i, iy_, k, 0);
 
       double rho_tmp =  1.0/(1.0+uy_bc_)*(lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 1) + lattice->get_f(ind_iq + 2) +
                                           lattice->get_f(ind_iq + 5) + lattice->get_f(ind_iq + 6) + lattice->get_f(ind_iq + 9) +
@@ -328,10 +328,10 @@ void ZouHeBC::setZouHeVelBC3D_yp (int iy_, int ix0_, int ix1_, int iz0_, int iz1
 }
 
 
-void ZouHeBC::setZouHeVelBC3D_zn (int iz_, int ix0_, int ix1_, int iy0_, int iy1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep) {
+void ZouHeBC::setZouHeVelBC3D_zn (int iz_, int ix0_, int ix1_, int iy0_, int iy1_, double ux_bc_, double uy_bc_, double uz_bc_) {
   for (int i = ix0_; i <= ix1_; ++i){
     for (int j = iy0_; j <= iy1_; ++j){
-      int ind_iq = lattice->index_fi(i, j, iz_, 0, currentStep);
+      int ind_iq = lattice->index_fi(i, j, iz_, 0);
 
       double rho_tmp =  1.0/(1.0-uz_bc_)*(lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 1) + lattice->get_f(ind_iq + 2) +
                                           lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 4) + lattice->get_f(ind_iq + 7) +
@@ -363,10 +363,10 @@ void ZouHeBC::setZouHeVelBC3D_zn (int iz_, int ix0_, int ix1_, int iy0_, int iy1
 }
 
 
-void ZouHeBC::setZouHeVelBC3D_zp (int iz_, int ix0_, int ix1_, int iy0_, int iy1_, double ux_bc_, double uy_bc_, double uz_bc_, int currentStep) {
+void ZouHeBC::setZouHeVelBC3D_zp (int iz_, int ix0_, int ix1_, int iy0_, int iy1_, double ux_bc_, double uy_bc_, double uz_bc_) {
   for (int i = ix0_; i <= ix1_; ++i){
     for (int j = iy0_; j <= iy1_; ++j){
-      int ind_iq = lattice->index_fi(i, j, iz_, 0, currentStep);
+      int ind_iq = lattice->index_fi(i, j, iz_, 0);
 
       double rho_tmp =  1.0/(1.0+uz_bc_)*(lattice->get_f(ind_iq + 0) + lattice->get_f(ind_iq + 1) + lattice->get_f(ind_iq + 2) +
                                           lattice->get_f(ind_iq + 3) + lattice->get_f(ind_iq + 4) + lattice->get_f(ind_iq + 7) +
