@@ -218,28 +218,13 @@ void fix_LBM_PSM::post_force(int vflag)
     double **t = atom->torque;
     v_init(vflag);
 
-    vector<double> fh;
-    fh.resize(3);
-    vector<double> th;
-    th.resize(3);
-    vector<double> stresslet;
-    stresslet.resize(6);
+    double fh[3], th[3], stresslet[6];
 
     for(int i = 0; i < nPart; i++){
-      fh[0] = 0.0;
-      fh[1] = 0.0;
-      fh[2] = 0.0;
-      
-      th[0] = 0.0;
-      th[1] = 0.0;
-      th[2] = 0.0;
-
-      stresslet[0] = 0.0;
-      stresslet[1] = 0.0;
-      stresslet[2] = 0.0;
-      stresslet[3] = 0.0;
-      stresslet[4] = 0.0;
-      stresslet[5] = 0.0;
+      fh[0] = fh[1] = fh[2] = 0.0;
+      th[0] = th[1] = th[2] = 0.0;
+      stresslet[0] = stresslet[1] = stresslet[2] = 0.0;
+      stresslet[3] = stresslet[4] = stresslet[5] = 0.0;
 
       exchangeParticleData->calculateHydrodynamicInteractions(dynamics, unitConversion, atom->tag[i], atom->x[i], atom->radius[i], fh, th, stresslet);
 
@@ -271,8 +256,7 @@ void fix_LBM_PSM::post_force(int vflag)
       hydrodynamicInteractions[i][4] = th[1];
       hydrodynamicInteractions[i][5] = th[2];
 
-      double stresslet_arr[6] = {stresslet[0], stresslet[1], stresslet[2], stresslet[3], stresslet[4], stresslet[5]};
-      v_tally(i, stresslet_arr);
+      v_tally(i, stresslet);
     }
 
     // Communicate (and sum) forces from ghost particle back to the original particle

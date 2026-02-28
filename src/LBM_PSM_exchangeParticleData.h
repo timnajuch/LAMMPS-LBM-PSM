@@ -16,6 +16,7 @@ Tim Najuch, 2022
 #include <algorithm>
 #include <iostream>
 #include <vector>
+#include <array>
 
 #include "atom.h"
 #include "lmptype.h"
@@ -37,7 +38,7 @@ class ExchangeParticleData {
 
     void setParticlesOnLattice(LBMPSMLattice *lattice_, UnitConversion *unitConversion, int numberParticles, LAMMPS_NS::tagint *tag, double **xPart, double **uPart, double **omega, double *rp);
     double calcSolidFraction(int i, int j, int k, double xP_LB, double yP_LB, double zP_LB, double rP_LB);
-    void calculateHydrodynamicInteractions(LBMPSMLattice *lattice_, UnitConversion *unitConversion, LAMMPS_NS::tagint tag, double *xPart, double rp, vector<double> &fHydro, vector<double> &tHydro, vector<double> &stresslet);
+    void calculateHydrodynamicInteractions(LBMPSMLattice *lattice_, UnitConversion *unitConversion, LAMMPS_NS::tagint tag, double *xPart, double rp, double *fHydro, double *tHydro, double *stresslet);
 
 };
 
