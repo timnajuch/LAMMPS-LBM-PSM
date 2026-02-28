@@ -277,6 +277,7 @@ void fix_LBM_PSM::post_force(int vflag)
 
     // Communicate (and sum) forces from ghost particle back to the original particle
     comm->reverse_comm();
+    //comm->reverse_comm_fix(this,0);
   }
 }
 

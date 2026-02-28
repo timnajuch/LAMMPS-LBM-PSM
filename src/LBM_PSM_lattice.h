@@ -88,9 +88,9 @@ class LBMPSMLattice{
 
     void initialise_domain(double dx_, double dy_, double dz_);
 
-    int index_1D(int i, int j, int k);
-    int index_2D(int i, int j, int k, int direction);
-    int index_fi(int i, int j, int k, int iq, int step);
+    inline int index_1D(int i, int j, int k){ return i*ny*nz + j*nz + k; }
+    inline int index_2D(int i, int j, int k, int direction){ return (i*ny*nz + j*nz + k)*3 + direction; }
+    inline int index_fi(int i, int j, int k, int iq, int step){ return nx*ny*nz*q*step + (i*ny*nz + j*nz + k)*q + iq; }
 
     int get_currentStep();
     void set_currentStep(int currentStep);

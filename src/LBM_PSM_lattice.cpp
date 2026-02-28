@@ -187,13 +187,6 @@ void LBMPSMLattice::initialise_domain(double dx_, double dy_, double dz_){
 
 }
 
-
-int LBMPSMLattice::index_1D(int i, int j, int k){ return i*ny*nz + j*nz + k; }
-
-int LBMPSMLattice::index_2D(int i, int j, int k, int direction){ return (i*ny*nz + j*nz + k)*3 + direction; }
-
-int LBMPSMLattice::index_fi(int i, int j, int k, int iq, int step){ return nx*ny*nz*q*step + (i*ny*nz + j*nz + k)*q + iq; }
-
 int LBMPSMLattice::get_currentStep(){ return currentStep; }
 
 void LBMPSMLattice::set_currentStep(int currentStep_){ currentStep = currentStep_; nextStep = 1 - currentStep_; }
