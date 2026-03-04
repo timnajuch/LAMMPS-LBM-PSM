@@ -107,23 +107,34 @@ void WriteVTK::execute_write_vtk(std::string name_, int timestep, bool binary,
     int nyL = fixLBMPSM->dynamics->get_nyLocal(jp);
     int nzL = (domain->dimension == 3) ? fixLBMPSM->dynamics->get_nzLocal(kp) : 1;
 
-    int nx_i = nxL - 2 * env;
-    int ny_i = nyL - 2 * env;
-    int nz_i = (domain->dimension == 3) ? (nzL - 2 * env) : 1;
+    // VTK PointData requires adjacent pieces to share exactly one boundary node.
+    // Non-leftmost processors include their left ghost cell as the first output point;
+    // that ghost cell holds the same value as the adjacent processor's last real cell,
+    // so the shared node is consistent across pieces.
+    int iStart = (ip > 0) ? env - 1 : env;
+    int jStart = (jp > 0) ? env - 1 : env;
+    int kStart = (domain->dimension == 3) ? ((kp > 0) ? env - 1 : env) : 0;
 
-    // Calculate the overlap/offset (there were problems in the output without)
-    int offsetX = 0; for (int i = 0; i < ip; i++) offsetX += (fixLBMPSM->dynamics->get_nxLocal(i) - 2 * env - 1);
-    int offsetY = 0; for (int j = 0; j < jp; j++) offsetY += (fixLBMPSM->dynamics->get_nyLocal(j) - 2 * env - 1);
+    int nx_i = nxL - env - iStart;
+    int ny_i = nyL - env - jStart;
+    int nz_i = (domain->dimension == 3) ? (nzL - env - kStart) : 1;
+
+    // offset = sum of real-cell counts of all preceding processors, minus 1 for the shared node
+    int offsetX = 0; for (int i = 0; i < ip; i++) offsetX += (fixLBMPSM->dynamics->get_nxLocal(i) - 2 * env);
+    if (ip > 0) offsetX--;
+    int offsetY = 0; for (int j = 0; j < jp; j++) offsetY += (fixLBMPSM->dynamics->get_nyLocal(j) - 2 * env);
+    if (jp > 0) offsetY--;
     int offsetZ = 0;
     if (domain->dimension == 3) {
-        for (int k = 0; k < kp; k++) offsetZ += (fixLBMPSM->dynamics->get_nzLocal(k) - 2 * env - 1);
+        for (int k = 0; k < kp; k++) offsetZ += (fixLBMPSM->dynamics->get_nzLocal(k) - 2 * env);
+        if (kp > 0) offsetZ--;
     }
 
-    int nxTot = 0; for (int i = 0; i < decomposition[0]; i++) nxTot += (fixLBMPSM->dynamics->get_nxLocal(i) - 2 * env - 1); nxTot++;
-    int nyTot = 0; for (int j = 0; j < decomposition[1]; j++) nyTot += (fixLBMPSM->dynamics->get_nyLocal(j) - 2 * env - 1); nyTot++;
+    int nxTot = 0; for (int i = 0; i < decomposition[0]; i++) nxTot += (fixLBMPSM->dynamics->get_nxLocal(i) - 2 * env);
+    int nyTot = 0; for (int j = 0; j < decomposition[1]; j++) nyTot += (fixLBMPSM->dynamics->get_nyLocal(j) - 2 * env);
     int nzTot = 1;
     if (domain->dimension == 3) {
-        nzTot = 0; for (int k = 0; k < decomposition[2]; k++) nzTot += (fixLBMPSM->dynamics->get_nzLocal(k) - 2 * env - 1); nzTot++;
+        nzTot = 0; for (int k = 0; k < decomposition[2]; k++) nzTot += (fixLBMPSM->dynamics->get_nzLocal(k) - 2 * env);
     }
 
     // Set the output path
@@ -137,12 +148,11 @@ void WriteVTK::execute_write_vtk(std::string name_, int timestep, bool binary,
     std::vector<T> B_o(nP), rho_o(nP), u_o(nP * 3);
 
     int id = 0;
-    int zStart = (domain->dimension == 3) ? env : 0;
-    int zEnd   = (domain->dimension == 3) ? nzL - env : 1;
+    int zEnd = (domain->dimension == 3) ? nzL - env : 1;
 
-    for (int k = zStart; k < zEnd; k++) {
-        for (int j = env; j < nyL - env; j++) {
-            for (int i = env; i < nxL - env; i++) {
+    for (int k = kStart; k < zEnd; k++) {
+        for (int j = jStart; j < nyL - env; j++) {
+            for (int i = iStart; i < nxL - env; i++) {
                 int idx = i * nyL * nzL + j * nzL + k;
                 auto pD = fixLBMPSM->dynamics->getParticleDataOnLatticeNode(idx);
                 double Bv = (pD.solidFraction[0] + pD.solidFraction[1]);
