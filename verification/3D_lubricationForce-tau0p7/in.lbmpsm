@@ -40,6 +40,5 @@ compute			1 all erotate/sphere
 thermo_style	custom step atoms ke
 thermo			1
 thermo_modify	lost ignore norm no flush yes
-compute_modify	thermo_temp dynamic yes
 
 run 100000

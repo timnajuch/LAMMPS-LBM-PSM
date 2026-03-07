@@ -30,7 +30,6 @@ compute			1 all erotate/sphere
 thermo_style	custom step atoms ke
 thermo			1000
 thermo_modify	lost ignore norm no flush yes
-compute_modify	thermo_temp dynamic yes
 
 compute         compTemp all temp
 compute         pressureFix all pressure NULL virial

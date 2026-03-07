@@ -8,6 +8,8 @@ import shutil
 
 print ("Create particle configurations")
 
+isWorkstation = True # Run on local workstation otherwise on cluster with sbatch
+
 phi = np.linspace(0.05,0.25,5)
 
 NP = 500.0
@@ -47,11 +49,8 @@ N_particle_dump = 10000
 bdim = d*50.0 # Beginning size of domain to create suspensions with above specified solid fraction
 bdim = bdim/2
 
-pathToLAMMPS = '~/lammps-stable_29Sep2021_update3/src/lmp_mpi'
+pathToLAMMPS = '~/LAMMPS/lammps/src/lmp_mpi'
 processors = 8
-nodes = 1
-time = '24:00:00'
-partition = 'short'
 
 
 for indexPhi in range(len(phi)):
@@ -71,36 +70,54 @@ for indexPhi in range(len(phi)):
     
     shutil.copy('create.lammps', simulationFolder)
     
-    jobSubmissionFile = simulationFolder+'/job_submission_'+str(caseCreate)+'.sh'
- 
-    parseStrings = [
-    '#!/bin/bash',
-    '#SBATCH -o output.out',
-    '#SBATCH -e output.err',
-    '#SBATCH --job-name='+str(caseCreate),
-    '#SBATCH --nodes='+str(nodes),
-    '#SBATCH --time='+time,
-    '#SBATCH --ntasks-per-node='+str(processors),
-    '#SBATCH --partition='+partition,                        
-    'srun --mpi=pmix '+pathToLAMMPS+\
-    " -var NP "+str(int(NP))+" -var random "+str(int(random))+" -var d "+str(d)+" -var rho "+str(rho)+ \
-    " -var kn "+str(kn)+" -var kt "+str(kt)+" -var gamman "+str(gamman)+" -var gammat "+str(gammat)+" -var xmur "+str(xmur)+" -var dt_create "+str(dt_create)+" -var skin "+str(skin)+ \
-    " -var N_timesteps_creation "+str(int(N_timesteps_creation))+" -var N_timesteps_relaxation "+str(int(N_timesteps_relaxation))+ \
-    " -var bdim "+str(bdim)+" -var edim "+str(edim)+" -var caseCreate "+caseCreate+ \
-    " < create.lammps > "+caseCreate+".log"
-    ]
+    if isWorkstation == True:
+        os.chdir(simulationFolder)
+        #os.system("mpirun -np {} {} < create.lammps".format(processors, pathToLAMMPS))
+        os.system("mpirun -np "+str(processors)+" "+pathToLAMMPS+\
+        " -var NP "+str(int(NP))+" -var random "+str(int(random))+" -var d "+str(d)+" -var rho "+str(rho)+ \
+        " -var kn "+str(kn)+" -var kt "+str(kt)+" -var gamman "+str(gamman)+" -var gammat "+str(gammat)+" -var xmur "+str(xmur)+" -var dt_create "+str(dt_create)+" -var skin "+str(skin)+ \
+        " -var N_timesteps_creation "+str(int(N_timesteps_creation))+" -var N_timesteps_relaxation "+str(int(N_timesteps_relaxation))+ \
+        " -var bdim "+str(bdim)+" -var edim "+str(edim)+" -var caseCreate "+caseCreate+ \
+        " < create.lammps") 
 
-    try:
-        f = open(jobSubmissionFile,'x')
-    except:
-        f = open(jobSubmissionFile,'w')
-    for iLine in range(len(parseStrings)):
-        f.write(parseStrings[iLine]+'\n')
-    f.close()
+# > "+caseCreate+".log")
+        os.chdir("..")
 
-####   Executing LAMMPS create.lammps
-    os.chdir(simulationFolder)
-    os.system("sbatch job_submission_"+str(caseCreate)+".sh")
-    os.chdir("..")
+    else:
+        nodes = 1
+        time = '24:00:00'
+        partition = 'short'
+
+        jobSubmissionFile = simulationFolder+'/job_submission_'+str(caseCreate)+'.sh'
+     
+        parseStrings = [
+        '#!/bin/bash',
+        '#SBATCH -o output.out',
+        '#SBATCH -e output.err',
+        '#SBATCH --job-name='+str(caseCreate),
+        '#SBATCH --nodes='+str(nodes),
+        '#SBATCH --time='+time,
+        '#SBATCH --ntasks-per-node='+str(processors),
+        '#SBATCH --partition='+partition,                        
+        'srun --mpi=pmix '+pathToLAMMPS+\
+        " -var NP "+str(int(NP))+" -var random "+str(int(random))+" -var d "+str(d)+" -var rho "+str(rho)+ \
+        " -var kn "+str(kn)+" -var kt "+str(kt)+" -var gamman "+str(gamman)+" -var gammat "+str(gammat)+" -var xmur "+str(xmur)+" -var dt_create "+str(dt_create)+" -var skin "+str(skin)+ \
+        " -var N_timesteps_creation "+str(int(N_timesteps_creation))+" -var N_timesteps_relaxation "+str(int(N_timesteps_relaxation))+ \
+        " -var bdim "+str(bdim)+" -var edim "+str(edim)+" -var caseCreate "+caseCreate+ \
+        " < create.lammps > "+caseCreate+".log"
+        ]
+
+        try:
+            f = open(jobSubmissionFile,'x')
+        except:
+            f = open(jobSubmissionFile,'w')
+        for iLine in range(len(parseStrings)):
+            f.write(parseStrings[iLine]+'\n')
+        f.close()
+
+        ####   Executing LAMMPS create.lammps
+        os.chdir(simulationFolder)
+        os.system("sbatch job_submission_"+str(caseCreate)+".sh")
+        os.chdir("..")
 
 print('Finished')

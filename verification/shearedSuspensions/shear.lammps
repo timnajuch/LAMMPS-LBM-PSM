@@ -9,7 +9,7 @@ comm_modify 	vel yes #cutoff 0.002
 boundary		p f p
 newton			off
 
-processors      3 3 3
+processors      2 2 2
 
 ##### Read in initial particle configuration #####
 read_data		initial.${caseCreate}

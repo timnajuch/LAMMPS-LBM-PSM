@@ -13,7 +13,7 @@ newton			off
 
 timestep        1e-6
 
-processors      7 2 2 map cart
+processors      2 2 2 map cart
 region			box block 0.0 1.0 -0.15 0.15 -0.15 0.15 units box
 create_box		2 box
 
@@ -46,7 +46,6 @@ compute			1 all erotate/sphere
 thermo_style	custom step atoms ke
 thermo			1000
 thermo_modify	lost ignore norm no flush yes
-compute_modify	thermo_temp dynamic yes
 
 compute         compTemp all temp
 compute         pressureFix all pressure NULL virial
