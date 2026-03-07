@@ -7,7 +7,7 @@ under the GNU General Public License.
 See the README and License file in the top-level 
 LAMMPS-LBM-PSM directory for more details.
 
-Tim Najuch, 2022
+Tim Najuch
 ------------------------------------------------------*/
 
 #include "LBM_PSM_particleDataOnLattice.h"
