@@ -58,18 +58,18 @@ class WriteVTK : public Fix{
     void pre_force(int);
 
     void write_vtk_wrapper(std::string name_, int timestep, bool binary, bool useDouble,
-                         vector<double> &x_, double x0_,
-                         vector<double> &y_, double y0_,
-                         vector<double> &z_, double z0_,
+                         vector<double> &x_,
+                         vector<double> &y_,
+                         vector<double> &z_,
                          vector<double> &B_, double B0_,
                          vector<double> &rho_, double rho0_,
                          vector<double> &u_, double u0_);
 
 
     template <typename T> void execute_write_vtk(std::string name_, int timestep, bool binary,
-                         vector<double> &x_, double x0_,
-                         vector<double> &y_, double y0_,
-                         vector<double> &z_, double z0_,
+                         vector<double> &x_,
+                         vector<double> &y_,
+                         vector<double> &z_,
                          vector<double> &B_, double B0_,
                          vector<double> &rho_, double rho0_,
                          vector<double> &u_, double u0_);
@@ -81,8 +81,8 @@ class WriteVTK : public Fix{
 
 template <typename T>
 void WriteVTK::execute_write_vtk(std::string name_, int timestep, bool binary,
-                                 vector<double> &x_, double x0_, vector<double> &y_, double y0_,
-                                 vector<double> &z_, double z0_, vector<double> &B_, double B0_,
+                                 vector<double> &x_, vector<double> &y_,
+                                 vector<double> &z_, vector<double> &B_, double B0_,
                                  vector<double> &rho_, double rho0_, vector<double> &u_, double u0_)
 {
     int rank = comm->me;
@@ -168,6 +168,17 @@ void WriteVTK::execute_write_vtk(std::string name_, int timestep, bool binary,
         }
     }
 
+    // Physical lattice spacing (uniform grid: dx = dy = dz).
+    // Global VTK origin = physical position of global node (0,0,0) = proc 0's first output point.
+    // Each processor derives this consistently without MPI:
+    //   origin = coordinate_of_local_first_output_node - offset * dx
+    // origin_global being negative is handled correctly since x_/y_/z_ store full physical coords.
+    double dx = fixLBMPSM->unitConversion->get_dx();
+    int idx_first = iStart * nyL * nzL + jStart * nzL + kStart;
+    double originX = x_[idx_first] - offsetX * dx;
+    double originY = y_[idx_first] - offsetY * dx;
+    double originZ = (domain->dimension == 3) ? z_[idx_first] - offsetZ * dx : 0.0;
+
     // Write the local vti files. One file per core
     std::string vfname = baseTimePath + "_rank" + std::to_string(rank) + ".vti";
     int xE = offsetX + nx_i - 1;
@@ -180,7 +191,9 @@ void WriteVTK::execute_write_vtk(std::string name_, int timestep, bool binary,
         uint32_t u_sz = (uint32_t)(nP * 3 * scalarSize);
 
         vti << "<?xml version=\"1.0\"?>\n<VTKFile type=\"ImageData\" version=\"1.0\" byte_order=\"LittleEndian\" header_type=\"UInt32\">\n";
-        vti << " <ImageData WholeExtent=\"0 " << nxTot-1 << " 0 " << nyTot-1 << " 0 " << nzTot-1 << "\" Origin=\"0 0 0\" Spacing=\"1 1 1\">\n";
+        vti << " <ImageData WholeExtent=\"0 " << nxTot-1 << " 0 " << nyTot-1 << " 0 " << nzTot-1 << "\""
+            << " Origin=\"" << originX << " " << originY << " " << originZ << "\""
+            << " Spacing=\"" << dx << " " << dx << " " << dx << "\">\n";
         vti << "  <Piece Extent=\"" << offsetX << " " << xE << " " << offsetY << " " << yE << " " << offsetZ << " " << zE_ext << "\">\n";
         vti << "   <PointData>\n";
         vti << "    <DataArray type=\"" << typeStr << "\" Name=\"SolidFraction\" format=\"appended\" offset=\"0\"/>\n";
@@ -196,7 +209,9 @@ void WriteVTK::execute_write_vtk(std::string name_, int timestep, bool binary,
     } else {
         std::ofstream vti(vfname);
         vti << "<?xml version=\"1.0\"?>\n<VTKFile type=\"ImageData\" version=\"0.1\">\n";
-        vti << " <ImageData WholeExtent=\"0 " << nxTot-1 << " 0 " << nyTot-1 << " 0 " << nzTot-1 << "\">\n";
+        vti << " <ImageData WholeExtent=\"0 " << nxTot-1 << " 0 " << nyTot-1 << " 0 " << nzTot-1 << "\""
+            << " Origin=\"" << originX << " " << originY << " " << originZ << "\""
+            << " Spacing=\"" << dx << " " << dx << " " << dx << "\">\n";
         vti << "  <Piece Extent=\"" << offsetX << " " << xE << " " << offsetY << " " << yE << " " << offsetZ << " " << zE_ext << "\">\n";
         vti << "   <PointData>\n";
         
@@ -220,7 +235,9 @@ void WriteVTK::execute_write_vtk(std::string name_, int timestep, bool binary,
     if (rank == 0) {
         std::ofstream pvti(baseTimePath + ".pvti");
         pvti << "<?xml version=\"1.0\"?>\n<VTKFile type=\"PImageData\" version=\"0.1\">\n";
-        pvti << " <PImageData WholeExtent=\"0 " << nxTot-1 << " 0 " << nyTot-1 << " 0 " << nzTot-1 << "\" Origin=\"0 0 0\" Spacing=\"1 1 1\">\n";
+        pvti << " <PImageData WholeExtent=\"0 " << nxTot-1 << " 0 " << nyTot-1 << " 0 " << nzTot-1 << "\""
+             << " Origin=\"" << originX << " " << originY << " " << originZ << "\""
+             << " Spacing=\"" << dx << " " << dx << " " << dx << "\">\n";
         pvti << "  <PPointData>\n";
         pvti << "   <PDataArray type=\"" << typeStr << "\" Name=\"SolidFraction\"/>\n";
         pvti << "   <PDataArray type=\"" << typeStr << "\" Name=\"Density\"/>\n";

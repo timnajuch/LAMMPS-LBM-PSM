@@ -70,9 +70,9 @@ void WriteVTK::init()
   nz = fixLBMPSM->dynamics->get_nz();
 
   write_vtk_wrapper(fileName, 0, binary_, useDouble_,
-            fixLBMPSM->dynamics->get_x_reference(), 1.0,
-            fixLBMPSM->dynamics->get_y_reference(), 1.0,
-            fixLBMPSM->dynamics->get_z_reference(), 1.0,
+            fixLBMPSM->dynamics->get_x_reference(),
+            fixLBMPSM->dynamics->get_y_reference(),
+            fixLBMPSM->dynamics->get_z_reference(),
             fixLBMPSM->dynamics->get_B_reference(), 1.0,
             fixLBMPSM->dynamics->get_rho_reference(), fixLBMPSM->get_rho(),
             fixLBMPSM->dynamics->get_u_reference(), 0.0);
@@ -86,9 +86,9 @@ void WriteVTK::pre_force(int)
   double Uc = fixLBMPSM->unitConversion->get_Uc();
 
   write_vtk_wrapper(fileName, update->ntimestep, binary_, useDouble_,
-            fixLBMPSM->dynamics->get_x_reference(), 1.0,
-            fixLBMPSM->dynamics->get_y_reference(), 1.0,
-            fixLBMPSM->dynamics->get_z_reference(), 1.0,
+            fixLBMPSM->dynamics->get_x_reference(),
+            fixLBMPSM->dynamics->get_y_reference(),
+            fixLBMPSM->dynamics->get_z_reference(),
             fixLBMPSM->dynamics->get_B_reference(), 1.0,
             fixLBMPSM->dynamics->get_rho_reference(), fixLBMPSM->get_rho(),
             fixLBMPSM->dynamics->get_u_reference(), Uc/u_infty);
@@ -99,20 +99,16 @@ void WriteVTK::pre_force(int)
 
 
 void WriteVTK::write_vtk_wrapper(std::string name_, int timestep, bool binary, bool useDouble,
-                         vector<double> &x_, double x0_,
-                         vector<double> &y_, double y0_,
-                         vector<double> &z_, double z0_,
+                         vector<double> &x_,
+                         vector<double> &y_,
+                         vector<double> &z_,
                          std::vector<double> &rho_, double rho0_,
                          std::vector<double> &u_, double u0_,
-                         std::vector<double> &B_, double B0_) 
+                         std::vector<double> &B_, double B0_)
 {
     if (useDouble) {
-        execute_write_vtk<double>(name_, timestep, binary, x_, x0_,
-                         y_, y0_,
-                         z_, z0_,rho_, rho0_, u_, u0_, B_, B0_);
+        execute_write_vtk<double>(name_, timestep, binary, x_, y_, z_, rho_, rho0_, u_, u0_, B_, B0_);
     } else {
-        execute_write_vtk<float>(name_, timestep, binary, x_, x0_,
-                         y_, y0_,
-                         z_, z0_,rho_, rho0_, u_, u0_, B_, B0_);
+        execute_write_vtk<float>(name_, timestep, binary, x_, y_, z_, rho_, rho0_, u_, u0_, B_, B0_);
     }
 }
