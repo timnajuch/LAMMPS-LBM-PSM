@@ -26,7 +26,7 @@ pair_style		none
 
 fix             lbDYN all lbm-psm every 1 Nlc 11 lc 0.0005 rho 1000.0 nu 0.0001 Re 0.1 tau 0.7 
 fix             lbBC all lbm-psm-bc xFlow
-fix             lbVTK all lbm-psm-vtk every 2000
+fix             lbVTI all lbm-psm-vti every 2000
 
 dump           	iddump all custom 100 s.p id type diameter mass x y z vx vy vz fx fy fz tqx tqy tqz omegax omegay omegaz
 

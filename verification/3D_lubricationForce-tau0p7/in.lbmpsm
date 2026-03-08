@@ -25,7 +25,7 @@ neigh_modify	delay 0 every 1 check yes
 pair_style		none
 
 fix             lbDYN all lbm-psm every 1 Nlc 11 lc 0.0005 rho 1000.0 nu 0.0001 Re 0.1 tau 0.7 
-fix             lbVTK all lbm-psm-vtk every 10000
+fix             lbVTI all lbm-psm-vti every 10000
 
 variable        Re equal 0.1
 variable        nu equal 0.0001

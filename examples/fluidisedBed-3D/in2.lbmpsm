@@ -33,7 +33,7 @@ fix             gravity g1 addforce v_gravForce1 0.0 0.0
 
 fix             lbDYN all lbm-psm every 5 Nlc 6 lc 0.0125 rho 100 nu 0.005 Re 0.1 tau 0.65 Fext -981.0 0.0 0.0
 fix             lbBC all lbm-psm-bc channel-velIn-pressOut
-fix             lbVTK all lbm-psm-vtk every 5000
+fix             lbVTI all lbm-psm-vti every 5000
 
 fix             integrate all nve/sphere
 

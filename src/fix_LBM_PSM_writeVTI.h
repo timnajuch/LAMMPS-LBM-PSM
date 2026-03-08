@@ -12,12 +12,12 @@ Tim Najuch
 
 #ifdef FIX_CLASS
 
-FixStyle(lbm-psm-vtk,WriteVTK)
+FixStyle(lbm-psm-vti,WriteVTI)
 
 #else
 
-#ifndef WRITEVTK_H
-#define WRITEVTK_H
+#ifndef WRITEVTI_H
+#define WRITEVTI_H
 
 #include <algorithm>
 #include <fstream> 
@@ -42,7 +42,7 @@ using namespace std;
 
 namespace fs = std::filesystem;
 
-class WriteVTK : public Fix{
+class WriteVTI : public Fix{
   private:
     int nx, ny, nz;
     int decomposition[3];
@@ -51,13 +51,13 @@ class WriteVTK : public Fix{
     bool useDouble_;
 
   public:
-    WriteVTK(class LAMMPS *, int, char **);
-    ~WriteVTK();
+    WriteVTI(class LAMMPS *, int, char **);
+    ~WriteVTI();
     int setmask();
     void init();
     void pre_force(int);
 
-    void write_vtk_wrapper(std::string name_, int timestep, bool binary, bool useDouble,
+    void write_vti_wrapper(std::string name_, int timestep, bool binary, bool useDouble,
                          vector<double> &x_,
                          vector<double> &y_,
                          vector<double> &z_,
@@ -66,7 +66,7 @@ class WriteVTK : public Fix{
                          vector<double> &u_, double u0_);
 
 
-    template <typename T> void execute_write_vtk(std::string name_, int timestep, bool binary,
+    template <typename T> void execute_write_vti(std::string name_, int timestep, bool binary,
                          vector<double> &x_,
                          vector<double> &y_,
                          vector<double> &z_,
@@ -80,7 +80,7 @@ class WriteVTK : public Fix{
 
 
 template <typename T>
-void WriteVTK::execute_write_vtk(std::string name_, int timestep, bool binary,
+void WriteVTI::execute_write_vti(std::string name_, int timestep, bool binary,
                                  vector<double> &x_, vector<double> &y_,
                                  vector<double> &z_, vector<double> &B_, double B0_,
                                  vector<double> &rho_, double rho0_, vector<double> &u_, double u0_)
@@ -107,7 +107,7 @@ void WriteVTK::execute_write_vtk(std::string name_, int timestep, bool binary,
     int nyL = fixLBMPSM->dynamics->get_nyLocal(jp);
     int nzL = (domain->dimension == 3) ? fixLBMPSM->dynamics->get_nzLocal(kp) : 1;
 
-    // VTK PointData requires adjacent pieces to share exactly one boundary node.
+    // VTI PointData requires adjacent pieces to share exactly one boundary node.
     // Non-leftmost processors include their left ghost cell as the first output point;
     // that ghost cell holds the same value as the adjacent processor's last real cell,
     // so the shared node is consistent across pieces.
@@ -169,7 +169,7 @@ void WriteVTK::execute_write_vtk(std::string name_, int timestep, bool binary,
     }
 
     // Physical lattice spacing (uniform grid: dx = dy = dz).
-    // Global VTK origin = physical position of global node (0,0,0) = proc 0's first output point.
+    // Global VTI origin = physical position of global node (0,0,0) = proc 0's first output point.
     // Each processor derives this consistently without MPI:
     //   origin = coordinate_of_local_first_output_node - offset * dx
     // origin_global being negative is handled correctly since x_/y_/z_ store full physical coords.

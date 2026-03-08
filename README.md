@@ -31,10 +31,7 @@ https://github.com/timnajuch/LAMMPS-LBM-PSM/assets/14159338/3f8336c5-b4cf-4411-8
 
 
 ## Adding this feature to LAMMPS
-The current version has been tested and used with "lammps-stable_29Sep2021_update3".
-Simply copy all files from the src folder into your LAMMPS src folder and compile your LAMMPS executable.
-
-Last update caught up with the main LAMMPS repo so that the code compiles. Verification cases have not been re-run though.
+Simply copy all files from the src folder into your LAMMPS src folder and compile your LAMMPS executable with the MPI Makefile of LAMMPS.
 
 ## How to use the coupled LBM-DEM feature
 The LBM-DEM coupling can be used by employing some simple LAMMPS commands (fix and pair_style) in your LAMMPS input script.
@@ -58,16 +55,17 @@ fix ID group-ID lbm-psm every value Nlc value lc value rho value nu value Re val
 
 Example: fix lbDYN all lbm-psm every 1 Nlc 16 lc 0.0005 rho 1000.0 nu 0.0001 Re 0.1 tau 0.65 Fext -9810.0 0.0 0.0
 
-### fix lbm-psm-vtk
-Writes a vtk output file containing information on the fluid velocity field, fluid pressure field, and solid fractions of the lattice nodes.
+### fix lbm-psm-vti
+Writes vti output files containing information on the fluid velocity field, fluid pressure field, and solid fractions of the lattice nodes.
+Each processor write one vti file and the vti files are combined through a pvti file. Therefore, e.g. in Paraview, read in the pvti file.
 
-fix ID group-ID lbm-psm-vtk every value
+fix ID group-ID lbm-psm-vti every value
 
 + ID, group-ID are documented in fix command
-+ lb-psm-vtk: Style name of this fix command
-+ every value: Write the vtk output file every this many timesteps
++ lb-psm-vti: Style name of this fix command
++ every value: Write the pvti/vti output file every this many timesteps
 
-Example: fix lbVTK all lbm-psm-vtk every 20000
+Example: fix lbVTI all lbm-psm-vti every 20000
 
 ### fix lbm-psm-bc
 Sets a combination of boundary condition. If this fix is not used, all domain boundary conditions are periodic.\
@@ -149,4 +147,4 @@ A written document on the lubrication force and torque correction will follow.
 
 This software is distributed under the [GNU General Public License](https://www.gnu.org/licenses/gpl-3.0.html).
 
-Author: Tim Najuch, 2023
+Author: Tim Najuch, 2026

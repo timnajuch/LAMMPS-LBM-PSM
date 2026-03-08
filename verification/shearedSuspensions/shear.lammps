@@ -28,7 +28,7 @@ timestep        ${dt}
 
 fix             lbDYN all lbm-psm every 10 Nlc 11 lc 0.0005 rho 500.0 nu ${nu} Re ${Re} tau 0.7 
 fix             lbBC all lbm-psm-bc shear
-fix             lbVTK all lbm-psm-vtk every 10000
+fix             lbVTI all lbm-psm-vti every 10000
 fix             lbRestart all lbm-psm-restart every 10000 write 1 read 0
 
 #### Time integration ####
