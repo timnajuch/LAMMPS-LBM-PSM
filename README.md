@@ -58,6 +58,8 @@ Example: fix lbDYN all lbm-psm every 1 Nlc 16 lc 0.0005 rho 1000.0 nu 0.0001 Re 
 ### fix lbm-psm-vti
 Writes vti output files containing information on the fluid velocity field, fluid pressure field, and solid fractions of the lattice nodes.
 Each processor write one vti file and the vti files are combined through a pvti file. Therefore, e.g. in Paraview, read in the pvti file.
+Caution: On Ubuntu 24.04, the Paraview version (5.11.2) installed by apt install has problems loading pvti files due to some bug in some library.
+Recommendation: Download the Paraview binary from the official Paraview website to avoid dependency issues (version 6.1.0-RC1 from the Paraview website worked without problems).
 
 fix ID group-ID lbm-psm-vti every value
 
