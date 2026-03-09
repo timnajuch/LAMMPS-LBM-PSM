@@ -8,4 +8,4 @@ The workstation has two processor sockets with each having a Xeon Silver 4114 (1
 Using more than 10 cores will result in both sharing/competing over the memory bandwidth. This explains the "flattening" of the speed-up curve for more than 12 cores as the limiting factor is the memory bandwidth.
 It would be interesting to run the benchmark on a HPC where each computational node has its own memory. 
 
-<img src="benchmark-results.png" height="400"/>
+<img src="benchmarkResults.png" height="400"/>
